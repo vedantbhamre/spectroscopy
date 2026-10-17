@@ -1,26 +1,96 @@
 @import "tailwindcss";
 
+/* Instrument-panel palette taken from the SpectraSense intro (deep navy, cyan glow, spectral accent). */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #060b1a;
+  --panel: #0b1328;
+  --panel-2: #0f1a35;
+  --line: #1c2a4d;
+  --line-strong: #2a3d6b;
+  --ink: #e6ecf8;
+  --ink-2: #a9b6d3;
+  --ink-3: #6f7fa6;
+  --cyan: #2fd9f0;
+  --cyan-dim: #1b8fa3;
+  --ok: #3ddc97;
+  --warn: #f5b84b;
+  --bad: #ff6b7a;
+  --violet: #a78bfa;
+  --spectrum: linear-gradient(90deg, #7c3aed, #3b82f6, #22d3ee, #34d399, #facc15, #fb923c, #ef4444);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-cyan: var(--cyan);
+  --color-cyan-dim: var(--cyan-dim);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-violet: var(--violet);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-plex-sans), system-ui, sans-serif;
+}
+
+.spectrum-line {
+  background: var(--spectrum);
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(47, 217, 240, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(47, 217, 240, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.glow {
+  box-shadow: 0 0 0 1px rgba(47, 217, 240, 0.35), 0 0 24px -6px rgba(47, 217, 240, 0.55);
+}
+
+@keyframes hero-zoom {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.hero-zoom {
+  animation: hero-zoom 20s ease-in-out infinite;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

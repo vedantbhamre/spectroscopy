@@ -1,103 +1,76 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, FileSearch, HelpCircle, Layers, FlaskConical, ShieldCheck } from "lucide-react";
+import { Hero } from "@/components/Hero";
+import { Preloader } from "@/components/Preloader";
+import { Reveal } from "@/components/Reveal";
+import { SiteHeader } from "@/components/SiteHeader";
+
+const steps = [
+  { icon: FileSearch, title: "Read the use case", text: "Client facts are kept apart from everything the client did not say." },
+  { icon: HelpCircle, title: "Find what is missing", text: "Clarification questions, ordered by whether the answer could change the method or setup." },
+  { icon: Layers, title: "Recommend approaches", text: "Methods or combinations worth testing, each with its reason, conditions and page citation." },
+  { icon: FlaskConical, title: "Propose a first experiment", text: "Representative samples, independent references, what is compared, and the go / no-go basis." },
+  { icon: ShieldCheck, title: "Stay reviewable", text: "Premise checks and verified citations so an AFS expert can audit the answer in minutes." },
+];
+
+// Principles from the challenge expert Q&A (Hackathon_QA_Summary.pdf) and the organizers' good-practice notes.
+const principles = [
+  ["As simple as possible, as complicated as necessary.", "Default to the simplest method that meets the need; combine only when one is not enough."],
+  ["“Insufficient information” can be the right answer.", "An honest provisional plan beats a final configuration built on missing facts."],
+  ["A published application is a reason to test, not proof.", "No invented accuracies, ratings, prices or guarantees."],
+];
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main>
+      <Preloader />
+      <SiteHeader overlay />
+      <Hero />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      <section id="how" className="grid-bg border-t border-line">
+        <div className="mx-auto max-w-6xl px-6 py-24">
+          <p className="font-mono text-xs uppercase tracking-[0.25em] text-cyan">How it works</p>
+          <h2 className="mt-3 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
+            A first technical assessment, structured for expert review.
+          </h2>
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {steps.map((s, i) => (
+              <Reveal key={s.title} delay={i * 0.06} className="h-full">
+              <div className="h-full rounded-lg border border-line bg-panel p-5">
+                <div className="flex items-center justify-between">
+                  <s.icon className="h-5 w-5 text-cyan" aria-hidden />
+                  <span className="font-mono text-xs text-ink-3">0{i + 1}</span>
+                </div>
+                <h3 className="mt-4 font-semibold">{s.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-ink-2">{s.text}</p>
+              </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <div className="mt-20 grid gap-6 lg:grid-cols-3">
+            {principles.map(([h, t], i) => (
+              <Reveal key={h} delay={i * 0.08}>
+                <blockquote className="border-l-2 border-cyan/60 pl-5">
+                  <p className="text-lg font-medium text-ink">{h}</p>
+                  <p className="mt-2 text-sm text-ink-2">{t}</p>
+                </blockquote>
+              </Reveal>
+            ))}
+          </div>
+
+          <div className="mt-20 flex flex-wrap items-center gap-4">
+            <Link href="/assess" className="glow inline-flex items-center gap-2 rounded-md bg-cyan px-5 py-3 font-semibold text-bg hover:bg-white">
+              Open the workbench <ArrowRight className="h-4 w-4" />
+            </Link>
+            <span className="text-sm text-ink-3">Development scenarios D01–D08 · Evaluation scenarios H01–H06 · Your own enquiry</span>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </section>
+
+      <footer className="border-t border-line py-8 text-center text-xs text-ink-3">
+        National AI Hackathon 2026 · Art Fiber Systems challenge · Assistant output is a first hypothesis for expert review.
       </footer>
-    </div>
+    </main>
   );
 }
