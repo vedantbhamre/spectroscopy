@@ -4,6 +4,7 @@ from typing import Optional, TypedDict
 class AgentState(TypedDict, total=False):
     messages: list[dict]  # full conversation, sent by the client each turn
     scenario_id: Optional[str]
+    gate_flags: list[str]  # non-blocking premise flags from the safety gate
     intent: str  # "assessment" | "conversational"
     queries: list[str]
     facts: dict

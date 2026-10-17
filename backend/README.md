@@ -4,9 +4,8 @@ FastAPI + LangGraph assessment pipeline. Structure follows the team architecture
 [8hr-MARATHON](https://github.com/d-hackmt/8hr-MARATHON) template it is based on).
 
 ```
-POST /assess ─► Guardrails gate ─► planner ─┬─► analyst ─► retriever ─► checker ─► responder ─► report
-                (app/guardrails,             └─► conversational (answers from the last report, MemorySaver)
-                 guardrails branch)
+POST /assess ─► safety gate ─► planner ─┬─► analyst ─► retriever ─► checker ─► responder ─► report
+                (app/guardrails)        └─► conversational (answers from the last report, MemorySaver)
 ```
 
 | Node | What it does | LLM? |
@@ -55,11 +54,18 @@ PDF text comes from poppler's `pdftotext` when installed (better spacing for quo
 | `GEMINI_API_KEY` | BM25 only (vector step skipped) |
 | `QDRANT_CLUSTER_ENDPOINT` | embedded Qdrant in `backend/.qdrant` |
 | FlashRank model download | fused BM25/vector order |
-| `app/guardrails` | gate reported as `skipped` in the trace |
+| LLM for the gate | rule-based gate (`engine: rules` in the trace) |
 
-## Guardrails (teammate's branch)
+## Safety gate (app/guardrails)
 
-`app/main.py` imports `initialize_rails()` and `guard(text) -> (fired, response)` from `app.guardrails` if present. Keep that interface and nothing else needs to change. A blocked request returns a reply plus an `out_of_scope` report, so the frontend renders it.
+From `feat/safety-gate` (Vedant), adapted to the team stack. Runs on the latest client message before the graph.
+
+| Category | Effect |
+| --- | --- |
+| `off_topic`, `jailbreak`, `injection` | **block**: refusal reply + `out_of_scope` report, pipeline skipped |
+| `approval_demand`, `immediate_config`, `research_as_proof` | **pass with a flag**: shown in the trace and fed to the premise checks (certainty, source scope). H04/H05/H06 are scored cases and need the full assessment. |
+
+Engine: LLM classifier on the gateway's small tier (Groq Llama 3.1 8B via Portkey, as in the 8hr-MARATHON template), with the deterministic rule gate as runtime fallback; rules only when no LLM is configured or `GUARD_MODE=rules`. Template interface kept: `initialize_rails()`, `guard(text) -> (fired, response)`; `check(text)` returns the full `GuardResult`. The architecture diagram's NeMo box is replaced by this gate (no NeMo dependency).
 
 ## Tests
 
@@ -67,4 +73,4 @@ PDF text comes from poppler's `pdftotext` when installed (better spacing for quo
 .venv/bin/python -m pytest -q
 ```
 
-Citation verifier, premise checks on the evaluation enquiries, and the full graph with a scripted LLM (an invented quote is marked `failed`, an over-confident status is lowered, an unquoted "fact" is dropped, follow-up questions use MemorySaver).
+Citation verifier, premise checks on the evaluation enquiries, the safety gate (hard blocks, no scenario blocked, LLM fallback), and the full graph with a scripted LLM (an invented quote is marked `failed`, an over-confident status is lowered, an unquoted "fact" is dropped, follow-up questions use MemorySaver).

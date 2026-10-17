@@ -39,6 +39,12 @@ def analyst_node(state: AgentState) -> dict:
             combination_requested=bool(data.get("combination_requested")),
         )
         facts = detect(said, facts)
+        # Safety-gate premise flags (approval demand, immediate config, research as proof) feed the checks.
+        gate = set(state.get("gate_flags") or [])
+        if gate & {"approval_demand", "immediate_config"}:
+            facts.asks_for_certainty = True
+        if "research_as_proof" in gate:
+            facts.cites_study_as_proof = True
         rec["detail"] = f"{len(stated)} stated · {len(facts.unknowns)} unknown" + (f" · {dropped} unquoted dropped" if dropped else "")
         if dropped:
             rec["status"] = "warn"

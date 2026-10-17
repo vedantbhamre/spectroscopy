@@ -1,7 +1,7 @@
 """Dependency-light, deterministic Safety Gate.
 
-This is the FALLBACK used when no OpenAI key is configured. It needs no network and no
-heavy packages, so the service always has a working gate and the demo never breaks.
+This is the FALLBACK used when no LLM is configured (or the LLM gate fails). It needs no
+network and no heavy packages, so the service always has a working gate and the demo never breaks.
 
 It mirrors the reference project's Colang rails (off-topic / jailbreak) and adds the
 domain premise flags. Detection is keyword / phrase based and intentionally
@@ -12,8 +12,8 @@ from __future__ import annotations
 
 import re
 
-from safety_gate.guardrails.base import Guard, GuardCategory, GuardResult
-from safety_gate.guardrails.scope import message_for
+from app.guardrails.base import GuardCategory, GuardResult
+from app.guardrails.scope import message_for
 
 # --- jailbreak: attempts to change the assistant's role / rules ---
 _JAILBREAK_PATTERNS = [
@@ -95,8 +95,8 @@ class RuleGuard:
         if _any(_OFF_TOPIC_PATTERNS, t) and not self._looks_spectroscopy(t):
             return self._block(GuardCategory.OFF_TOPIC)
 
-        # Premise flags — on-topic, but push back. Can co-occur; pick the first as
-        # primary and record the rest as extras.
+        # Premise flags — on-topic, so the request proceeds; the flags go to the pipeline's
+        # premise checks. Can co-occur; pick the first as primary and record the rest as extras.
         flags: list[GuardCategory] = []
         if _any(_APPROVAL_PATTERNS, t):
             flags.append(GuardCategory.APPROVAL_DEMAND)
@@ -107,7 +107,7 @@ class RuleGuard:
         if flags:
             primary, *extra = flags
             return GuardResult(
-                passed=False,
+                passed=True,
                 category=primary,
                 message=message_for(primary),
                 extra=extra,

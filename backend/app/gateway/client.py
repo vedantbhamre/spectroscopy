@@ -22,6 +22,8 @@ GATEWAY_CONFIG = {
         {"override_params": {"model": f"@{settings.GROQ_SLUG_2}/{settings.FALLBACK_MODEL}"}},
     ],
 }
+# Small tier for fast classifiers (safety gate): 8B first, 70B as fallback.
+GATEWAY_CONFIG_SMALL = {**GATEWAY_CONFIG, "targets": list(reversed(GATEWAY_CONFIG["targets"]))}
 GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 
 
@@ -38,17 +40,16 @@ class LLMResult:
     cache: str = "MISS"
 
 
-_portkey = None
+_portkey: dict[str, object] = {}
 _groq: dict[str, object] = {}
 
 
-def _portkey_client():
-    global _portkey
-    if _portkey is None:
+def _portkey_client(tier: str = "default"):
+    if tier not in _portkey:
         from portkey_ai import Portkey
 
-        _portkey = Portkey(api_key=settings.PORTKEY_API_KEY, config=GATEWAY_CONFIG)
-    return _portkey
+        _portkey[tier] = Portkey(api_key=settings.PORTKEY_API_KEY, config=GATEWAY_CONFIG_SMALL if tier == "small" else GATEWAY_CONFIG)
+    return _portkey[tier]
 
 
 def _groq_client(key: str):
@@ -69,7 +70,9 @@ def _cache_status(resp) -> str:
     return "MISS"
 
 
-def chat(messages: list[dict], *, json_mode: bool = False, temperature: float = 0.1, feature: str = "assess", max_tokens: int = 4096) -> LLMResult:
+def chat(messages: list[dict], *, json_mode: bool = False, temperature: float = 0.1, feature: str = "assess",
+         max_tokens: int = 4096, tier: str = "default") -> LLMResult:
+    """tier="small": Llama 3.1 8B first (fast classification), 70B as fallback."""
     if not settings.llm_configured:
         raise LLMUnavailable("No LLM configured: set PORTKEY_API_KEY or GROQ_API_KEY in backend/.env")
     kwargs: dict = {"messages": messages, "temperature": temperature, "max_tokens": max_tokens}
@@ -79,12 +82,14 @@ def chat(messages: list[dict], *, json_mode: bool = False, temperature: float = 
     start = time.perf_counter()
     with logfire.span("llm {feature}", feature=feature):
         if settings.PORTKEY_API_KEY:
-            resp = _portkey_client().with_options(metadata={"feature": feature, "_user": "spectrasense"}).chat.completions.create(**kwargs)
+            resp = _portkey_client(tier).with_options(metadata={"feature": feature, "_user": "spectrasense"}).chat.completions.create(**kwargs)
             return LLMResult(resp.choices[0].message.content or "", getattr(resp, "model", "portkey"), "portkey",
                              (time.perf_counter() - start) * 1000, _cache_status(resp))
 
         attempts = [(settings.GROQ_API_KEY, settings.PRIMARY_MODEL),
                     (settings.GROQ_FALLBACK_API_KEY or settings.GROQ_API_KEY, settings.FALLBACK_MODEL)]
+        if tier == "small":
+            attempts.reverse()
         last: Exception | None = None
         for key, model in attempts:
             try:

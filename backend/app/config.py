@@ -47,9 +47,18 @@ class Settings:
 
     FRONTEND_ORIGIN = _env("FRONTEND_ORIGIN", "http://localhost:3000")
 
+    # --- Safety gate: "llm" (Groq 8B classifier, rules as fallback) | "rules" | unset = llm when an LLM is configured ---
+    GUARD_MODE = _env("GUARD_MODE")
+
     @property
     def llm_configured(self) -> bool:
         return bool(self.PORTKEY_API_KEY or self.GROQ_API_KEY)
+
+    @property
+    def llm_guard_available(self) -> bool:
+        if self.GUARD_MODE == "rules":
+            return False
+        return self.llm_configured
 
 
 settings = Settings()

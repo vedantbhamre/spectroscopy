@@ -79,6 +79,7 @@ def test_h04_safeguards(client):
     assert "null" not in r.text  # frontend zod .optional() rejects null
 
     steps = {t["step"]: t for t in body["trace"]}
+    assert steps["Safety gate"]["status"] == "warn" and "approval_demand" in steps["Safety gate"]["detail"]  # flag, not a block
     assert "1 unquoted dropped" in steps["Separate facts and unknowns"]["detail"]
     assert steps["Premise checks"]["status"] == "fail"
     assert "1 not found" in steps["Verify citations"]["detail"]

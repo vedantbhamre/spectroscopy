@@ -8,7 +8,7 @@ test first), grounded in the supplied AFS materials.
 """
 from __future__ import annotations
 
-from safety_gate.guardrails.base import GuardCategory
+from app.guardrails.base import GuardCategory
 
 # A compact description of scope, reused in the LLM system prompt and in refusals.
 DOMAIN_DESCRIPTION = (
