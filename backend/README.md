@@ -67,6 +67,32 @@ From `feat/safety-gate` (Vedant), adapted to the team stack. Runs on the latest 
 
 Engine: LLM classifier on the gateway's small tier (Groq Llama 3.1 8B via Portkey, as in the 8hr-MARATHON template), with the deterministic rule gate as runtime fallback; rules only when no LLM is configured or `GUARD_MODE=rules`. Template interface kept: `initialize_rails()`, `guard(text) -> (fired, response)`; `check(text)` returns the full `GuardResult`. The architecture diagram's NeMo box is replaced by this gate (no NeMo dependency).
 
+## Evals (evals/)
+
+RAGAS-style metrics implemented in `evals/metrics.py` (no extra dependency), scored by a judge LLM on its own Groq key, plus deterministic checks that cost nothing.
+
+```bash
+.venv/bin/python -m evals.run_evals                # all scenarios: live pipeline + judge
+.venv/bin/python -m evals.run_evals D01 H04        # selected scenarios
+.venv/bin/python -m evals.run_evals --no-judge     # deterministic metrics only
+.venv/bin/python -m evals.run_evals --from-cache   # score frontend/outputs/<ID>.json (no context metrics)
+```
+
+| Metric | Measures | Judge? |
+| --- | --- | --- |
+| faithfulness | report claims supported by the retrieved pages | yes |
+| answer_relevancy | the report addresses the client's enquiry | yes |
+| context_precision | relevant retrieved pages, rank-weighted (average precision) | yes |
+| context_recall | organiser reference statements found in the retrieved pages (D01, D02) | yes |
+| answer_correctness | F1 of the report against the organiser reference (D01, D02) | yes |
+| citation_validity | citations whose quote was found on the cited page | no |
+| grounding | recommendations backed by a verified citation | no |
+| clarification | unknowns listed and questions asked | no |
+| feasibility | first experiment has steps and a decision basis | no |
+| expectations | expected status, premise checks and terms per scenario (`evals/golden.json`) | no |
+
+Judge: `JUDGE_GROQ` (Llama 3.3 70B on Groq) so grading never rate-limits the live app; without it the judge uses the app gateway. `evals/golden.json` is read by the evals only, never by the pipeline. Results: `evals/results/latest.{json,md}` and `frontend/outputs/evals-latest.json`, shown on the frontend's **Evals** page.
+
 ## Tests
 
 ```bash

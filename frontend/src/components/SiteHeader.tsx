@@ -8,6 +8,7 @@ import { ThemeToggle } from "./ThemeToggle";
 const links = [
   { href: "/assess", label: "Assess" },
   { href: "/how-it-works", label: "How it works" },
+  { href: "/evals", label: "Evals" },
 ];
 
 export function SiteHeader() {

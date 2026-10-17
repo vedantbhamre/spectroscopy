@@ -50,6 +50,9 @@ class Settings:
     # --- Safety gate: "llm" (Groq 8B classifier, rules as fallback) | "rules" | unset = llm when an LLM is configured ---
     GUARD_MODE = _env("GUARD_MODE")
 
+    # --- Evals: separate Groq key for the judge LLM (falls back to the app gateway) ---
+    JUDGE_GROQ = _env("JUDGE_GROQ")
+
     @property
     def llm_configured(self) -> bool:
         return bool(self.PORTKEY_API_KEY or self.GROQ_API_KEY)
