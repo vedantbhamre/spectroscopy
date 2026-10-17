@@ -145,8 +145,8 @@ export function Hero() {
               <Link href="/assess" className="inline-flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-accent-dim">
                 Start an assessment <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/reference" className="inline-flex items-center gap-2 rounded-md border border-night-line px-6 py-3 text-sm font-semibold text-night-ink backdrop-blur-md transition-all duration-300 hover:bg-night-3">
-                <BookOpen className="h-4 w-4" /> Methods &amp; fibers
+              <Link href="/how-it-works" className="inline-flex items-center gap-2 rounded-md border border-night-line px-6 py-3 text-sm font-semibold text-night-ink backdrop-blur-md transition-all duration-300 hover:bg-night-3">
+                <BookOpen className="h-4 w-4" /> How it works
               </Link>            </div>
           </Reveal>
         </div>

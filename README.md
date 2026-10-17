@@ -12,15 +12,17 @@ npm run build
 
 | Route | What it is |
 | --- | --- |
-| `/` | Scroll-driven intro (52 frames in `public/frames`) + how it works |
-| `/assess` | Workbench: scenario picker (D01–D08, H01–H06) or own enquiry → report |
-| `/reference` | Method overview, S01 Table 1 (p.6), fiber windows (S02 p.6) with compatibility view |
+| `/` | Landing: preloader, intro animation (52 frames in `public/frames`) beside the pitch, steps and principles |
+| `/assess` | Chat workbench for a customer enquiry → report versions (`?example=H04` preloads an example enquiry) |
+| `/how-it-works` | Lottie pipeline animation (`src/lib/lottie-pipeline.ts`) and scripted chat walkthroughs (`src/data/demo-conversations.ts`) |
+
+The walkthroughs on `/how-it-works` are scripted, not pipeline output, and say so in the UI. Every quote in them was checked against the cited page of `kb/pages.json`.
 
 ## Connecting the pipeline
 
-The UI only talks to `POST /api/assess` with `{ enquiry, scenarioId? }`. The route resolves in this order:
+The UI only talks to `POST /api/assess` with `{ messages, scenarioId? }` and expects `{ reply, report, trace }` (`AssessRequest` / `AssessResponse` in `src/lib/report.ts`). The route resolves in this order:
 
-1. **Live**: if `ASSESS_BACKEND_URL` is set, the request is forwarded there. The response must match `Report` in `src/lib/report.ts` (zod-validated; invalid responses fall through).
+1. **Live**: if `ASSESS_BACKEND_URL` is set, the request is forwarded there. The response is zod-validated; invalid responses fall through.
 2. **Cached**: `outputs/<scenarioId>.json` written by the batch runner (D01–D08, H01–H06). Never edit these by hand.
 3. **Reference**: organizer worked examples D01 and D02 (`src/data/reference-answers.ts`), badged `REFERENCE`.
 4. Otherwise `503 pipeline_not_connected`. The UI shows that state instead of inventing an answer.

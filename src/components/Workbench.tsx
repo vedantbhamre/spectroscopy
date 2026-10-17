@@ -93,14 +93,13 @@ export function Workbench({ mode = "assess" }: { mode?: "assess" | "examples" })
     el?.setSelectionRange(el.value.length, el.value.length);
   }, [focusTick]);
 
-  // /how-it-works?example=H04 places that example in the message box on arrival.
+  // ?example=H04 places that example enquiry in the message box on arrival.
   const runRef = useRef(runExample);
   runRef.current = runExample;
   useEffect(() => {
-    if (!isExamples) return;
     const id = new URLSearchParams(window.location.search).get("example");
-    if (id && scenarioById(id)) { window.history.replaceState(null, "", "/how-it-works"); runRef.current(id); }
-  }, [isExamples]);
+    if (id && scenarioById(id)) { window.history.replaceState(null, "", window.location.pathname); runRef.current(id); }
+  }, []);
 
   const answerQuestions = (qs: string[]) => {
     setDraft(qs.map((q, i) => `${i + 1}. ${q}\n   Answer: `).join("\n"));
@@ -210,7 +209,7 @@ export function Workbench({ mode = "assess" }: { mode?: "assess" | "examples" })
                 Describe the process, the sample and any constraints in the customer&apos;s words. The assistant separates what they said from what is unknown, asks what is missing and cites the AFS material it uses.
               </p>
               <p className="mt-4 text-sm text-night-ink-3">You can answer its questions here and it will revise the report.</p>
-              <p className="mt-4 text-sm text-night-ink-3">Want to see one first? <Link href="/how-it-works" className="font-medium text-accent underline underline-offset-2">Browse example enquiries</Link>.</p>
+              <p className="mt-4 text-sm text-night-ink-3">Want to see one first? <Link href="/how-it-works" className="font-medium text-ink underline underline-offset-2 hover:text-violet">See how it works</Link>.</p>
             </div>
           )}
 

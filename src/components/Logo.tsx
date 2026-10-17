@@ -1,15 +1,18 @@
-export function Logo({ className = "", dark = false }: { className?: string; dark?: boolean }) {
+// Ink wordmark: a prism that splits one ray into three, with a violet registered dot.
+export function Logo({ className = "", size = "md" }: { className?: string; size?: "md" | "lg"; dark?: boolean }) {
+  const lg = size === "lg";
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
-      <svg viewBox="0 0 32 32" className="h-7 w-7" aria-hidden>
-        <path d="M6 28 C 8 16, 14 8, 24 4" style={{ stroke: dark ? "var(--accent-bright)" : "var(--accent)" }} strokeWidth="2.2" fill="none" strokeLinecap="round" />
-        <path d="M10 28 C 12 18, 18 11, 28 8" style={{ stroke: "var(--amber)" }} strokeWidth="2.2" fill="none" strokeLinecap="round" />
-        <path d="M14 28 C 16 21, 21 15, 30 13" stroke={dark ? "#c4a5ff" : "#7c3aed"} strokeWidth="2.2" fill="none" strokeLinecap="round" />
-        <path d="M3 30 L9 22 L15 30 Z" style={{ fill: dark ? "var(--night-ink)" : "var(--ink)" }} />
+    <span className={`inline-flex items-center ${lg ? "gap-[0.32em]" : "gap-2"} text-ink ${className}`}>
+      <svg viewBox="0 0 40 26" className={lg ? "h-[0.76em] w-auto" : "h-[17px] w-auto"} aria-hidden fill="currentColor">
+        <path d="M0 12.2h11v1.6H0Z" />
+        <path d="M11 26 20 0l9 26Zm4.4-3.2h9.2L20 9.6Z" />
+        <path d="m27.6 9.2 12.2-4 .4 1.5-12.2 4ZM28.2 12.2H40v1.6H28.2ZM27.6 16.8l.4-1.5 12.2 4-.4 1.5Z" />
       </svg>
-      <span className="whitespace-nowrap leading-none">
-        <span className={`block text-[15px] font-semibold tracking-tight ${dark ? "text-night-ink" : "text-ink"}`}>SpectraSense AI</span>
-        <span className={`block text-[11px] ${dark ? "text-night-ink-3" : "text-ink-3"}`}>for Art Fiber Systems</span>
+      <span className={`relative whitespace-nowrap pr-[0.24em] leading-none ${lg ? "" : "text-[17px]"}`} style={{ fontWeight: 400, letterSpacing: "-0.02em" }}>
+        SpectraSense
+        <svg viewBox="0 0 10 10" className="absolute right-0 top-[-0.02em] h-[0.19em] w-[0.19em] text-violet" aria-hidden fill="currentColor">
+          <path d="M5 0 6.25 3.75 10 5 6.25 6.25 5 10 3.75 6.25 0 5 3.75 3.75Z" />
+        </svg>
       </span>
     </span>
   );
