@@ -1,0 +1,154 @@
+{
+ "reply": "For monitoring fat and protein in your opaque, concentrated milk product, NIR (diffuse reflection) is a suitable primary method. It is effective for inline analysis of opaque dairy products and can be integrated into your processing line with a fiber optic probe. Consider a comparison with Raman spectroscopy to assess any additional benefits, particularly if fluorescence interference is minimal.",
+ "report": {
+  "scenarioId": "D02",
+  "title": "Spectroscopy for Opaque Milk Product Monitoring",
+  "origin": "live",
+  "generatedAt": "2026-10-17T17:09:47+00:00",
+  "decisionStatus": "provisional",
+  "requirements": {
+   "stated": [
+    "produces opaque, concentrated milk product",
+    "product flows through a processing line",
+    "currently sample for fat and protein analysis",
+    "want earlier information about composition changes",
+    "product temperature and texture vary during production",
+    "want initial spectroscopy concept and practical comparison experiment",
+    "retain laboratory checks"
+   ],
+   "unknowns": [
+    "specific spectroscopy methods the client is interested in",
+    "exact composition changes to monitor"
+   ]
+  },
+  "questions": [
+   {
+    "text": "What are the specific composition changes you are most concerned about?",
+    "impact": "method"
+   },
+   {
+    "text": "Are there any known issues with fluorescence in your product?",
+    "impact": "method"
+   },
+   {
+    "text": "What is the range of temperature and texture variations during production?",
+    "impact": "setup"
+   }
+  ],
+  "recommendations": [
+   {
+    "method": "NIR (diffuse reflection)",
+    "methodIds": [
+     "NIR"
+    ],
+    "role": "primary",
+    "reason": "Effective for inline monitoring of opaque dairy products like concentrated milk.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "17",
+      "quote": "The use of Near-Infrared (NIR) spectroscopy for the inline monitoring of milk is a cornerstone...",
+      "check": "verified"
+     }
+    ]
+   },
+   {
+    "method": "Raman",
+    "methodIds": [],
+    "role": "comparison",
+    "reason": "Potentially useful for additional molecular specificity if fluorescence is not an issue.",
+    "citations": []
+   }
+  ],
+  "concept": {
+   "summary": "NIR diffuse reflection for inline monitoring of fat and protein in opaque milk products.",
+   "probe": "Fiber optic probe for NIR reflection.",
+   "location": "Inline, flush-mounted in processing line.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "17",
+     "quote": "NIR Reflection: Inline NIR Reflection is primarily used for opaque or highly concentrated dairy products...",
+     "check": "verified"
+    }
+   ]
+  },
+  "spectralRange": {
+   "summary": "NIR nominal range 780–2500 nm; specify based on system selection.",
+   "citations": []
+  },
+  "risks": [
+   "Potential fluorescence interference in Raman spectroscopy.",
+   "Variability in temperature and texture affecting measurement accuracy."
+  ],
+  "feasibility": {
+   "steps": [
+    "Conduct lab trials with NIR to establish baseline spectral features.",
+    "Develop and validate a chemometric model for fat and protein.",
+    "Compare with Raman spectroscopy to evaluate additional benefits."
+   ],
+   "decisionBasis": "Initial trials to determine the simplest effective method for inline monitoring."
+  },
+  "premiseChecks": [
+   {
+    "id": "target_defined",
+    "label": "The variable to measure is named",
+    "status": "pass",
+    "detail": "Target: fat, protein.",
+    "citations": []
+   }
+  ],
+  "sources": [
+   {
+    "source": "S01",
+    "page": "17",
+    "quote": "The use of Near-Infrared (NIR) spectroscopy for the inline monitoring of milk is a cornerstone...",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "17",
+    "quote": "NIR Reflection: Inline NIR Reflection is primarily used for opaque or highly concentrated dairy products...",
+    "check": "verified"
+   }
+  ]
+ },
+ "trace": [
+  {
+   "step": "Plan the turn",
+   "status": "ok",
+   "ms": 830.0,
+   "detail": "assessment · 3 search queries"
+  },
+  {
+   "step": "Separate facts and unknowns",
+   "status": "ok",
+   "ms": 1954.0,
+   "detail": "7 stated · 2 unknown"
+  },
+  {
+   "step": "Retrieve AFS pages",
+   "status": "ok",
+   "ms": 98.0,
+   "detail": "S01 p.17, S01 p.18, S01 p.7, S01 p.8, S01 p.9, S02 p.20, S03 p.16, S05 p.2 · BM25 · flashrank"
+  },
+  {
+   "step": "Premise checks",
+   "status": "ok",
+   "ms": 0.0,
+   "detail": "nothing contradicted"
+  },
+  {
+   "step": "Compose the assessment",
+   "status": "ok",
+   "ms": 5604.0,
+   "detail": "gpt-4o via openai"
+  },
+  {
+   "step": "Verify citations",
+   "status": "ok",
+   "ms": 0.0,
+   "detail": "2 of 2 quotes found on the cited page"
+  }
+ ]
+}

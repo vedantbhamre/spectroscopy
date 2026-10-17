@@ -1,0 +1,157 @@
+{
+ "reply": "The existing NIR calibration may not directly apply to the new API and excipient blend, as calibrations are typically matrix-specific. Adding Raman could provide complementary information, but each method should be assessed independently first. Begin by testing the NIR calibration on the new blend with independent reference assays to determine its applicability. If NIR alone is insufficient, consider Raman as a comparison method to capture additional molecular information.",
+ "report": {
+  "scenarioId": "H01",
+  "title": "Assessing NIR Calibration Transfer for New API Blend",
+  "origin": "live",
+  "generatedAt": "2026-10-17T17:10:50+00:00",
+  "decisionStatus": "insufficient",
+  "requirements": {
+   "stated": [
+    "reuse the calibration",
+    "introducing a different API and excipient blend"
+   ],
+   "unknowns": [
+    "specific API and excipient blend details",
+    "current calibration details",
+    "compatibility of Raman with new formulation"
+   ]
+  },
+  "questions": [
+   {
+    "text": "What are the specific details of the new API and excipient blend?",
+    "impact": "method"
+   },
+   {
+    "text": "What are the details of the current NIR calibration?",
+    "impact": "method"
+   },
+   {
+    "text": "Is Raman spectroscopy compatible with the new formulation?",
+    "impact": "method"
+   }
+  ],
+  "recommendations": [],
+  "concept": {
+   "summary": "NIR and Raman spectroscopy are complementary techniques. NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "15",
+     "quote": "NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
+     "check": "verified"
+    }
+   ]
+  },
+  "spectralRange": {
+   "summary": "NIR reflectance spectra 900–1700 nm.",
+   "citations": [
+    {
+     "source": "S02",
+     "page": "12",
+     "quote": "NIR reflectance spectra 900–1700 nm",
+     "check": "visual_note"
+    }
+   ]
+  },
+  "risks": [
+   "Existing NIR calibration may not be valid for the new blend.",
+   "Raman may not provide additional useful information without prior assessment."
+  ],
+  "feasibility": {
+   "steps": [
+    "Test existing NIR calibration on new blend with reference assays.",
+    "Evaluate Raman spectroscopy independently if NIR is insufficient."
+   ],
+   "decisionBasis": "Assess each method's applicability to the new blend before considering a combination."
+  },
+  "premiseChecks": [
+   {
+    "id": "target_defined",
+    "label": "The variable to measure is named",
+    "status": "pass",
+    "detail": "Target: API concentration.",
+    "citations": []
+   },
+   {
+    "id": "calibration_transfer",
+    "label": "An existing calibration applies to the new material",
+    "status": "flag",
+    "detail": "The calibration was built for a different formulation. Whether it transfers has to be tested on the new blend with independent references; adding a method does not by itself keep it valid.",
+    "citations": []
+   },
+   {
+    "id": "combination",
+    "label": "A method combination is justified",
+    "status": "flag",
+    "detail": "Assess each method on its own first; a gain from combining them is a hypothesis to test for this material.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "15",
+      "quote": "By combining Raman and NIR, these models can predict API potency or coating thickness with higher accuracy and robustness than single-method models.",
+      "check": "verified"
+     }
+    ]
+   }
+  ],
+  "sources": [
+   {
+    "source": "S01",
+    "page": "15",
+    "quote": "NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
+    "check": "verified"
+   },
+   {
+    "source": "S02",
+    "page": "12",
+    "quote": "NIR reflectance spectra 900–1700 nm",
+    "check": "visual_note"
+   },
+   {
+    "source": "S01",
+    "page": "15",
+    "quote": "By combining Raman and NIR, these models can predict API potency or coating thickness with higher accuracy and robustness than single-method models.",
+    "check": "verified"
+   }
+  ]
+ },
+ "trace": [
+  {
+   "step": "Plan the turn",
+   "status": "ok",
+   "ms": 720.0,
+   "detail": "assessment · 3 search queries"
+  },
+  {
+   "step": "Separate facts and unknowns",
+   "status": "ok",
+   "ms": 1881.0,
+   "detail": "4 stated · 3 unknown"
+  },
+  {
+   "step": "Retrieve AFS pages",
+   "status": "ok",
+   "ms": 77.0,
+   "detail": "S01 p.12, S01 p.15, S01 p.16, S02 p.12, S02 p.14, S03 p.12, S03 p.13, S04 p.1 · BM25 · flashrank"
+  },
+  {
+   "step": "Premise checks",
+   "status": "warn",
+   "ms": 0.0,
+   "detail": "An existing calibration applies to the new material; A method combination is justified"
+  },
+  {
+   "step": "Compose the assessment",
+   "status": "ok",
+   "ms": 4426.0,
+   "detail": "gpt-4o via openai"
+  },
+  {
+   "step": "Verify citations",
+   "status": "ok",
+   "ms": 0.0,
+   "detail": "2 of 2 quotes found on the cited page"
+  }
+ ]
+}

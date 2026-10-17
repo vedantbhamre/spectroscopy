@@ -1,0 +1,413 @@
+{
+ "run_at": "2026-10-17T17:14:08+00:00",
+ "mode": "live pipeline",
+ "judge": "openai:gpt-4o (JUDGE_OPENAI_API_KEY)",
+ "judge_calls": 46,
+ "metrics": [
+  "citation_validity",
+  "grounding",
+  "clarification",
+  "feasibility",
+  "expectations",
+  "faithfulness",
+  "answer_relevancy",
+  "context_precision",
+  "context_recall",
+  "answer_correctness"
+ ],
+ "summary": {
+  "citation_validity": {
+   "all": 1.0,
+   "development": 1.0,
+   "evaluation": 1.0
+  },
+  "grounding": {
+   "all": 0.9167,
+   "development": 0.9,
+   "evaluation": 1.0
+  },
+  "clarification": {
+   "all": 1.0,
+   "development": 1.0,
+   "evaluation": 1.0
+  },
+  "feasibility": {
+   "all": 1.0,
+   "development": 1.0,
+   "evaluation": 1.0
+  },
+  "expectations": {
+   "all": 0.9643,
+   "development": 0.9375,
+   "evaluation": 1.0
+  },
+  "faithfulness": {
+   "all": 0.7202,
+   "development": 0.6771,
+   "evaluation": 0.7778
+  },
+  "answer_relevancy": {
+   "all": 0.7381,
+   "development": 0.7417,
+   "evaluation": 0.7333
+  },
+  "context_precision": {
+   "all": 0.806,
+   "development": 0.8216,
+   "evaluation": 0.7852
+  },
+  "context_recall": {
+   "all": 0.3556,
+   "development": 0.3556,
+   "evaluation": null
+  },
+  "answer_correctness": {
+   "all": 0.6458,
+   "development": 0.6458,
+   "evaluation": null
+  }
+ },
+ "scenarios": [
+  {
+   "id": "D01",
+   "set": "development",
+   "title": "Blend potency in a tablet press feed frame",
+   "status": "provisional",
+   "ms": 8842.21770905424,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": 1.0,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [
+     "Potential interference from excipients in the blend.",
+     "Need for matrix-specific calibration models."
+    ],
+    "faithfulness": 0.7142857142857143,
+    "answer_relevancy": 0.8,
+    "context_precision": 0.9266666666666665,
+    "context_recall": 0.6,
+    "answer_correctness": 0.625
+   }
+  },
+  {
+   "id": "D02",
+   "set": "development",
+   "title": "Fat and protein monitoring in opaque dairy product",
+   "status": "provisional",
+   "ms": 7759.114208049141,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": 0.5,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [
+     "There is a risk of potential interference from product temperature and texture variations."
+    ],
+    "faithfulness": 0.8333333333333334,
+    "answer_relevancy": 0.8,
+    "context_precision": 0.8583333333333332,
+    "context_recall": 0.1111111111111111,
+    "answer_correctness": 0.6666666666666666
+   }
+  },
+  {
+   "id": "D03",
+   "set": "development",
+   "title": "A clear whey stream before concentration",
+   "status": "provisional",
+   "ms": 8012.178082950413,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": 1.0,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [
+     "Monitor protein concentration in a whey stream with varying turbidity using spectroscopy.",
+     "Raman shift typically 200–3400 cm-1 with excitation around 785 nm.",
+     "Potential interference from turbidity affecting spectral measurements."
+    ],
+    "faithfulness": 0.5714285714285714,
+    "answer_relevancy": 0.95,
+    "context_precision": 0.6791666666666667,
+    "context_recall": null,
+    "answer_correctness": null
+   }
+  },
+  {
+   "id": "D04",
+   "set": "development",
+   "title": "Glucose and lactate trends in an aqueous bioprocess",
+   "status": "insufficient",
+   "ms": 14325.55054104887,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": 1.0,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [
+     "In situ spectroscopy is used for monitoring glucose and lactate in cell culture.",
+     "Calibration complexity arises due to medium and cell population changes."
+    ],
+    "faithfulness": 0.7142857142857143,
+    "answer_relevancy": 0.85,
+    "context_precision": 0.8541666666666666,
+    "context_recall": null,
+    "answer_correctness": null
+   }
+  },
+  {
+   "id": "D05",
+   "set": "development",
+   "title": "Biomass related monitoring during yeast fermentation",
+   "status": "insufficient",
+   "ms": 5931.4517499879,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": null,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [
+     "Undefined measurement targets may lead to inappropriate method selection."
+    ],
+    "faithfulness": 0.6666666666666666,
+    "answer_relevancy": 0.7,
+    "context_precision": 0.775,
+    "context_recall": null,
+    "answer_correctness": null
+   }
+  },
+  {
+   "id": "D06",
+   "set": "development",
+   "title": "Water content in a petroleum stream",
+   "status": "insufficient",
+   "ms": 8235.884207999334,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": 1.0,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [
+     "Potential challenges in fiber coupling efficiency over long distances."
+    ],
+    "faithfulness": 0.75,
+    "answer_relevancy": 0.4333,
+    "context_precision": 0.7329365079365079,
+    "context_recall": null,
+    "answer_correctness": null
+   }
+  },
+  {
+   "id": "D07",
+   "set": "development",
+   "title": "API concentration during hot polymer extrusion",
+   "status": "insufficient",
+   "ms": 9433.919667033479,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": null,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 0.5,
+    "expectation_failures": [
+     "mentions one of ['mir', 'atr', 'raman', 'nir']"
+    ],
+    "unsupported_claims": [
+     "Unspecified measurement variable may lead to inappropriate method selection.",
+     "High temperature and material build-up could affect probe performance."
+    ],
+    "faithfulness": 0.5,
+    "answer_relevancy": 0.8,
+    "context_precision": 0.8083333333333332,
+    "context_recall": null,
+    "answer_correctness": null
+   }
+  },
+  {
+   "id": "D08",
+   "set": "development",
+   "title": "Local measurements of heterogeneous model tissues",
+   "status": "insufficient",
+   "ms": 7912.875875015743,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": null,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [
+     "The study aims to compare MIR ATR and fluorescence for classifying biological tissues.",
+     "The combination's benefit is a hypothesis to test."
+    ],
+    "faithfulness": 0.6666666666666666,
+    "answer_relevancy": 0.6,
+    "context_precision": 0.9379251700680271,
+    "context_recall": null,
+    "answer_correctness": null
+   }
+  },
+  {
+   "id": "H01",
+   "set": "evaluation",
+   "title": "A new formulation after an existing NIR pilot",
+   "status": "insufficient",
+   "ms": 6691.783000016585,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": null,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [
+     "Each method should be evaluated independently before considering a combination.",
+     "Existing NIR calibration may not transfer to the new blend.",
+     "Adding Raman does not guarantee the old calibration's validity."
+    ],
+    "faithfulness": 0.5,
+    "answer_relevancy": 0.9,
+    "context_precision": 0.41666666666666663,
+    "context_recall": null,
+    "answer_correctness": null
+   }
+  },
+  {
+   "id": "H02",
+   "set": "evaluation",
+   "title": "Composition monitoring across two dairy streams",
+   "status": "provisional",
+   "ms": 8517.22816703841,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": 1.0,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [
+     "NIR (Transmission) is suitable for relatively clear whey stream, allowing deeper light penetration."
+    ],
+    "faithfulness": 0.8333333333333334,
+    "answer_relevancy": 0.9,
+    "context_precision": 0.8166666666666667,
+    "context_recall": null,
+    "answer_correctness": null
+   }
+  },
+  {
+   "id": "H03",
+   "set": "evaluation",
+   "title": "A fluorescence instrument requested for glucose and viable biomass",
+   "status": "insufficient",
+   "ms": 7480.307791032828,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": null,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [
+     "Fluorescence spectroscopy requires a defined fluorescent target for accurate measurement of glucose and biomass.",
+     "Lack of a defined fluorescent target may lead to inaccurate measurements."
+    ],
+    "faithfulness": 0.3333333333333333,
+    "answer_relevancy": 0.6,
+    "context_precision": 0.8166666666666667,
+    "context_recall": null,
+    "answer_correctness": null
+   }
+  },
+  {
+   "id": "H04",
+   "set": "evaluation",
+   "title": "Reuse of a silica link for petroleum MIR ATR",
+   "status": "insufficient",
+   "ms": 6167.5138749415055,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": null,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [],
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.8,
+    "context_precision": 0.9166666666666666,
+    "context_recall": null,
+    "answer_correctness": null
+   }
+  },
+  {
+   "id": "H05",
+   "set": "evaluation",
+   "title": "An undefined off specification liquid",
+   "status": "insufficient",
+   "ms": 5733.053875039332,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": null,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [],
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.4,
+    "context_precision": 0.7961904761904762,
+    "context_recall": null,
+    "answer_correctness": null
+   }
+  },
+  {
+   "id": "H06",
+   "set": "evaluation",
+   "title": "A research sensor requested for immediate surgical use",
+   "status": "out_of_scope",
+   "ms": 6481.333083007485,
+   "pages_retrieved": 8,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": null,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [],
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.8,
+    "context_precision": 0.9484126984126983,
+    "context_recall": null,
+    "answer_correctness": null
+   }
+  }
+ ]
+}

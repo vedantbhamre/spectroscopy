@@ -7,6 +7,7 @@ def test_fallback_order_uses_both_keys(monkeypatch):
     monkeypatch.setattr(settings, "OPENAI_FALLBACK_API_KEY", "k2")
     monkeypatch.setattr(settings, "PRIMARY_MODEL", "gpt-4o")
     monkeypatch.setattr(settings, "FALLBACK_MODEL", "gpt-4o-mini")
+    monkeypatch.setattr(settings, "GROQ_FALLBACK_API_KEY", None)
     assert [(k, m) for k, m, _ in client.attempts()] == [("k1", "gpt-4o"), ("k2", "gpt-4o"), ("k1", "gpt-4o-mini"), ("k2", "gpt-4o-mini")]
     assert [m for _, m, _ in client.attempts("small")][:2] == ["gpt-4o-mini", "gpt-4o-mini"]
 
@@ -15,6 +16,7 @@ def test_fallback_key_alone_is_enough(monkeypatch):
     monkeypatch.setattr(settings, "OPENAI_API_KEY", None)
     monkeypatch.setattr(settings, "OPENAI_FALLBACK_API_KEY", "k2")
     monkeypatch.setattr(settings, "PORTKEY_API_KEY", None)
+    monkeypatch.setattr(settings, "GROQ_FALLBACK_API_KEY", None)
     assert settings.llm_configured
     assert {k for k, _, _ in client.attempts()} == {"k2"}
 
@@ -26,7 +28,7 @@ def test_chat_moves_to_fallback_key_on_error(monkeypatch):
     calls = []
 
     class Fake:
-        def __init__(self, key):
+        def __init__(self, key, base_url=None):
             self.key = key
             self.chat = self
             self.completions = self
@@ -42,3 +44,12 @@ def test_chat_moves_to_fallback_key_on_error(monkeypatch):
     res = client.chat([{"role": "user", "content": "hi"}])
     assert res.text == "ok" and res.via == "openai-fallback-key"
     assert calls == [("k1", settings.PRIMARY_MODEL), ("k2", settings.PRIMARY_MODEL)]
+
+
+def test_groq_is_the_last_resort(monkeypatch):
+    monkeypatch.setattr(settings, "OPENAI_API_KEY", "k1")
+    monkeypatch.setattr(settings, "OPENAI_FALLBACK_API_KEY", None)
+    monkeypatch.setattr(settings, "GROQ_FALLBACK_API_KEY", "g1")
+    labels = [label for _, _, label in client.attempts()]
+    assert labels[-2:] == ["groq", "groq"] and labels.count("openai") == 2
+    assert client.attempts("small")[-2][1] == settings.GROQ_SMALL_MODEL

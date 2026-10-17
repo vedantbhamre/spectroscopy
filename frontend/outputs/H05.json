@@ -1,0 +1,134 @@
+{
+ "reply": "To recommend a spectroscopy method, we first need to identify the contaminant or the affected quality variable in your liquid process. Without this information, selecting a method is premature. Initial lab trials using multiple spectroscopy methods can help identify key spectral features and guide method selection. Consider starting with a multi-method lab trial to explore potential contaminants and affected variables.",
+ "report": {
+  "scenarioId": "H05",
+  "title": "Identifying Contaminant in Liquid Process",
+  "origin": "live",
+  "generatedAt": "2026-10-17T17:11:19+00:00",
+  "decisionStatus": "insufficient",
+  "requirements": {
+   "stated": [
+    "liquid process occasionally goes off specification"
+   ],
+   "unknowns": [
+    "contaminant identity",
+    "affected quality variable"
+   ]
+  },
+  "questions": [
+   {
+    "text": "What is the suspected contaminant or affected quality variable?",
+    "impact": "method"
+   },
+   {
+    "text": "What are the specific process conditions (e.g., temperature, pressure)?",
+    "impact": "setup"
+   },
+   {
+    "text": "Do you have any existing spectroscopy equipment?",
+    "impact": "setup"
+   }
+  ],
+  "recommendations": [],
+  "concept": {
+   "summary": "Multi-method lab trials can identify key spectral features for method selection.",
+   "citations": [
+    {
+     "source": "S02",
+     "page": "20",
+     "quote": "Multi-method lab trials (AFS tests your process using all key fiber optic spectroscopy methods)",
+     "check": "visual_note"
+    }
+   ]
+  },
+  "spectralRange": {
+   "summary": "0.3–16 µm range for multi-spectral fiber systems",
+   "citations": [
+    {
+     "source": "S02",
+     "page": "3",
+     "quote": "Multi-Spectral Fiber Systems allow to test 4 spectroscopy methods in 0.3-16µm range",
+     "check": "verified"
+    }
+   ]
+  },
+  "risks": [
+   "Choosing a method without identifying the contaminant may lead to ineffective monitoring."
+  ],
+  "feasibility": {
+   "steps": [
+    "Conduct multi-method lab trials to identify spectral features.",
+    "Develop a chemometric model based on identified features."
+   ],
+   "decisionBasis": "Identify the contaminant or affected variable before selecting a method."
+  },
+  "premiseChecks": [
+   {
+    "id": "target_defined",
+    "label": "The variable to measure is named",
+    "status": "fail",
+    "detail": "The enquiry does not name the variable or substance to measure, so no method can be chosen yet. Ask for it first.",
+    "citations": []
+   },
+   {
+    "id": "certainty",
+    "label": "The request can be answered with certainty",
+    "status": "flag",
+    "detail": "The client asks for approval, proof or an exact configuration. The answer can only be a provisional assessment with the questions and experiment that would decide it.",
+    "citations": []
+   }
+  ],
+  "sources": [
+   {
+    "source": "S02",
+    "page": "20",
+    "quote": "Multi-method lab trials (AFS tests your process using all key fiber optic spectroscopy methods)",
+    "check": "visual_note"
+   },
+   {
+    "source": "S02",
+    "page": "3",
+    "quote": "Multi-Spectral Fiber Systems allow to test 4 spectroscopy methods in 0.3-16µm range",
+    "check": "verified"
+   }
+  ]
+ },
+ "trace": [
+  {
+   "step": "Plan the turn",
+   "status": "ok",
+   "ms": 651.0,
+   "detail": "assessment · 3 search queries"
+  },
+  {
+   "step": "Separate facts and unknowns",
+   "status": "warn",
+   "ms": 1407.0,
+   "detail": "2 stated · 4 unknown · 1 unquoted dropped"
+  },
+  {
+   "step": "Retrieve AFS pages",
+   "status": "ok",
+   "ms": 73.0,
+   "detail": "S01 p.16, S01 p.4, S01 p.7, S02 p.20, S02 p.3, S04 p.1, S05 p.2 · BM25 · flashrank"
+  },
+  {
+   "step": "Premise checks",
+   "status": "fail",
+   "ms": 0.0,
+   "detail": "The variable to measure is named; The request can be answered with certainty"
+  },
+  {
+   "step": "Compose the assessment",
+   "status": "ok",
+   "ms": 3485.0,
+   "detail": "gpt-4o via openai"
+  },
+  {
+   "step": "Verify citations",
+   "status": "ok",
+   "ms": 0.0,
+   "detail": "2 of 2 quotes found on the cited page"
+  }
+ ]
+}

@@ -37,6 +37,7 @@ def health() -> dict:
         "llm": ("portkey → openai" if settings.PORTKEY_API_KEY else "openai" if settings.llm_configured else None),
         "models": [settings.PRIMARY_MODEL, settings.FALLBACK_MODEL],
         "fallback_key": bool(settings.OPENAI_FALLBACK_API_KEY),
+        "groq_fallback": settings.GROQ_MODEL if settings.GROQ_FALLBACK_API_KEY else None,
         "embeddings": bool(settings.GEMINI_API_KEY),
         "qdrant": "cloud" if settings.QDRANT_URL else "local",
         "kb_chunks": len(retrieval.chunks()),
@@ -49,10 +50,19 @@ def graph() -> dict:
     return {"mermaid": agent.get_graph().draw_mermaid()}
 
 
-def _gate(text: str) -> tuple[bool, str | None, list[str], TraceStep]:
-    """Safety gate on the latest client message. Hard rails block; premise flags pass through to the checks."""
+def _gate(text: str, history: list[dict] | None = None) -> tuple[bool, str | None, list[str], TraceStep]:
+    """Safety gate on the latest client message. Hard rails block; premise flags pass through to the checks.
+
+    history: earlier turns; the opening enquiry and the last assistant reply are given to the LLM gate as
+    context, so a short follow-up ("What does fibre link mean?") is not read as off-topic on its own.
+    """
+    context = None
+    if history:
+        first = next((m["content"] for m in history if m["role"] == "user"), "")
+        last = next((m["content"] for m in reversed(history) if m["role"] == "assistant"), "")
+        context = f"Client: {first[:600]}" + (f"\nAssistant: {last[:600]}" if last else "")
     with logfire.span("safety gate"):
-        r = guardrails.check(text)
+        r = guardrails.check(text, context=context)
     flags = [c.value for c in r.all_flags if c.is_premise_flag]
     if not r.passed:
         return True, r.message, [], TraceStep(step="Safety gate", status="fail", detail=f"blocked: {r.category.value} · {r.engine}")
@@ -84,7 +94,7 @@ def _unavailable(e: Exception) -> JSONResponse:
 def assess(req: AssessRequest):
     """Frontend contract: whole conversation in, reply + full report version + trace out."""
     messages = [m.model_dump() for m in req.messages]
-    fired, response, flags, gate = _gate(messages[-1]["content"])
+    fired, response, flags, gate = _gate(messages[-1]["content"], messages[:-1])
     if fired:
         return AssessResponse(reply=response or "This request is outside what the assistant can help with.",
                               report=_blocked_report(req.scenarioId), trace=[gate])
@@ -102,12 +112,12 @@ def assess(req: AssessRequest):
 @app.post("/query")
 def query(req: QueryRequest):
     """Template-compatible endpoint (Streamlit chat / eval app): one message per call, memory by thread_id."""
-    fired, response, flags, _ = _gate(req.q)
+    config = {"configurable": {"thread_id": req.thread_id or "default_user"}}
+    prior = agent.get_state(config).values.get("messages", []) if agent.get_state(config) else []
+    fired, response, flags, _ = _gate(req.q, prior)
     if fired:
         return {"question": req.q, "answer": response, "thought_process": ["Intent: Guardrails Fired", "Retrieval: Skipped"],
                 "status": "Blocked by guardrails.", "sources": []}
-    config = {"configurable": {"thread_id": req.thread_id or "default_user"}}
-    prior = agent.get_state(config).values.get("messages", []) if agent.get_state(config) else []
     messages = [*prior, {"role": "user", "content": req.q}]
     try:
         out = agent.invoke({"messages": messages, "gate_flags": flags, "trace": []}, config=config)

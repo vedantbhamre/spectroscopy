@@ -33,7 +33,8 @@ _LABELS = {
 _SYSTEM_PROMPT = f"""You are the safety gate for an assistant whose only job is:
 {DOMAIN_DESCRIPTION}
 
-Classify the USER message. Return ONLY JSON with this exact shape:
+Classify the USER message. If CONVERSATION SO FAR is given, the message is a follow-up in that
+conversation: read it in that context, but classify only the latest message. Return ONLY JSON with this exact shape:
 {{"primary": "<label>", "flags": ["<label>", ...], "reason": "<short>"}}
 
 Labels:
@@ -62,9 +63,9 @@ class LLMGuard:
     def __init__(self, fallback: Guard) -> None:
         self._fallback = fallback
 
-    def check(self, text: str) -> GuardResult:
+    def check(self, text: str, context: str | None = None) -> GuardResult:
         try:
-            raw = self._classify(text)
+            raw = self._classify(text, context)
         except Exception as exc:  # any API/parse failure -> deterministic fallback
             log.warning("LLM guard call failed (%s); using rule-based fallback.", exc)
             return self._fallback.check(text)
@@ -79,6 +80,11 @@ class LLMGuard:
             return GuardResult(passed=True, category=GuardCategory.NONE, engine=self.name)
         if primary is GuardCategory.NONE:
             primary, *extras = extras
+        # Short follow-ups ("What does fibre link mean?") are often misread as off-topic. Within a
+        # conversation, off_topic blocks only if the rule gate agrees; jailbreak/injection still block.
+        if primary is GuardCategory.OFF_TOPIC and context and self._fallback.check(text).passed:
+            log.info("LLM gate said off_topic for a follow-up; rule gate passes it.")
+            return GuardResult(passed=True, category=GuardCategory.NONE, engine=self.name)
         # Premise flags are non-blocking; only hard rails stop the request.
         return GuardResult(
             passed=not primary.is_hard_block,
@@ -88,9 +94,10 @@ class LLMGuard:
             engine=self.name,
         )
 
-    def _classify(self, text: str) -> dict:
+    def _classify(self, text: str, context: str | None = None) -> dict:
+        user = f"CONVERSATION SO FAR:\n{context}\n\nLATEST USER MESSAGE (classify this):\n{text}" if context else text
         res = chat(
-            [{"role": "system", "content": _SYSTEM_PROMPT}, {"role": "user", "content": text}],
+            [{"role": "system", "content": _SYSTEM_PROMPT}, {"role": "user", "content": user}],
             json_mode=True, temperature=0, feature="guard", max_tokens=200, tier="small",
         )
         return parse_json(res.text or "{}")

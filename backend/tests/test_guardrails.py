@@ -85,6 +85,31 @@ def test_llm_gate_unknown_label_fails_open(monkeypatch):
     assert _llm(monkeypatch, {"primary": "banana"}).check("hello").passed
 
 
+def test_llm_gate_reads_follow_up_in_context(monkeypatch):
+    import app.guardrails.llm_guard as mod
+
+    seen = []
+    monkeypatch.setattr(mod, "chat", lambda messages, **kw: seen.append(messages[1]["content"]) or LLMResult('{"primary": "on_topic"}', "fake", "test", 1))
+    assert LLMGuard(fallback=RuleGuard()).check("What does fibre link mean?", context="Client: MIR ATR in petroleum").passed
+    assert "CONVERSATION SO FAR" in seen[0] and seen[0].endswith("What does fibre link mean?")
+
+
+def test_follow_up_off_topic_needs_rule_gate_to_agree(monkeypatch):
+    g = _llm(monkeypatch, {"primary": "off_topic"})
+    assert g.check("What does fibre link mean?", context="Client: MIR ATR").passed  # rules pass it
+    assert not g.check("Tell me a joke about cats.", context="Client: MIR ATR").passed  # both agree
+    assert not g.check("What does fibre link mean?").passed  # first turn: LLM verdict stands
+
+
+def test_api_gives_gate_the_earlier_turns(monkeypatch):
+    import app.main as main
+
+    seen = {}
+    monkeypatch.setattr(main.guardrails, "check", lambda text, context=None: seen.update(text=text, context=context) or RuleGuard().check(text))
+    main._gate("Why?", [{"role": "user", "content": "Moisture in soil"}, {"role": "assistant", "content": "Report ready."}])
+    assert seen == {"text": "Why?", "context": "Client: Moisture in soil\nAssistant: Report ready."}
+
+
 def test_llm_gate_falls_back_to_rules(monkeypatch):
     r = _llm(monkeypatch, RuntimeError("network down")).check("Tell me a joke about cats.")
     assert not r.passed and r.engine == "rules"

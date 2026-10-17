@@ -1,4 +1,5 @@
-"""LLM gateway: OpenAI, primary model (gpt-4o) with fallback model (gpt-4o-mini) and a fallback API key.
+"""LLM gateway: OpenAI, primary model (gpt-4o) with fallback model (gpt-4o-mini) and a fallback API key;
+Groq (gpt-oss) as the last-resort provider when GROQ_FALLBACK_API_KEY is set.
 
 With PORTKEY_API_KEY, requests go through Portkey (retry, cache, fallback) using the same
 gateway config shape as the 8hr-MARATHON template; the two Portkey integrations hold the
@@ -55,21 +56,26 @@ def _portkey_client(tier: str = "default"):
     return _portkey[tier]
 
 
-def _openai_client(key: str):
+def _openai_client(key: str, base_url: str | None = None):
     if key not in _openai:
         from openai import OpenAI
 
-        _openai[key] = OpenAI(api_key=key, base_url=settings.OPENAI_BASE_URL, max_retries=2, timeout=90)
+        _openai[key] = OpenAI(api_key=key, base_url=base_url or settings.OPENAI_BASE_URL, max_retries=2, timeout=90)
     return _openai[key]
 
 
 def attempts(tier: str = "default") -> list[tuple[str, str, str]]:
-    """(api_key, model, label) in the order they are tried."""
+    """(api_key, model, label) in the order they are tried: OpenAI models × keys, then Groq."""
     keys = [(k, label) for k, label in ((settings.OPENAI_API_KEY, "openai"), (settings.OPENAI_FALLBACK_API_KEY, "openai-fallback-key")) if k]
     models = [settings.PRIMARY_MODEL, settings.FALLBACK_MODEL]
+    groq = [settings.GROQ_MODEL, settings.GROQ_SMALL_MODEL]
     if tier == "small":
         models.reverse()
-    return [(k, m, label) for m in dict.fromkeys(models) for k, label in keys]
+        groq.reverse()
+    out = [(k, m, label) for m in dict.fromkeys(models) for k, label in keys]
+    if settings.GROQ_FALLBACK_API_KEY:
+        out += [(settings.GROQ_FALLBACK_API_KEY, m, "groq") for m in dict.fromkeys(groq)]
+    return out
 
 
 def _cache_status(resp) -> str:
@@ -101,7 +107,10 @@ def chat(messages: list[dict], *, json_mode: bool = False, temperature: float = 
         last: Exception | None = None
         for key, model, label in attempts(tier):
             try:
-                resp = _openai_client(key).chat.completions.create(model=model, **kwargs)
+                if label == "groq":  # gpt-oss reasons before answering; keep it short so max tokens go to the answer
+                    resp = _openai_client(key, settings.GROQ_BASE_URL).chat.completions.create(model=model, reasoning_effort="low", **kwargs)
+                else:
+                    resp = _openai_client(key).chat.completions.create(model=model, **kwargs)
                 return LLMResult(resp.choices[0].message.content or "", model, label, (time.perf_counter() - start) * 1000)
             except Exception as e:  # noqa: BLE001 - try the next key / model
                 logfire.warning("{label} {model} failed: {err}", label=label, model=model, err=str(e))

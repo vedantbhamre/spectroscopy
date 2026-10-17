@@ -22,7 +22,7 @@ def normalise(s: str) -> str:
     s = re.sub(r"-\s*\n\s*", "", s)  # hyphenation at line end
     s = re.sub(r"\s+-(?=\w)", "-", s)  # "fiber -optic" → "fiber-optic"
     s = re.sub(r"[‐-―−]", "-", s)
-    s = s.replace("‘", "'").replace("’", "'").replace("“", '"').replace("”", '"')
+    s = re.sub(r"[‘’‚‛“”„‟\"`]", "'", s)  # models swap " and ' freely
     s = s.replace("cm⁻¹", "cm-1").replace("cm−1", "cm-1")
     return re.sub(r"\s+", " ", s).strip().lower()
 
@@ -55,6 +55,19 @@ def page_exists(source: str, page: str) -> bool:
     return any(s == source and n in wanted for s, n, _, _ in _normalised())
 
 
+def _contains(text: str, quote: str) -> bool:
+    """The quote is on the page; "..." elides words, so each piece must appear, in order."""
+    pos = 0
+    for piece in (p.strip(" ,;:.!?") for p in quote.split("...")):
+        if not piece:
+            continue
+        i = text.find(piece, pos)
+        if i < 0:
+            return False
+        pos = i + len(piece)
+    return pos > 0
+
+
 def verify(c: Citation) -> Citation:
     """Return a copy of the citation with `check` set by the verifier."""
     if c.source == "EXT":
@@ -66,7 +79,7 @@ def verify(c: Citation) -> Citation:
         return c.model_copy(update={"check": "unverified"})
     q = normalise(c.quote)
     wanted = set(page_numbers(c.page))
-    kinds = [k for s, n, k, text in _normalised() if s == c.source and n in wanted and q in text]
+    kinds = [k for s, n, k, text in _normalised() if s == c.source and n in wanted and _contains(text, q)]
     if not kinds:
         return c.model_copy(update={"check": "failed"})
     return c.model_copy(update={"check": "visual_note" if kinds == ["visual_note"] else "verified"})

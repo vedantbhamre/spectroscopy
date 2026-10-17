@@ -1,0 +1,70 @@
+{
+  "_about": "Golden dataset for the evals ONLY. The assessment pipeline never reads this file. 'reference' = key statements of the organiser worked examples (AFS_Examples_and_Reference.docx §2, D01/D02). Other fields are team expectations derived from the challenge brief, the organiser notes and the AFS expert Q&A; they test behaviour (status, premise checks, terms), not wording.",
+  "D01": {
+    "status_in": ["provisional"],
+    "must_mention_any": [["nir"], ["raman"]],
+    "min_questions": 2,
+    "reference": [
+      "NIR diffuse reflection is supported for blend concentration in powders (S01 p.14-15).",
+      "A matrix-specific calibration must be built and tested.",
+      "Raman is a comparison candidate; check fluorescence background and signal quality.",
+      "NIR + Raman should only be considered after each method is assessed on its own; a gain is a hypothesis to test.",
+      "The measurement concept is a powder interface in the feed frame, e.g. a diffuse reflection probe for NIR and a Raman probe.",
+      "NIR has a nominal method range of 780-2500 nm; do not pick an optimal band without sample spectra.",
+      "A change of API or excipients can invalidate a calibration.",
+      "Physical variation of the powder (particle size, density, flow) changes the signal.",
+      "The first experiment prepares representative blends with independent API reference assays and validates on held-out runs or batches.",
+      "Numerical acceptance criteria must be agreed with the client before the test; choose the simplest configuration that meets them."
+    ]
+  },
+  "D02": {
+    "status_in": ["provisional"],
+    "must_mention_any": [["nir"], ["reflection"]],
+    "min_questions": 2,
+    "reference": [
+      "NIR diffuse reflection is supported for opaque or concentrated dairy products (S01 p.17).",
+      "Test a reflection interface on representative laboratory samples before specifying the process installation.",
+      "780-2500 nm is the general NIR range, not a required full coverage; check the bands the instrument and fibre cover.",
+      "Temperature, texture and scattering changes can mimic composition changes.",
+      "Fat and protein each need their own independent reference results.",
+      "A reflection spectrum is not yet a fat or protein calibration.",
+      "Collect representative samples with independent fat and protein results across production variation.",
+      "Separate the effect of physical changes (temperature, texture) from composition.",
+      "Validate on independent production runs against client-agreed error and maintenance requirements."
+    ]
+  },
+  "D03": { "must_mention_any": [["whey"], ["turbid", "scatter"]] },
+  "D04": { "must_mention_any": [["raman", "nir"], ["glucose"], ["lactate"]] },
+  "D05": { "must_mention_any": [["biomass", "optical density"]] },
+  "D06": { "must_mention_any": [["mir", "atr", "mid-ir"], ["fibre", "fiber"]] },
+  "D07": { "must_mention_any": [["mir", "atr", "raman", "nir"], ["temperature", "hot", "fouling", "build-up", "build up"]] },
+  "D08": { "must_mention_any": [["mir", "atr"], ["fluorescence"]] },
+  "H01": {
+    "status_in": ["provisional", "insufficient"],
+    "premise_flagged": ["calibration_transfer"],
+    "must_mention_any": [["calibration", "recalibrat"], ["raman"], ["reference"]]
+  },
+  "H02": {
+    "status_in": ["provisional", "insufficient"],
+    "must_mention_any": [["whey"], ["concentrate"], ["transmission", "transflection"], ["reflection"]]
+  },
+  "H03": {
+    "status_in": ["insufficient", "out_of_scope"],
+    "premise_flagged": ["fluorescent_target"],
+    "must_mention_any": [["fluorescent target", "marker", "fluorophore", "fluorescent species"]]
+  },
+  "H04": {
+    "status_in": ["insufficient", "out_of_scope"],
+    "premise_flagged": ["fiber_"],
+    "must_mention_any": [["silica"], ["chalcogenide", "fluoride", "hollow", "polycrystalline", "pir", "cir", "hwg"]]
+  },
+  "H05": {
+    "status_in": ["insufficient"],
+    "min_questions": 3
+  },
+  "H06": {
+    "status_in": ["out_of_scope", "insufficient"],
+    "premise_flagged": ["source_scope"],
+    "must_mention_any": [["in vitro"]]
+  }
+}

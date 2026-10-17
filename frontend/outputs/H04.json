@@ -1,0 +1,225 @@
+{
+ "reply": "The current setup with a silica fiber cable from a visible or NIR measurement is unsuitable for MIR ATR, as silica fibers do not transmit in the MIR range required for ATR (2.5–25 µm). Alternative fibers like chalcogenide or polycrystalline IR would be necessary. Further details on link length, routing, and operating conditions are needed to assess feasibility.",
+ "report": {
+  "scenarioId": "H04",
+  "title": "MIR ATR for Water Content in Petroleum",
+  "origin": "live",
+  "generatedAt": "2026-10-17T17:11:13+00:00",
+  "decisionStatus": "insufficient",
+  "requirements": {
+   "stated": [
+    "investigate water content in a petroleum line",
+    "use MIR ATR",
+    "analyzer in another building",
+    "reuse silica fiber cable from visible or NIR setup"
+   ],
+   "unknowns": [
+    "link length",
+    "routing",
+    "operating conditions"
+   ]
+  },
+  "questions": [
+   {
+    "text": "What is the length and routing of the fiber link?",
+    "impact": "setup"
+   },
+   {
+    "text": "What are the operating conditions (temperature, pressure) of the petroleum line?",
+    "impact": "method"
+   },
+   {
+    "text": "Is there flexibility in using alternative fiber types?",
+    "impact": "method"
+   }
+  ],
+  "recommendations": [],
+  "concept": {
+   "summary": "MIR ATR requires fibers that transmit in the 2.5–25 µm range, which silica fibers do not support.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "10",
+     "quote": "ATR fiber probes enable the analysis of liquids and solid elastic samples...",
+     "check": "failed"
+    }
+   ]
+  },
+  "spectralRange": {
+   "summary": "MIR ATR operates in the 4000–400 cm⁻¹ (2.5–25 µm) range.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "10",
+     "quote": "ATR fiber probes enable the analysis of liquids and solid elastic samples...",
+     "check": "failed"
+    }
+   ]
+  },
+  "risks": [
+   "Incompatibility of silica fibers with MIR range.",
+   "Uncertainty in fiber link feasibility without additional details."
+  ],
+  "feasibility": {
+   "steps": [
+    "Assess alternative fiber options like chalcogenide or polycrystalline IR.",
+    "Gather detailed information on link length and operating conditions."
+   ],
+   "decisionBasis": "Determine fiber compatibility and operational feasibility with additional data."
+  },
+  "premiseChecks": [
+   {
+    "id": "target_defined",
+    "label": "The variable to measure is named",
+    "status": "pass",
+    "detail": "Target: water content.",
+    "citations": []
+   },
+   {
+    "id": "fiber_silica_visnir_MIR_ATR",
+    "label": "Vis-NIR silica fibre carries the MIR (ATR) range",
+    "status": "fail",
+    "detail": "A Vis-NIR silica fibre transmits about 0.35–2.4 µm; MIR (ATR) works at 4000–400 cm⁻¹ (2.5–25 µm). The link cannot carry the signal. Fibres in the supplied material that reach this range: chalcogenide (CIR) fibre (1.1–6.5 µm), polycrystalline IR (PIR) fibre (3.0–17.0 µm), hollow glass waveguide (2.0–18.0 µm), indium fluoride fibre (0.3–5.5 µm), zirconium fluoride fibre (0.3–4.5 µm).",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "9",
+      "quote": "Vibrational spectroscopy in the mid-IR range (4000–400 cm-1) is one of the most informative methods of chemical analysis.",
+      "check": "verified"
+     },
+     {
+      "source": "S02",
+      "page": "6",
+      "quote": "standard and Al/Cu-coated VIS-NIR silica fibers 350–2400 nm",
+      "check": "visual_note"
+     },
+     {
+      "source": "S02",
+      "page": "6",
+      "quote": "chalcogenide As-S IR fibers 1100–6500 nm",
+      "check": "visual_note"
+     },
+     {
+      "source": "S02",
+      "page": "6",
+      "quote": "polycrystalline infrared fibers 3000 nm–17 µm",
+      "check": "visual_note"
+     },
+     {
+      "source": "S02",
+      "page": "6",
+      "quote": "hollow glass waveguides 2000 nm–18 µm",
+      "check": "visual_note"
+     },
+     {
+      "source": "S02",
+      "page": "6",
+      "quote": "indium fluoride fibers 300–5500 nm",
+      "check": "visual_note"
+     },
+     {
+      "source": "S02",
+      "page": "6",
+      "quote": "zirconium fluoride fibers 300–4500 nm",
+      "check": "visual_note"
+     }
+    ]
+   },
+   {
+    "id": "certainty",
+    "label": "The request can be answered with certainty",
+    "status": "flag",
+    "detail": "The client asks for approval, proof or an exact configuration. The answer can only be a provisional assessment with the questions and experiment that would decide it.",
+    "citations": []
+   }
+  ],
+  "sources": [
+   {
+    "source": "S01",
+    "page": "10",
+    "quote": "ATR fiber probes enable the analysis of liquids and solid elastic samples...",
+    "check": "failed"
+   },
+   {
+    "source": "S01",
+    "page": "9",
+    "quote": "Vibrational spectroscopy in the mid-IR range (4000–400 cm-1) is one of the most informative methods of chemical analysis.",
+    "check": "verified"
+   },
+   {
+    "source": "S02",
+    "page": "6",
+    "quote": "standard and Al/Cu-coated VIS-NIR silica fibers 350–2400 nm",
+    "check": "visual_note"
+   },
+   {
+    "source": "S02",
+    "page": "6",
+    "quote": "chalcogenide As-S IR fibers 1100–6500 nm",
+    "check": "visual_note"
+   },
+   {
+    "source": "S02",
+    "page": "6",
+    "quote": "polycrystalline infrared fibers 3000 nm–17 µm",
+    "check": "visual_note"
+   },
+   {
+    "source": "S02",
+    "page": "6",
+    "quote": "hollow glass waveguides 2000 nm–18 µm",
+    "check": "visual_note"
+   },
+   {
+    "source": "S02",
+    "page": "6",
+    "quote": "indium fluoride fibers 300–5500 nm",
+    "check": "visual_note"
+   },
+   {
+    "source": "S02",
+    "page": "6",
+    "quote": "zirconium fluoride fibers 300–4500 nm",
+    "check": "visual_note"
+   }
+  ]
+ },
+ "trace": [
+  {
+   "step": "Plan the turn",
+   "status": "ok",
+   "ms": 676.0,
+   "detail": "assessment · 3 search queries"
+  },
+  {
+   "step": "Separate facts and unknowns",
+   "status": "ok",
+   "ms": 2400.0,
+   "detail": "4 stated · 3 unknown"
+  },
+  {
+   "step": "Retrieve AFS pages",
+   "status": "ok",
+   "ms": 81.0,
+   "detail": "S01 p.1, S01 p.10, S01 p.13, S01 p.14, S01 p.3, S02 p.13 · BM25 · flashrank"
+  },
+  {
+   "step": "Premise checks",
+   "status": "fail",
+   "ms": 0.0,
+   "detail": "Vis-NIR silica fibre carries the MIR (ATR) range; The request can be answered with certainty"
+  },
+  {
+   "step": "Compose the assessment",
+   "status": "ok",
+   "ms": 4506.0,
+   "detail": "gpt-4o via openai"
+  },
+  {
+   "step": "Verify citations",
+   "status": "warn",
+   "ms": 0.0,
+   "detail": "0 of 2 quotes found on the cited page · 2 not found"
+  }
+ ]
+}

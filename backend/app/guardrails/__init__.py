@@ -3,7 +3,7 @@
 Public surface:
     build_guard()        -> a Guard with `.check(text) -> GuardResult`
     initialize_rails()   -> build the process-wide gate (8hr-MARATHON template interface)
-    check(text)          -> GuardResult from the process-wide gate
+    check(text, context) -> GuardResult from the process-wide gate (context: earlier turns, LLM gate only)
     guard(text)          -> (fired, response), template interface: fired only for hard blocks
     GuardResult, GuardCategory
 
@@ -42,9 +42,12 @@ def initialize_rails() -> None:
     _GUARD = build_guard()
 
 
-def check(text: str) -> GuardResult:
+def check(text: str, context: str | None = None) -> GuardResult:
+    """context: earlier turns of the conversation, so the LLM gate reads a follow-up as part of it."""
     if _GUARD is None:
         initialize_rails()
+    if context and getattr(_GUARD, "name", "") == "llm":
+        return _GUARD.check(text, context=context)  # type: ignore[call-arg,union-attr]
     return _GUARD.check(text)  # type: ignore[union-attr]
 
 

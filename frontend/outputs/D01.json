@@ -1,0 +1,168 @@
+{
+ "reply": "For assessing API concentration in a powder blend within the feed frame, NIR (diffuse reflection) and Raman spectroscopy are promising methods. NIR is suitable for online applications due to its penetration depth and compatibility with fiber optics. Raman can provide complementary information, especially for symmetric vibrations. A pilot should test each method individually before considering a combined approach.",
+ "report": {
+  "scenarioId": "D01",
+  "title": "In-line API Concentration Monitoring in Tablet Manufacturing",
+  "origin": "live",
+  "generatedAt": "2026-10-17T17:09:39+00:00",
+  "decisionStatus": "provisional",
+  "requirements": {
+   "stated": [
+    "manufacture tablets from a powder blend",
+    "laboratory checks are too slow",
+    "want to assess fiber based measurement in the feed frame",
+    "first pilot should compare measurement options"
+   ],
+   "unknowns": [
+    "specific measurement methods the client is considering",
+    "specific API or excipients in the blend"
+   ]
+  },
+  "questions": [
+   {
+    "text": "What is the specific API and excipients in the blend?",
+    "impact": "method"
+   },
+   {
+    "text": "What are the acceptance criteria for API concentration measurement?",
+    "impact": "acceptance"
+   },
+   {
+    "text": "Are there any known fluorescence issues with the API or excipients?",
+    "impact": "method"
+   }
+  ],
+  "recommendations": [
+   {
+    "method": "NIR (diffuse reflection)",
+    "methodIds": [
+     "NIR"
+    ],
+    "role": "primary",
+    "reason": "NIR is ideal for online applications due to its penetration depth and compatibility with fiber optics.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "5",
+      "quote": "NIR spectroscopy, with its relatively large penetration depth...",
+      "check": "verified"
+     }
+    ]
+   },
+   {
+    "method": "Raman spectroscopy",
+    "methodIds": [],
+    "role": "comparison",
+    "reason": "Raman provides complementary information, especially for symmetric vibrations.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "12",
+      "quote": "Raman spectra (as well as IR absorption spectra) can be used...",
+      "check": "verified"
+     }
+    ]
+   }
+  ],
+  "concept": {
+   "summary": "Assessing API concentration in a powder blend using fiber-based spectroscopy in the feed frame.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "14",
+     "quote": "In-line monitoring of critical manufacturing stages, such as powder blending...",
+     "check": "verified"
+    }
+   ]
+  },
+  "spectralRange": {
+   "summary": "NIR nominal 780–2500 nm; Raman shift in cm-1 with visible to NIR excitation.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "NIR spectroscopy, with its relatively large penetration depth...",
+     "check": "verified"
+    }
+   ]
+  },
+  "risks": [
+   "Potential fluorescence interference with Raman measurements."
+  ],
+  "feasibility": {
+   "steps": [
+    "Conduct laboratory tests to establish calibration models for NIR and Raman.",
+    "Evaluate each method's performance in the feed frame environment.",
+    "Validate models with independent reference assays."
+   ],
+   "decisionBasis": "Test each method individually to determine suitability before considering a combined approach."
+  },
+  "premiseChecks": [
+   {
+    "id": "target_defined",
+    "label": "The variable to measure is named",
+    "status": "pass",
+    "detail": "Target: API concentration.",
+    "citations": []
+   }
+  ],
+  "sources": [
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "NIR spectroscopy, with its relatively large penetration depth...",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "12",
+    "quote": "Raman spectra (as well as IR absorption spectra) can be used...",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "14",
+    "quote": "In-line monitoring of critical manufacturing stages, such as powder blending...",
+    "check": "verified"
+   }
+  ]
+ },
+ "trace": [
+  {
+   "step": "Plan the turn",
+   "status": "ok",
+   "ms": 1295.0,
+   "detail": "assessment · 3 search queries"
+  },
+  {
+   "step": "Separate facts and unknowns",
+   "status": "ok",
+   "ms": 1944.0,
+   "detail": "4 stated · 2 unknown"
+  },
+  {
+   "step": "Retrieve AFS pages",
+   "status": "ok",
+   "ms": 565.0,
+   "detail": "S01 p.1, S01 p.11, S01 p.12, S01 p.14, S01 p.15, S01 p.5, S02 p.10, S02 p.14 · BM25 · flashrank"
+  },
+  {
+   "step": "Premise checks",
+   "status": "ok",
+   "ms": 0.0,
+   "detail": "nothing contradicted"
+  },
+  {
+   "step": "Compose the assessment",
+   "status": "ok",
+   "ms": 4457.0,
+   "detail": "gpt-4o via openai"
+  },
+  {
+   "step": "Verify citations",
+   "status": "ok",
+   "ms": 0.0,
+   "detail": "4 of 4 quotes found on the cited page"
+  }
+ ]
+}

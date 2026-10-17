@@ -13,6 +13,15 @@ from app.knowledge.optics import FIBERS, METHODS, coverage
 from app.schemas import Citation, DecisionStatus, PremiseCheck
 
 
+def _carrier_ids(method: tuple[float, float], exclude: str) -> list[str]:
+    return [fid for fid, f in FIBERS.items() if fid != exclude and coverage(method, f.range_um)[0] != "none"]
+
+
+def _carriers(method: tuple[float, float], exclude: str) -> list[str]:
+    """Fibres whose window overlaps the method range, for the 'cannot carry' check."""
+    return [f"{FIBERS[fid].label} ({FIBERS[fid].range_um[0]}–{FIBERS[fid].range_um[1]} µm)" for fid in _carrier_ids(method, exclude)]
+
+
 class Facts(BaseModel):
     """What the client stated. Unknown stays unknown."""
 
@@ -100,8 +109,9 @@ def run_checks(facts: Facts) -> list[PremiseCheck]:
             if kind == "none":
                 checks.append(PremiseCheck(
                     id=f"fiber_{fid}_{mid}", label=f"{f.label} carries the {m.label} range", status="fail",
-                    detail=f"A {f.label} transmits about {f.range_um[0]}–{f.range_um[1]} µm; {m.label} works at {m.range_label}. The link cannot carry the signal.",
-                    citations=cites,
+                    detail=f"A {f.label} transmits about {f.range_um[0]}–{f.range_um[1]} µm; {m.label} works at {m.range_label}. The link cannot carry the signal."
+                    + (f" Fibres in the supplied material that reach this range: {', '.join(alt)}." if (alt := _carriers(m.range_um, fid)) else ""),
+                    citations=cites + [FIBERS[a].cite for a in _carrier_ids(m.range_um, fid)],
                 ))
             elif kind == "partial":
                 checks.append(PremiseCheck(

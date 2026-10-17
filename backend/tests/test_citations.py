@@ -55,3 +55,23 @@ def test_page_numbers():
     assert page_numbers("14–15") == [14, 15]
     assert page_numbers("Table 1 (p.6)") == [6]
     assert page_numbers("10") == [10]
+
+
+def test_ellipsis_and_quote_style():
+    from app.schemas import Citation
+    from app.services.citations import verify
+
+    ok = verify(Citation(source="S01", page="5", quote="NIR spectroscopy, with its relatively large penetration depth..."))
+    assert ok.check == "verified"
+    gap = verify(Citation(source="S01", page="17", quote="The use of Near-Infrared (NIR) spectroscopy ... modern dairy 'Process Analytical Technology'"))
+    assert gap.check == "verified"
+    wrong_order = verify(Citation(source="S01", page="17", quote="modern dairy ... The use of Near-Infrared (NIR) spectroscopy"))
+    assert wrong_order.check == "failed"
+
+
+def test_trailing_full_stop_where_the_sentence_continues():
+    from app.schemas import Citation
+    from app.services.citations import verify
+
+    q = "The difference in operating wavelength ranges—from 360 nm to 25,000 nm (400 cm-1)—requires the use of different light sources, optics, and detectors."
+    assert verify(Citation(source="S01", page="4", quote=q)).check == "verified"
