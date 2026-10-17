@@ -16,7 +16,7 @@ def planner_node(state: AgentState) -> dict:
             res = chat(
                 [{"role": "system", "content": prompts.PLANNER.replace("{has_report}", "yes" if has_report else "no")},
                  {"role": "user", "content": transcript(state["messages"])}],
-                json_mode=True, temperature=0, feature="planner", max_tokens=300,
+                json_mode=True, temperature=0, feature="planner", max_tokens=300, tier="small",
             )
             data = parse_json(res.text)
             intent = data.get("intent", "assessment")

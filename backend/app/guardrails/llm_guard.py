@@ -1,7 +1,7 @@
-"""Primary Safety Gate: an LLM classifier on the team gateway (Groq Llama 3.1 8B via Portkey).
+"""Primary Safety Gate: an LLM classifier on the team gateway's small tier (OpenAI gpt-4o-mini).
 
-The 8hr-MARATHON template runs its guard on llama-3.1-8b-instant for the same reason: the
-gate must be fast and cheap; the 70B model is reserved for the assessment.
+Like the 8hr-MARATHON template (which uses a small model for its guard), the gate must be
+fast and cheap; the larger model is reserved for the assessment.
 
 It asks for strict JSON and maps the label onto the same categories as the rule gate.
 Any failure — network error, bad key, malformed JSON — hands the request to the injected

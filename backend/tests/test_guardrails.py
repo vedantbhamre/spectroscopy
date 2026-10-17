@@ -107,4 +107,4 @@ def test_api_blocks_jailbreak(api):
 
 
 def test_api_health_reports_gate(api):
-    assert api.get("/health").json()["guardrails"] in ("rules", "llm (Groq 8B, rules fallback)")
+    assert api.get("/health").json()["guardrails"].startswith(("rules", "llm ("))

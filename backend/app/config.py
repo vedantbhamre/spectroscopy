@@ -13,14 +13,15 @@ def _env(name: str, default: str | None = None) -> str | None:
 
 
 class Settings:
-    # --- LLM gateway (Portkey → Groq) ---
+    # --- LLM: OpenAI (optionally via Portkey) ---
+    OPENAI_API_KEY = _env("OPENAI_API_KEY")
+    OPENAI_FALLBACK_API_KEY = _env("OPENAI_FALLBACK_API_KEY")  # used when the primary key fails (quota, rate limit)
+    OPENAI_BASE_URL = _env("OPENAI_BASE_URL")  # optional: OpenAI-compatible endpoint
+    PRIMARY_MODEL = _env("OPENAI_MODEL", "gpt-4o")
+    FALLBACK_MODEL = _env("OPENAI_FALLBACK_MODEL", "gpt-4o-mini")
     PORTKEY_API_KEY = _env("PORTKEY_API_KEY")
-    GROQ_SLUG = _env("GROQ_SLUG", "rag")
-    GROQ_SLUG_2 = _env("GROQ_SLUG_2", "brag")
-    GROQ_API_KEY = _env("GROQ_API_KEY")
-    GROQ_FALLBACK_API_KEY = _env("GROQ_FALLBACK_API_KEY")
-    PRIMARY_MODEL = "llama-3.3-70b-versatile"
-    FALLBACK_MODEL = "llama-3.1-8b-instant"
+    PORTKEY_SLUG = _env("PORTKEY_SLUG", "openai")  # Portkey integration holding the primary OpenAI key
+    PORTKEY_SLUG_2 = _env("PORTKEY_SLUG_2", "openai-fallback")  # integration holding the fallback key
 
     # --- Embeddings ---
     GEMINI_API_KEY = _env("GEMINI_API_KEY")
@@ -47,12 +48,12 @@ class Settings:
 
     FRONTEND_ORIGIN = _env("FRONTEND_ORIGIN", "http://localhost:3000")
 
-    # --- Safety gate: "llm" (Groq 8B classifier, rules as fallback) | "rules" | unset = llm when an LLM is configured ---
+    # --- Safety gate: "llm" (small-model classifier, rules as fallback) | "rules" | unset = llm when an LLM is configured ---
     GUARD_MODE = _env("GUARD_MODE")
 
     @property
     def llm_configured(self) -> bool:
-        return bool(self.PORTKEY_API_KEY or self.GROQ_API_KEY)
+        return bool(self.PORTKEY_API_KEY or self.OPENAI_API_KEY or self.OPENAI_FALLBACK_API_KEY)
 
     @property
     def llm_guard_available(self) -> bool:

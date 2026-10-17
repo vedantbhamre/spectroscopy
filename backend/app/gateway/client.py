@@ -1,7 +1,9 @@
-"""LLM gateway: Portkey (routing, retry, cache, fallback) → Groq Llama 3.3 70B, fallback Llama 3.1 8B.
+"""LLM gateway: OpenAI, primary model (gpt-4o) with fallback model (gpt-4o-mini) and a fallback API key.
 
-Same gateway config as the 8hr-MARATHON template. Without PORTKEY_API_KEY the client calls
-Groq's OpenAI-compatible API directly and applies the same fallback order itself.
+With PORTKEY_API_KEY, requests go through Portkey (retry, cache, fallback) using the same
+gateway config shape as the 8hr-MARATHON template; the two Portkey integrations hold the
+primary and the fallback OpenAI key. Without Portkey, the client calls OpenAI directly and
+tries each model with the primary key, then the fallback key.
 """
 
 import json
@@ -18,13 +20,14 @@ GATEWAY_CONFIG = {
     "cache": {"mode": "simple"},
     "retry": {"attempts": 2, "on_status_codes": [429, 503]},
     "targets": [
-        {"override_params": {"model": f"@{settings.GROQ_SLUG}/{settings.PRIMARY_MODEL}"}},
-        {"override_params": {"model": f"@{settings.GROQ_SLUG_2}/{settings.FALLBACK_MODEL}"}},
+        {"override_params": {"model": f"@{settings.PORTKEY_SLUG}/{settings.PRIMARY_MODEL}"}},
+        {"override_params": {"model": f"@{settings.PORTKEY_SLUG_2}/{settings.PRIMARY_MODEL}"}},
+        {"override_params": {"model": f"@{settings.PORTKEY_SLUG}/{settings.FALLBACK_MODEL}"}},
+        {"override_params": {"model": f"@{settings.PORTKEY_SLUG_2}/{settings.FALLBACK_MODEL}"}},
     ],
 }
-# Small tier for fast classifiers (safety gate): 8B first, 70B as fallback.
-GATEWAY_CONFIG_SMALL = {**GATEWAY_CONFIG, "targets": list(reversed(GATEWAY_CONFIG["targets"]))}
-GROQ_BASE_URL = "https://api.groq.com/openai/v1"
+# Small tier for fast classifiers (safety gate, planner): small model first, large as fallback.
+GATEWAY_CONFIG_SMALL = {**GATEWAY_CONFIG, "targets": GATEWAY_CONFIG["targets"][2:] + GATEWAY_CONFIG["targets"][:2]}
 
 
 class LLMUnavailable(RuntimeError):
@@ -35,13 +38,13 @@ class LLMUnavailable(RuntimeError):
 class LLMResult:
     text: str
     model: str
-    via: str  # "portkey" | "groq"
+    via: str  # "portkey" | "openai" | "openai-fallback-key"
     ms: float
     cache: str = "MISS"
 
 
 _portkey: dict[str, object] = {}
-_groq: dict[str, object] = {}
+_openai: dict[str, object] = {}
 
 
 def _portkey_client(tier: str = "default"):
@@ -52,12 +55,21 @@ def _portkey_client(tier: str = "default"):
     return _portkey[tier]
 
 
-def _groq_client(key: str):
-    if key not in _groq:
+def _openai_client(key: str):
+    if key not in _openai:
         from openai import OpenAI
 
-        _groq[key] = OpenAI(api_key=key, base_url=GROQ_BASE_URL, max_retries=2, timeout=60)
-    return _groq[key]
+        _openai[key] = OpenAI(api_key=key, base_url=settings.OPENAI_BASE_URL, max_retries=2, timeout=90)
+    return _openai[key]
+
+
+def attempts(tier: str = "default") -> list[tuple[str, str, str]]:
+    """(api_key, model, label) in the order they are tried."""
+    keys = [(k, label) for k, label in ((settings.OPENAI_API_KEY, "openai"), (settings.OPENAI_FALLBACK_API_KEY, "openai-fallback-key")) if k]
+    models = [settings.PRIMARY_MODEL, settings.FALLBACK_MODEL]
+    if tier == "small":
+        models.reverse()
+    return [(k, m, label) for m in dict.fromkeys(models) for k, label in keys]
 
 
 def _cache_status(resp) -> str:
@@ -72,10 +84,10 @@ def _cache_status(resp) -> str:
 
 def chat(messages: list[dict], *, json_mode: bool = False, temperature: float = 0.1, feature: str = "assess",
          max_tokens: int = 4096, tier: str = "default") -> LLMResult:
-    """tier="small": Llama 3.1 8B first (fast classification), 70B as fallback."""
+    """tier="small": the fallback (small) model first, for fast classification."""
     if not settings.llm_configured:
-        raise LLMUnavailable("No LLM configured: set PORTKEY_API_KEY or GROQ_API_KEY in backend/.env")
-    kwargs: dict = {"messages": messages, "temperature": temperature, "max_tokens": max_tokens}
+        raise LLMUnavailable("No LLM configured: set OPENAI_API_KEY (and optionally OPENAI_FALLBACK_API_KEY) in backend/.env")
+    kwargs: dict = {"messages": messages, "temperature": temperature, "max_completion_tokens": max_tokens}
     if json_mode:
         kwargs["response_format"] = {"type": "json_object"}
 
@@ -86,17 +98,13 @@ def chat(messages: list[dict], *, json_mode: bool = False, temperature: float = 
             return LLMResult(resp.choices[0].message.content or "", getattr(resp, "model", "portkey"), "portkey",
                              (time.perf_counter() - start) * 1000, _cache_status(resp))
 
-        attempts = [(settings.GROQ_API_KEY, settings.PRIMARY_MODEL),
-                    (settings.GROQ_FALLBACK_API_KEY or settings.GROQ_API_KEY, settings.FALLBACK_MODEL)]
-        if tier == "small":
-            attempts.reverse()
         last: Exception | None = None
-        for key, model in attempts:
+        for key, model, label in attempts(tier):
             try:
-                resp = _groq_client(key).chat.completions.create(model=model, **kwargs)
-                return LLMResult(resp.choices[0].message.content or "", model, "groq", (time.perf_counter() - start) * 1000)
-            except Exception as e:  # noqa: BLE001 - try the fallback model
-                logfire.warning("groq {model} failed: {err}", model=model, err=str(e))
+                resp = _openai_client(key).chat.completions.create(model=model, **kwargs)
+                return LLMResult(resp.choices[0].message.content or "", model, label, (time.perf_counter() - start) * 1000)
+            except Exception as e:  # noqa: BLE001 - try the next key / model
+                logfire.warning("{label} {model} failed: {err}", label=label, model=model, err=str(e))
                 last = e
         raise LLMUnavailable(f"All LLM targets failed: {last}")
 

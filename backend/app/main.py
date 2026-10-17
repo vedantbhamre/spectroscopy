@@ -34,11 +34,13 @@ logfire.instrument_fastapi(app)
 def health() -> dict:
     return {
         "service": "spectrasense-backend",
-        "llm": "portkey" if settings.PORTKEY_API_KEY else "groq" if settings.GROQ_API_KEY else None,
+        "llm": ("portkey → openai" if settings.PORTKEY_API_KEY else "openai" if settings.llm_configured else None),
+        "models": [settings.PRIMARY_MODEL, settings.FALLBACK_MODEL],
+        "fallback_key": bool(settings.OPENAI_FALLBACK_API_KEY),
         "embeddings": bool(settings.GEMINI_API_KEY),
         "qdrant": "cloud" if settings.QDRANT_URL else "local",
         "kb_chunks": len(retrieval.chunks()),
-        "guardrails": "llm (Groq 8B, rules fallback)" if settings.llm_guard_available else "rules",
+        "guardrails": f"llm ({settings.FALLBACK_MODEL}, rules fallback)" if settings.llm_guard_available else "rules",
     }
 
 

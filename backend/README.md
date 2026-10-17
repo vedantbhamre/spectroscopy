@@ -21,7 +21,7 @@ POST /assess ─► safety gate ─► planner ─┬─► analyst ─► retri
 ```bash
 cd backend
 uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python -r requirements.txt
-cp .env.example .env               # add GROQ_API_KEY or PORTKEY_API_KEY (+ GEMINI_API_KEY for vectors)
+cp .env.example .env               # add OPENAI_API_KEY (+ OPENAI_FALLBACK_API_KEY, GEMINI_API_KEY for vectors)
 .venv/bin/uvicorn app.main:app --reload --port 8000
 ```
 
@@ -50,7 +50,8 @@ PDF text comes from poppler's `pdftotext` when installed (better spacing for quo
 | Missing | Behaviour |
 | --- | --- |
 | LLM key | `/assess` returns 503; the frontend shows "not connected" |
-| `PORTKEY_API_KEY` | direct Groq calls, same 70B → 8B fallback |
+| `PORTKEY_API_KEY` | direct OpenAI calls: each model with the primary key, then the fallback key; gpt-4o → gpt-4o-mini |
+| `OPENAI_FALLBACK_API_KEY` | only the primary key is used |
 | `GEMINI_API_KEY` | BM25 only (vector step skipped) |
 | `QDRANT_CLUSTER_ENDPOINT` | embedded Qdrant in `backend/.qdrant` |
 | FlashRank model download | fused BM25/vector order |
@@ -65,7 +66,7 @@ From `feat/safety-gate` (Vedant), adapted to the team stack. Runs on the latest 
 | `off_topic`, `jailbreak`, `injection` | **block**: refusal reply + `out_of_scope` report, pipeline skipped |
 | `approval_demand`, `immediate_config`, `research_as_proof` | **pass with a flag**: shown in the trace and fed to the premise checks (certainty, source scope). H04/H05/H06 are scored cases and need the full assessment. |
 
-Engine: LLM classifier on the gateway's small tier (Groq Llama 3.1 8B via Portkey, as in the 8hr-MARATHON template), with the deterministic rule gate as runtime fallback; rules only when no LLM is configured or `GUARD_MODE=rules`. Template interface kept: `initialize_rails()`, `guard(text) -> (fired, response)`; `check(text)` returns the full `GuardResult`. The architecture diagram's NeMo box is replaced by this gate (no NeMo dependency).
+Engine: LLM classifier on the gateway's small tier (gpt-4o-mini; the 8hr-MARATHON template likewise uses a small model for its guard), with the deterministic rule gate as runtime fallback; rules only when no LLM is configured or `GUARD_MODE=rules`. Template interface kept: `initialize_rails()`, `guard(text) -> (fired, response)`; `check(text)` returns the full `GuardResult`. The architecture diagram's NeMo box is replaced by this gate (no NeMo dependency).
 
 ## Tests
 

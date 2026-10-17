@@ -8,7 +8,7 @@ Public surface:
     GuardResult, GuardCategory
 
 Mode is picked once at startup:
-    LLM configured (Portkey / Groq) -> LLMGuard on Llama 3.1 8B, RuleGuard as runtime fallback
+    LLM configured (OpenAI / Portkey) -> LLMGuard on the small model (gpt-4o-mini), RuleGuard as runtime fallback
     otherwise, or GUARD_MODE=rules  -> RuleGuard (no network)
 Both implement the same interface, so callers never branch on the mode.
 """
