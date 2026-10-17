@@ -1,0 +1,37 @@
+# API
+fastapi==0.143.3
+uvicorn[standard]==0.54.0
+pydantic==2.14.1
+python-dotenv==1.2.4
+httpx==0.28.1
+
+# Agent engine
+langgraph==1.2.16
+langchain-core==1.6.12
+langchain-openai==1.7.2
+openai==3.33.0              # Groq OpenAI-compatible client (direct mode)
+
+# LLM gateway (Portkey → Groq)
+portkey-ai==2.3.4
+
+# Knowledge: embeddings, vector DB, reranker
+langchain-google-genai==4.4.2
+qdrant-client==1.19.1
+flashrank==0.2.10
+
+# Ingestion loaders
+pypdf==6.21.1
+beautifulsoup4==4.15.0
+python-docx==1.2.0
+python-pptx==1.0.2
+openpyxl==3.1.5
+
+# Observability
+logfire[fastapi]==5.2.0
+langsmith==0.14.11
+
+# Tests
+pytest==9.1.1
+
+# Guardrails (NeMo) are added by the guardrails branch.
+fonttools==4.60.1  # pypdf: CFF font encodings in S03/S04

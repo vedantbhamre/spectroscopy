@@ -1,0 +1,7 @@
+.venv/
+.env
+.qdrant/
+__pycache__/
+.pytest_cache/
+/data/materials/
+.flashrank/

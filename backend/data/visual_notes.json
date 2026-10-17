@@ -1,0 +1,79 @@
+[
+ {
+  "source": "S02",
+  "page": 3,
+  "kind": "visual_note",
+  "file": "team transcription",
+  "text": "[Team transcription of slide image] Cartoon: vendors say 'Buy our NIR!', 'Buy our Raman!', 'Invest in our product!' to a confused scientist. Probe wheel: Diamond ATR, TransFlex, ATR-Loop, Fluorescence, Reflex, Raman probes 'compatible with any spectrometer'. Modular Multispectral Fiber System diagram: Raman, FTIR, Fluorescence, NIR modules, chemometric analysis of data fusion, feedback, multispectral fiber probe of customised structure in a stirred reactor."
+ },
+ {
+  "source": "S02",
+  "page": 6,
+  "kind": "visual_note",
+  "file": "team transcription",
+  "text": "[Team transcription of slide figure; check figure before relying on exact numbers] Fiber transmission ranges: standard and Al/Cu-coated UV-VIS silica fibers 190–1200 nm; standard and Al/Cu-coated VIS-NIR silica fibers 350–2400 nm; chalcogenide As-S IR fibers 1100–6500 nm; polycrystalline infrared fibers 3000 nm–17 µm; hollow glass waveguides 2000 nm–18 µm; indium fluoride fibers 300–5500 nm; zirconium fluoride fibers 300–4500 nm."
+ },
+ {
+  "source": "S02",
+  "page": 7,
+  "kind": "visual_note",
+  "file": "team transcription",
+  "text": "[Team transcription of slide figure] Optical loss (dB/km) of silica fiber versus wavelength 0.7–2.0 µm for early 1980s, late 1980s and modern fiber; telecom windows marked. Photo of a bioreactor with fiber connections."
+ },
+ {
+  "source": "S02",
+  "page": 9,
+  "kind": "visual_note",
+  "file": "team transcription",
+  "text": "[Team transcription of slide figures] Transmission of AsS CIR fibre is high roughly between 2 and 6.5 µm; AgHal PIR fibre transmits roughly 3–18 µm. Comparison of AgHal PIR fiber and hollow waveguide transmission, both 2 m long (HWG-750-2m, PIR 600/700-2m), over 3100–600 cm-1. Fiber probes for FTIR process spectroscopy shown on a reactor."
+ },
+ {
+  "source": "S02",
+  "page": 12,
+  "kind": "visual_note",
+  "file": "team transcription",
+  "text": "[Team transcription of slide figures] NIR reflectance spectra 900–1700 nm; SNV-corrected spectra of starch, flour and sugar; PLS regression coefficients with selected wavelength bands highlighted. FlexiSens sensor: optimal set of wavelengths to see moisture of media in contact; customized calibration; IP address to collect data from each sensor by LAN; TransFlex or diffuse reflection. Software trace: water drop drying on wood surface with time."
+ },
+ {
+  "source": "S02",
+  "page": 13,
+  "kind": "visual_note",
+  "file": "team transcription",
+  "text": "[Team transcription of slide figure] ATR probe with PEEK shaft. Plot: absorbance versus wavenumber 4000–2000 cm-1 for pure oil and oil with 0.1%, 0.5%, 1.0% and 2.0% water; absorbance increases with water content. Laboratory spectra; no process installation, fiber length or analyzer distance is shown."
+ },
+ {
+  "source": "S02",
+  "page": 14,
+  "kind": "visual_note",
+  "file": "team transcription",
+  "text": "[Team transcription of slide] Hot melt extruder schematic with NIR probe at the die and feed-forward control of a waste gate; photo of NIR probe in extruder barrel; spectra of API in hot polymer obtained with a diamond cone ATR probe coupled to an iC10 FTIR."
+ },
+ {
+  "source": "S02",
+  "page": 15,
+  "kind": "visual_note",
+  "file": "team transcription",
+  "text": "[Team transcription of slide figures] Combi probe: ATR (infrared) and autofluorescence from the same tip; tissue classification of liver, breast and fat; plot of IR absorbance at 1743 cm-1 versus fluorescence at 613 nm separates the three tissues ('Only 2 wavelengths!'); PCA score plots; reference doi 10.1021/acs.analchem.1c00080."
+ },
+ {
+  "source": "S02",
+  "page": 17,
+  "kind": "visual_note",
+  "file": "team transcription",
+  "text": "[Team transcription of slide figures; approximate] Gas absorption bands of CO2, CO, NO, H2O, NO2, SO3, SO2, CH4, NH3 between about 4 and 10 µm. Laser types: diode lasers up to about 3 µm, interband cascade lasers about 3–6 µm, quantum cascade lasers about 4–14 µm. PIR-fiber bundle combines 7 QC-lasers into an arthro-probe (osteoarthritis research)."
+ },
+ {
+  "source": "S02",
+  "page": 18,
+  "kind": "visual_note",
+  "file": "team transcription",
+  "text": "[Team transcription of slide figure] Band chart: 0.85–1.1 µm fat, protein, moisture; 1.3–1.7, 1.5–2.0, 1.7–2.2 µm moisture, polymers, API, ethanol; 3.0–3.7, 3.7–4.5 µm hydrocarbons, CO2; 6.0–8.0, 8.0–10.5 µm ethanol, glucose, glutamine, organic acids, ammonium."
+ },
+ {
+  "source": "S02",
+  "page": 20,
+  "kind": "visual_note",
+  "file": "team transcription",
+  "text": "[Team transcription of slide] AFS pathway: 1. Multi-method lab trials (AFS tests your process using all key fiber optic spectroscopy methods); 2. Identify key spectral features; 3. Choose: Path A chemometric model, Path B customized MSF system, Path C customized IoT sensors."
+ }
+]
