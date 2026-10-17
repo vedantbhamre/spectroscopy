@@ -119,47 +119,43 @@ export function Hero() {
   }, [drawFrame, handleResize]);
 
   return (
-    <section id="home" className="relative flex min-h-screen w-full items-center overflow-hidden bg-bg pb-16 pt-28 md:pb-0 md:pt-24">
+    <section id="home" className="relative flex min-h-screen w-full items-center overflow-hidden bg-night pb-16 pt-28 md:pb-0 md:pt-24">
       <div className="relative z-20 mx-auto grid w-full max-w-7xl items-center gap-12 px-6 md:grid-cols-[5fr_7fr] md:gap-10 md:px-10 lg:gap-14">
         {/* Text column — its own space, never on top of the footage */}
         <div className="order-2 flex flex-col items-start text-left md:order-1">
           <Reveal>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-line-strong bg-panel/60 px-3.5 py-1.5 text-xs font-medium text-ink-2 backdrop-blur-md">
-              <span className="spectrum-line h-1.5 w-6 rounded-full" />
+            <div className="mb-6 inline-flex items-center gap-2 rounded-md border border-night-line bg-night-2/60 px-3.5 py-1.5 text-xs font-medium text-night-ink-2 backdrop-blur-md">
+              <span className="h-1.5 w-1.5 rounded-md bg-accent-bright" />
               Art Fiber Systems · AI assessment assistant
             </div>
           </Reveal>
           <Reveal delay={0.08}>
-            <p className="mb-3 text-sm font-medium uppercase tracking-wide text-cyan">From process challenges to in-line measurement solutions</p>
+            <p className="mb-3 text-sm font-medium text-accent-bright">From process challenges to in-line measurement solutions</p>
           </Reveal>
           <Reveal delay={0.14}>
-            <h1 className="mb-6 text-4xl font-semibold leading-[1.05] tracking-tight text-ink sm:text-5xl lg:text-6xl">SpectraSense AI</h1>
+            <h1 className="mb-6 text-4xl font-semibold leading-[1.05] tracking-tight text-night-ink sm:text-5xl lg:text-6xl">SpectraSense AI</h1>
           </Reveal>
           <Reveal delay={0.22}>
-            <p className="mb-9 max-w-xl text-base leading-relaxed text-ink-2 md:text-lg">
+            <p className="mb-9 max-w-xl text-base leading-relaxed text-night-ink-2 md:text-lg">
               Customers know what they need to monitor, not which method, spectral range, fiber probe or setup to test first. SpectraSense turns a short enquiry into a first technical assessment an AFS expert can review in minutes.
             </p>
           </Reveal>
           <Reveal delay={0.3}>
             <div className="flex flex-row flex-wrap items-center gap-3">
-              <Link href="/assess" className="inline-flex items-center gap-2 rounded-full bg-cyan px-6 py-3 text-sm font-semibold text-bg transition-all duration-300 hover:bg-white">
+              <Link href="/assess" className="inline-flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-accent-dim">
                 Start an assessment <ArrowRight className="h-4 w-4" />
               </Link>
-              <Link href="/reference" className="inline-flex items-center gap-2 rounded-full border border-line-strong px-6 py-3 text-sm font-semibold text-ink backdrop-blur-md transition-all duration-300 hover:bg-white/10">
+              <Link href="/reference" className="inline-flex items-center gap-2 rounded-md border border-night-line px-6 py-3 text-sm font-semibold text-night-ink backdrop-blur-md transition-all duration-300 hover:bg-night-3">
                 <BookOpen className="h-4 w-4" /> Methods &amp; fibers
               </Link>            </div>
           </Reveal>
         </div>
 
-        {/* Frame box — edges dissolve into the page via a radial mask, not a hard card */}
+        {/* Frame box — a rounded card on the light hero */}
         <Reveal variant="left" delay={0.1} className="order-1 w-full md:order-2">
           <div
             ref={boxRef}
-            className="relative aspect-video w-full overflow-hidden"
-            style={{
-              maskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 48%, transparent 95%)",
-              WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 50%, black 48%, transparent 95%)",
-            }}
+            className="relative aspect-video w-full overflow-hidden rounded-2xl bg-[#0b1020] shadow-2xl shadow-slate-900/20 ring-1 ring-line"
           >
             <div ref={bgRef} className="absolute -inset-8 z-0 scale-110 bg-cover bg-center blur-3xl brightness-[0.45] saturate-[1.15]" />
             <canvas ref={canvasRef} className="hero-zoom absolute left-0 top-0 z-[1] h-full w-full contrast-[1.08] saturate-[1.12]" aria-label="SpectraSense intro animation" role="img" />
@@ -167,8 +163,8 @@ export function Hero() {
         </Reveal>
       </div>
 
-      <div className="pointer-events-none absolute bottom-8 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-2 text-ink-3 md:flex">
-        <span className="text-[10px] uppercase tracking-[0.2em]">Scroll</span>
+      <div className="pointer-events-none absolute bottom-8 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-2 text-night-ink-3 md:flex">
+        <span className="text-[11px]">Scroll</span>
         <ArrowDown className="h-4 w-4 animate-bounce" />
       </div>
     </section>

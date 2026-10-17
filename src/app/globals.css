@@ -1,22 +1,109 @@
 @import "tailwindcss";
 
-/* Instrument-panel palette taken from the SpectraSense intro (deep navy, cyan glow, spectral accent). */
+/* Active palette: team spec, deep teal. Earlier alternatives (swap the values in :root):
+   - Clean blue: accent #2563eb / hover #1d4ed8, sections #f8fafc, text #111827 / #64748b, borders #e5e7eb
+   - Oxblood & bronze: night #2a0e14/#3a1820/#4a222b, line #57303a, accent #8a5f33, bright #d2a774, sheet #fbf8f3
+   - Emerald & champagne gold: night #0c2622/#123530/#1a453e, line #245048, accent #86662a, bright #d4b26a, sheet #faf7f0
+   - Midnight sapphire & gold: night #0b1530/#142046/#1d2b5a, line #283769, accent #8c6a2f, bright #d4af6a, sheet #f8f7f4
+   - Graphite & petrol: night #0f1318/#171c23/#222932, line #2a313b, accent #0b6e79, bright #3fb6c2, sheet #ffffff */
 :root {
-  --bg: #060b1a;
-  --panel: #0b1328;
-  --panel-2: #0f1a35;
-  --line: #1c2a4d;
-  --line-strong: #2a3d6b;
-  --ink: #e6ecf8;
-  --ink-2: #a9b6d3;
-  --ink-3: #6f7fa6;
-  --cyan: #2fd9f0;
-  --cyan-dim: #1b8fa3;
-  --ok: #3ddc97;
-  --warn: #f5b84b;
-  --bad: #ff6b7a;
-  --violet: #a78bfa;
-  --spectrum: linear-gradient(90deg, #7c3aed, #3b82f6, #22d3ee, #34d399, #facc15, #fb923c, #ef4444);
+  /* Deep teal industrial (team spec) */
+  --bg: #ffffff;
+  --panel: #f5f6f8;
+  --panel-2: #f0f2f5;
+  --line: #d9dee5;
+  --line-strong: #c3cad3;
+  --ink: #222222;
+  --ink-2: #667085;
+  --ink-3: #667085;
+  --accent: #003c57;
+  --accent-dim: #002b40;
+  --ok: #218739;
+  --warn: #b87508;
+  --bad: #c62828;
+  --violet: #347a96;
+  --series-3: #6b7280;
+  --ai: #f0f5f8;
+  --tooltip: #222222;
+  /* Section surfaces (sidebar, hero, chat panel) */
+  --night: #f5f6f8;
+  --night-2: #ffffff;
+  --night-3: #f0f2f5;
+  --night-line: #d9dee5;
+  --night-ink: #222222;
+  --night-ink-2: #667085;
+  --night-ink-3: #667085;
+  --accent-bright: #003c57;
+  --amber: #347a96;
+  --spectrum: linear-gradient(90deg, #6d28d9, #2563eb, #0891b2, #059669, #ca8a04, #ea580c, #dc2626);
+}
+
+
+/* Chart palette (team spec), shared by the spectral band chart. */
+:root {
+  --chart-bg: #ffffff;
+  --chart-border: #d5dde5;
+  --chart-grid: #e2e8f0;
+  --chart-axis: #475569;
+  --chart-material: #334155;
+  --chart-range: #356a85;
+  --chart-full: #39845a;
+  --chart-partial: #c58a42;
+  --chart-unavailable: #aeb8c2;
+  --chart-tooltip-bg: #243746;
+  --chart-tooltip-text: #ffffff;
+  --chart-table-head: #f1f4f7;
+  --chart-divider: #dce3ea;
+  --chart-filter-bg: #e8eff4;
+  --chart-filter-border: #003c57;
+}
+
+/* Dark theme (header toggle). Screen only: printed reports always use the light palette. */
+@media screen {
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0f1720;
+    --panel: #151f2a;
+    --panel-2: #1b2733;
+    --line: #2a3644;
+    --line-strong: #3a4756;
+    --ink: #e6ebf0;
+    --ink-2: #a3afbc;
+    --ink-3: #8693a1;
+    --accent: #2a7fa6;
+    --accent-dim: #236c8e;
+    --ok: #4cc37a;
+    --warn: #e0a341;
+    --bad: #f2726f;
+    --violet: #6cb0cc;
+    --series-3: #9aa3ad;
+    --ai: #172430;
+    --tooltip: #2a3644;
+    --night: #131c26;
+    --night-2: #1a2530;
+    --night-3: #22303d;
+    --night-line: #2a3644;
+    --night-ink: #e6ebf0;
+    --night-ink-2: #a3afbc;
+    --night-ink-3: #8693a1;
+    --accent-bright: #6cb8d8;
+    --amber: #6cb0cc;
+    --chart-bg: #131c26;
+    --chart-border: #2a3644;
+    --chart-grid: #222e3a;
+    --chart-axis: #a3afbc;
+    --chart-material: #d5dce3;
+    --chart-range: #5a9cbc;
+    --chart-full: #4cb377;
+    --chart-partial: #d9a15c;
+    --chart-unavailable: #56626e;
+    --chart-tooltip-bg: #0b1117;
+    --chart-tooltip-text: #ffffff;
+    --chart-table-head: #1b2733;
+    --chart-divider: #2a3644;
+    --chart-filter-bg: #1d3646;
+    --chart-filter-border: #6cb8d8;
+  }
 }
 
 @theme inline {
@@ -28,62 +115,51 @@
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-ink-3: var(--ink-3);
-  --color-cyan: var(--cyan);
-  --color-cyan-dim: var(--cyan-dim);
+  --color-accent: var(--accent);
+  --color-accent-dim: var(--accent-dim);
   --color-ok: var(--ok);
   --color-warn: var(--warn);
   --color-bad: var(--bad);
   --color-violet: var(--violet);
-  --font-sans: var(--font-plex-sans);
-  --font-mono: var(--font-plex-mono);
+  --color-series-3: var(--series-3);
+  --color-ai: var(--ai);
+  --color-tooltip: var(--tooltip);
+  --color-night: var(--night);
+  --color-night-2: var(--night-2);
+  --color-night-3: var(--night-3);
+  --color-night-line: var(--night-line);
+  --color-night-ink: var(--night-ink);
+  --color-night-ink-2: var(--night-ink-2);
+  --color-night-ink-3: var(--night-ink-3);
+  --color-accent-bright: var(--accent-bright);
+  --color-amber: var(--amber);
+  --font-sans: var(--font-instrument-sans);
+  --font-serif: var(--font-source-serif);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-plex-sans), system-ui, sans-serif;
+  font-family: var(--font-instrument-sans), system-ui, sans-serif;
+  font-feature-settings: "tnum" 1;
 }
 
 .spectrum-line {
   background: var(--spectrum);
 }
 
-.grid-bg {
-  background-image:
-    linear-gradient(to right, rgba(47, 217, 240, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(47, 217, 240, 0.05) 1px, transparent 1px);
-  background-size: 32px 32px;
-}
-
-.glow {
-  box-shadow: 0 0 0 1px rgba(47, 217, 240, 0.35), 0 0 24px -6px rgba(47, 217, 240, 0.55);
-}
-
-@keyframes hero-zoom {
-  0%,
-  100% {
-    transform: scale(1);
+/* In the base layer so components with their own focus style (e.g. the chat composer) can override it. */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
-  50% {
-    transform: scale(1.05);
-  }
-}
-
-.hero-zoom {
-  animation: hero-zoom 20s ease-in-out infinite;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-:focus-visible {
-  outline: 2px solid var(--cyan);
-  outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

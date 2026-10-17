@@ -1,19 +1,26 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { Instrument_Sans, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
+import "./print.css";
 
-const plexSans = IBM_Plex_Sans({ variable: "--font-plex-sans", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
-const plexMono = IBM_Plex_Mono({ variable: "--font-plex-mono", subsets: ["latin"], weight: ["400", "500"] });
+const sans = Instrument_Sans({ variable: "--font-instrument-sans", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
+const serif = Source_Serif_4({ variable: "--font-source-serif", subsets: ["latin"], weight: ["400", "600"] });
 
 export const metadata: Metadata = {
   title: "SpectraSense AI · Art Fiber Systems",
-  description: "From process challenges to in-line measurement solutions — a first technical assessment assistant for AFS experts.",
+  description: "A first technical assessment assistant for AFS in-line spectroscopy experts.",
 };
+
+// Applies the saved theme before first paint, so dark mode does not flash light on load.
+const themeScript = `try{if(localStorage.getItem("theme")==="dark")document.documentElement.dataset.theme="dark"}catch(e){}`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`${plexSans.variable} ${plexMono.variable} antialiased`}>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
+      <body className={`${sans.variable} ${serif.variable} antialiased`}>{children}</body>
     </html>
   );
 }

@@ -1,23 +1,23 @@
 import { NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
-import { z } from "zod";
-import { Report } from "@/lib/report";
+import { AssessRequest, AssessResponse, Report } from "@/lib/report";
+import { demoResponse } from "@/lib/demo";
 import { referenceAnswers } from "@/data/reference-answers";
 
 // Resolution order:
-// 1. ASSESS_BACKEND_URL set → forward the enquiry to the pipeline (live).
-// 2. outputs/<scenarioId>.json from the batch runner → cached.
-// 3. Organizer worked example (D01, D02) → reference.
+// 1. ASSESS_BACKEND_URL set → forward the conversation to the FastAPI pipeline (live).
+// 2. First turn of an unedited example → outputs/<scenarioId>.json from the batch runner (cached).
+// 3. ASSESS_DEMO=1 → layout placeholder, badged DEMO. Never an assessment.
 // Otherwise 503, so the UI never shows a made-up answer.
+// 2b. No backend + unedited D01/D02 → organizer worked example, labelled "not assistant output".
 
-const Body = z.object({ enquiry: z.string().min(1).max(8000), scenarioId: z.string().optional() });
 const OUTPUTS_DIR = path.join(process.cwd(), "outputs");
 
 export async function POST(req: Request) {
-  const parsed = Body.safeParse(await req.json().catch(() => null));
-  if (!parsed.success) return NextResponse.json({ error: "invalid_request" }, { status: 400 });
-  const { enquiry, scenarioId } = parsed.data;
+  const parsed = AssessRequest.safeParse(await req.json().catch(() => null));
+  if (!parsed.success) return NextResponse.json({ error: "invalid_request", message: "The request did not contain a valid conversation." }, { status: 400 });
+  const { messages, scenarioId } = parsed.data;
 
   const backend = process.env.ASSESS_BACKEND_URL;
   if (backend) {
@@ -25,36 +25,57 @@ export async function POST(req: Request) {
       const r = await fetch(backend, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ enquiry, scenarioId }),
-        signal: AbortSignal.timeout(90_000),
+        body: JSON.stringify({ messages, scenarioId }),
+        signal: AbortSignal.timeout(120_000),
       });
-      const report = Report.safeParse(await r.json());
-      if (r.ok && report.success) return NextResponse.json({ ...report.data, origin: "live" });
-      console.error("assess backend returned an invalid report", report.error?.issues);
+      const body = AssessResponse.safeParse(await r.json());
+      if (r.ok && body.success) return NextResponse.json(withOrigin(body.data, "live"));
+      console.error("assess backend returned an invalid response", body.error?.issues);
     } catch (e) {
       console.error("assess backend unreachable", e);
     }
   }
 
-  if (scenarioId && /^[A-Z]\d{2}$/.test(scenarioId)) {
-    try {
-      const raw = await fs.readFile(path.join(OUTPUTS_DIR, `${scenarioId}.json`), "utf8");
-      const report = Report.safeParse(JSON.parse(raw));
-      if (report.success) return NextResponse.json({ ...report.data, origin: "cached" });
-    } catch {
-      // no cached output for this scenario
+  if (scenarioId && messages.length === 1 && /^[A-Z]\d{2}$/.test(scenarioId)) {
+    const cached = await readCached(scenarioId);
+    if (cached) return NextResponse.json(withOrigin(cached, "cached"));
+    // Without a pipeline, D01/D02 show the organizers' worked example, clearly labelled as such.
+    const ref = !backend ? referenceAnswers[scenarioId] : undefined;
+    if (ref) {
+      const reply: AssessResponse = {
+        reply: `Report ready for ${scenarioId}: the organisers' worked example (AFS_Examples_and_Reference.docx). The questions below are what to ask the customer next.`,
+        report: ref,
+        trace: [],
+      };
+      return NextResponse.json(reply);
     }
-    const ref = referenceAnswers[scenarioId];
-    if (ref) return NextResponse.json(ref);
   }
+
+  if (process.env.ASSESS_DEMO === "1") return NextResponse.json(demoResponse(messages));
 
   return NextResponse.json(
     {
       error: "pipeline_not_connected",
       message: backend
-        ? "The assessment pipeline did not return a valid report."
-        : "No assessment pipeline is connected and no cached output exists for this enquiry.",
+        ? "The assessment service did not return a valid answer. Check that the FastAPI server is running, then send the message again."
+        : "No assessment service is connected. Start the FastAPI backend and set ASSESS_BACKEND_URL.",
     },
     { status: 503 },
   );
+}
+
+const withOrigin = (r: AssessResponse, origin: "live" | "cached"): AssessResponse => ({ ...r, report: { ...r.report, origin } });
+
+// The batch runner may write either the full response or just the report.
+async function readCached(id: string): Promise<AssessResponse | null> {
+  try {
+    const json = JSON.parse(await fs.readFile(path.join(OUTPUTS_DIR, `${id}.json`), "utf8"));
+    const full = AssessResponse.safeParse(json);
+    if (full.success) return full.data;
+    const report = Report.safeParse(json);
+    if (report.success) return { reply: `Batch-run result for ${id}, generated by the assistant.`, report: report.data, trace: [] };
+  } catch {
+    // no cached output for this scenario
+  }
+  return null;
 }

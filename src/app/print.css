@@ -1,0 +1,102 @@
+/* Print / "Save as PDF" layout for the assessment report.
+   Only the report article is printed; the app chrome, chat panel and controls are hidden.
+   Kept separate from globals.css on purpose. */
+
+@media print {
+  @page {
+    size: A4;
+    margin: 18mm 16mm 20mm;
+  }
+
+  :root {
+    /* White paper instead of the on-screen sheet tint. */
+    --bg: #ffffff;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .print-hidden,
+  nextjs-portal {
+    display: none !important;
+  }
+
+  /* The workbench is a fixed-height, scrolling flex layout on screen.
+     In print it must flow so the whole report is printed, not only the visible part. */
+  .print-layout {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .print-main {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  .print-report {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 11pt;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .print-report header {
+    padding-bottom: 12pt !important;
+  }
+
+  .print-report h1 {
+    margin-top: 6pt !important;
+  }
+
+  .print-report h1,
+  .print-report h2,
+  .print-report h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .print-section {
+    padding-top: 14pt !important;
+    padding-bottom: 14pt !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Long sections may exceed a page; let them break, but keep their items whole. */
+  .print-report li,
+  .print-report figure,
+  .print-report svg,
+  .print-report p {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .print-report p {
+    orphans: 3;
+    widows: 3;
+  }
+
+  /* Citation popovers are interactive only. */
+  .print-report [role="tooltip"] {
+    display: none !important;
+  }
+
+  .print-report button {
+    cursor: default;
+  }
+
+  .print-report a {
+    color: inherit;
+    word-break: break-all;
+  }
+}

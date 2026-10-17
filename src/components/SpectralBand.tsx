@@ -14,14 +14,32 @@ const regions = [
 ];
 const ticks = [0.2, 0.5, 1, 2, 5, 10, 20];
 
-const covStyle = {
-  full: "bg-ok/15 text-ok border-ok/40",
-  partial: "bg-warn/15 text-warn border-warn/40",
-  none: "bg-bad/10 text-bad border-bad/40",
+// Chart palette (team spec), from CSS variables in globals.css so the dark theme applies.
+const C = {
+  bg: "var(--chart-bg)",
+  border: "var(--chart-border)",
+  grid: "var(--chart-grid)",
+  axis: "var(--chart-axis)",
+  material: "var(--chart-material)",
+  range: "var(--chart-range)",
+  full: "var(--chart-full)",
+  partial: "var(--chart-partial)",
+  unavailable: "var(--chart-unavailable)",
+  tooltipBg: "var(--chart-tooltip-bg)",
+  tooltipText: "var(--chart-tooltip-text)",
+  tableHead: "var(--chart-table-head)",
+  divider: "var(--chart-divider)",
+  filterBg: "var(--chart-filter-bg)",
+  filterBorder: "var(--chart-filter-border)",
 };
+
+const covColor = { full: C.full, partial: C.partial, none: C.unavailable } as const;
+
+interface Tip { text: string; left: number; top: number }
 
 export function SpectralBand({ highlight = [], interactive = true }: { highlight?: MethodId[]; interactive?: boolean }) {
   const [selected, setSelected] = useState<MethodId[]>(highlight);
+  const [tip, setTip] = useState<Tip | null>(null);
   const active = interactive ? selected : highlight;
   const placeable = methods.filter((m) => m.rangeUm);
   const unplaced = methods.filter((m) => !m.rangeUm && active.includes(m.id));
@@ -30,6 +48,12 @@ export function SpectralBand({ highlight = [], interactive = true }: { highlight
     [active, placeable],
   );
   const toggle = (id: MethodId) => setSelected((s) => (s.includes(id) ? s.filter((v) => v !== id) : [...s, id]));
+
+  const showTip = (e: React.MouseEvent<HTMLDivElement>, text: string) => {
+    const box = e.currentTarget.closest("[data-chart]")!.getBoundingClientRect();
+    const bar = e.currentTarget.getBoundingClientRect();
+    setTip({ text, left: bar.left - box.left + bar.width / 2, top: bar.top - box.top });
+  };
 
   return (
     <div className="space-y-3">
@@ -43,7 +67,8 @@ export function SpectralBand({ highlight = [], interactive = true }: { highlight
               disabled={!interactive}
               onClick={() => toggle(m.id)}
               aria-pressed={on}
-              className={`rounded-full border px-2.5 py-1 text-xs transition ${on ? "border-cyan bg-cyan/15 text-cyan" : "border-line text-ink-3 hover:border-line-strong hover:text-ink-2"} disabled:cursor-default`}
+              style={on ? { background: C.filterBg, borderColor: C.filterBorder, color: C.filterBorder } : { borderColor: C.border, color: C.axis }}
+              className={`rounded-full border px-2.5 py-1 text-xs transition ${on ? "font-semibold" : "hover:bg-panel"} disabled:cursor-default`}
             >
               {m.label}
             </button>
@@ -51,88 +76,100 @@ export function SpectralBand({ highlight = [], interactive = true }: { highlight
         })}
       </div>
 
-      <div className="relative rounded-md border border-line bg-bg/70 p-3">
+      <div data-chart className="relative rounded-md border p-3" style={{ background: C.bg, borderColor: C.border }} onMouseLeave={() => setTip(null)}>
         {/* axis + regions (offset by the 7rem row-label column) */}
         <div className="ml-28">
-        <svg viewBox="0 0 100 10" preserveAspectRatio="none" className="h-5 w-full" aria-hidden>
-          <defs>
-            <linearGradient id="vis" x1="0" x2="1">
-              <stop offset="0" stopColor="#3b82f6" /><stop offset="0.35" stopColor="#22d3ee" />
-              <stop offset="0.55" stopColor="#34d399" /><stop offset="0.75" stopColor="#facc15" /><stop offset="1" stopColor="#ef4444" />
-            </linearGradient>
-          </defs>
-          {regions.map((r) => (
-            <rect key={r.label} x={x(r.from)} y={0} width={x(r.to) - x(r.from)} height={10} fill={r.color} opacity={0.55} />
-          ))}
-        </svg>
-        <div className="relative mt-1 h-4 font-mono text-[10px] text-ink-3">
-          {regions.map((r) => (
-            <span key={r.label} className="absolute -translate-x-1/2" style={{ left: `${(x(r.from) + x(r.to)) / 2}%` }}>{r.label}</span>
-          ))}
-        </div>
+          <svg viewBox="0 0 100 10" preserveAspectRatio="none" className="h-5 w-full" aria-hidden>
+            <defs>
+              <linearGradient id="vis" x1="0" x2="1">
+                <stop offset="0" stopColor="#3b82f6" /><stop offset="0.35" stopColor="#22d3ee" />
+                <stop offset="0.55" stopColor="#34d399" /><stop offset="0.75" stopColor="#facc15" /><stop offset="1" stopColor="#ef4444" />
+              </linearGradient>
+            </defs>
+            {regions.map((r) => (
+              <rect key={r.label} x={x(r.from)} y={0} width={x(r.to) - x(r.from)} height={10} fill={r.color} opacity={0.45} />
+            ))}
+          </svg>
+          <div className="relative mt-1 h-4 text-[10px] font-medium" style={{ color: C.axis }}>
+            {regions.map((r) => (
+              <span key={r.label} className="absolute -translate-x-1/2" style={{ left: `${(x(r.from) + x(r.to)) / 2}%` }}>{r.label}</span>
+            ))}
+          </div>
         </div>
 
         {/* rows */}
         <div className="relative mt-2 space-y-1.5">
           {ticks.map((t) => (
-            <div key={t} className="pointer-events-none absolute inset-y-0 w-px bg-line/70" style={{ left: `calc(7rem + (100% - 7rem) * ${x(t) / 100})` }} aria-hidden />
+            <div key={t} className="pointer-events-none absolute inset-y-0 w-px" style={{ background: C.grid, left: `calc(7rem + (100% - 7rem) * ${x(t) / 100})` }} aria-hidden />
           ))}
           {placeable.map((m) => {
             const on = active.includes(m.id);
             const [a, b] = m.rangeUm!;
             return (
-              <Row key={m.id} label={`${m.label}`} sub="nominal" dim={!on}>
+              <Row key={m.id} label={m.label} sub="nominal" dim={!on}>
                 <div
-                  className={`absolute inset-y-0 rounded-sm ${on ? "bg-cyan/70 shadow-[0_0_12px_rgba(47,217,240,0.6)]" : "bg-ink-3/30"}`}
-                  style={{ left: `${x(a)}%`, width: `${x(Math.min(b, MAX)) - x(a)}%` }}
-                  title={`${m.label}: ${m.rangeLabel}`}
+                  className="absolute inset-y-0 rounded-sm"
+                  style={{ background: on ? C.range : C.unavailable, left: `${x(a)}%`, width: `${x(Math.min(b, MAX)) - x(a)}%` }}
+                  onMouseEnter={(e) => showTip(e, `${m.label}: ${m.rangeLabel} (nominal)`)}
                 />
               </Row>
             );
           })}
-          <div className="my-2 border-t border-dashed border-line" />
+          <div className="my-2 border-t border-dashed" style={{ borderColor: C.divider }} />
           {fibers.map((f) => {
             const covs = activeRanges.map(({ m, r }) => ({ m, ...coverage(r, f.rangeUm) }));
-            const anyFull = covs.some((c) => c.kind === "full");
-            const anyPartial = covs.some((c) => c.kind === "partial");
-            const tone = !covs.length ? "bg-violet/35" : anyFull ? "bg-ok/55" : anyPartial ? "bg-warn/55" : "bg-bad/35";
+            const kind = !covs.length ? null : covs.some((c) => c.kind === "full") ? "full" : covs.some((c) => c.kind === "partial") ? "partial" : "none";
+            const detail = covs.length ? covs.map((c) => `${c.m.label}: ${c.kind === "partial" ? `partial ${Math.round(c.share * 100)}%` : c.kind}`).join(", ") : "select a method to check coverage";
             return (
               <Row key={f.id} label={f.short} sub={`${f.rangeUm[0]}–${f.rangeUm[1]} µm`}>
                 <div
-                  className={`absolute inset-y-[3px] rounded-sm ${tone}`}
-                  style={{ left: `${x(f.rangeUm[0])}%`, width: `${x(f.rangeUm[1]) - x(f.rangeUm[0])}%` }}
-                  title={f.label}
+                  className="absolute inset-y-[3px] rounded-sm"
+                  style={{ background: kind ? covColor[kind] : C.unavailable, left: `${x(f.rangeUm[0])}%`, width: `${x(f.rangeUm[1]) - x(f.rangeUm[0])}%` }}
+                  onMouseEnter={(e) => showTip(e, `${f.label}, ${f.rangeUm[0]}–${f.rangeUm[1]} µm. ${detail}`)}
                 />
               </Row>
             );
           })}
         </div>
-        <div className="relative mt-1 h-4 font-mono text-[10px] text-ink-3" aria-hidden>
+        <div className="relative mt-1 h-4 text-[10px]" style={{ color: C.axis }} aria-hidden>
           {ticks.map((t) => (
             <span key={t} className="absolute -translate-x-1/2" style={{ left: `calc(7rem + (100% - 7rem) * ${x(t) / 100})` }}>{t}</span>
           ))}
           <span className="absolute right-0">µm</span>
         </div>
+
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[11px]" style={{ color: C.axis }}>
+          {([["Selected method range", C.range], ["Full coverage", C.full], ["Partial coverage", C.partial], ["No coverage or not selected", C.unavailable]] as const).map(([l, c]) => (
+            <span key={l} className="inline-flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm" style={{ background: c }} />{l}</span>
+          ))}
+        </div>
+
+        {tip && (
+          <div role="tooltip" className="pointer-events-none absolute z-20 max-w-xs -translate-x-1/2 -translate-y-full rounded-md px-2.5 py-1.5 text-xs shadow-lg" style={{ background: C.tooltipBg, color: C.tooltipText, left: tip.left, top: tip.top - 6 }}>
+            {tip.text}
+          </div>
+        )}
       </div>
 
       {activeRanges.length > 0 && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-md border" style={{ borderColor: C.divider }}>
           <table className="w-full text-xs">
-            <thead>
-              <tr className="text-left text-ink-3">
-                <th className="py-1 pr-3 font-medium">Fiber family ({FIBER_SOURCE})</th>
-                {activeRanges.map(({ m }) => <th key={m.id} className="py-1 pr-3 font-medium">{m.label} {m.rangeLabel}</th>)}
+            <thead style={{ background: C.tableHead }}>
+              <tr className="text-left" style={{ color: C.material }}>
+                <th className="px-3 py-2 font-semibold">Fiber family ({FIBER_SOURCE})</th>
+                {activeRanges.map(({ m }) => <th key={m.id} className="px-3 py-2 font-semibold">{m.label} {m.rangeLabel}</th>)}
               </tr>
             </thead>
             <tbody>
               {fibers.map((f) => (
-                <tr key={f.id} className="border-t border-line/60">
-                  <td className="py-1 pr-3 text-ink-2">{f.label}</td>
+                <tr key={f.id} className="border-t" style={{ borderColor: C.divider }}>
+                  <td className="px-3 py-1.5" style={{ color: C.material }}>{f.label}</td>
                   {activeRanges.map(({ m, r }) => {
                     const c = coverage(r, f.rangeUm);
+                    const col = covColor[c.kind];
                     return (
-                      <td key={m.id} className="py-1 pr-3">
-                        <span className={`rounded border px-1.5 py-0.5 font-mono text-[10px] ${covStyle[c.kind]}`}>
+                      <td key={m.id} className="px-3 py-1.5">
+                        <span className="rounded px-1.5 py-0.5 text-[11px] font-medium" style={{ color: c.kind === "none" ? C.axis : col, background: `color-mix(in srgb, ${col} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${col} 40%, transparent)` }}>
                           {c.kind === "partial" ? `partial ${Math.round(c.share * 100)}%` : c.kind}
                         </span>
                       </td>
@@ -159,10 +196,10 @@ export function SpectralBand({ highlight = [], interactive = true }: { highlight
 
 function Row({ label, sub, dim, children }: { label: string; sub?: string; dim?: boolean; children: React.ReactNode }) {
   return (
-    <div className={`flex items-center ${dim ? "opacity-60" : ""}`}>
+    <div className={`flex items-center ${dim ? "opacity-70" : ""}`}>
       <div className="w-28 shrink-0 pr-2">
-        <div className="truncate text-[11px] text-ink-2">{label}</div>
-        {sub && <div className="truncate font-mono text-[9px] text-ink-3">{sub}</div>}
+        <div className="truncate text-[11px] font-medium" style={{ color: C.material }}>{label}</div>
+        {sub && <div className="truncate text-[9px]" style={{ color: C.axis }}>{sub}</div>}
       </div>
       <div className="relative h-4 flex-1">{children}</div>
     </div>

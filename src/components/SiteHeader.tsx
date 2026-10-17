@@ -1,16 +1,37 @@
-import Link from "next/link";
-import { Logo } from "./Logo";
+"use client";
 
-export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Logo } from "./Logo";
+import { ThemeToggle } from "./ThemeToggle";
+
+const links = [
+  { href: "/assess", label: "Assess" },
+  { href: "/how-it-works", label: "How it works" },
+  { href: "/reference", label: "Methods and fibres" },
+];
+
+export function SiteHeader() {
+  const path = usePathname();
   return (
-    <header
-      className={`${overlay ? "fixed" : "sticky"} inset-x-0 top-0 z-40 border-b border-line/60 bg-bg/70 backdrop-blur-md`}
-    >
-      <div className="mx-auto flex h-14 max-w-[1400px] items-center justify-between px-4 sm:px-6">
-        <Link href="/" aria-label="SpectraSense AI home"><Logo /></Link>
+    <header className="print-hidden sticky inset-x-0 top-0 z-40 border-b border-line bg-bg text-ink">
+      <div className="flex h-14 items-center justify-between px-4 sm:px-6">
+        <Link href="/" aria-label="SpectraSense AI home"><Logo dark /></Link>
         <nav className="flex items-center gap-1 text-sm">
-          <Link href="/assess" className="rounded px-3 py-1.5 text-ink-2 hover:bg-panel-2 hover:text-ink">Assess</Link>
-          <Link href="/reference" className="rounded px-3 py-1.5 text-ink-2 hover:bg-panel-2 hover:text-ink"><span className="sm:hidden">Reference</span><span className="hidden sm:inline">Methods &amp; fibers</span></Link>
+          {links.map((l) => {
+            const on = path === l.href;
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                aria-current={on ? "page" : undefined}
+                className={`rounded-md px-3 py-1.5 ${on ? "bg-accent text-white" : "text-ink-2 hover:bg-panel hover:text-ink"}`}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
+          <ThemeToggle />
         </nav>
       </div>
     </header>

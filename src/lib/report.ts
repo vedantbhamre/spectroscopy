@@ -38,8 +38,8 @@ export type PremiseCheck = z.infer<typeof PremiseCheck>;
 export const Report = z.object({
   scenarioId: z.string().optional(),
   title: z.string(),
-  /** Where the content came from — shown as a badge. */
-  origin: z.enum(["live", "cached", "reference"]),
+  /** Where the content came from — shown as a badge. "demo" = placeholder from the mock, not an assessment. */
+  origin: z.enum(["live", "cached", "reference", "demo"]),
   originNote: z.string().optional(),
   generatedAt: z.string().optional(),
   decisionStatus: DecisionStatus,
@@ -61,6 +61,36 @@ export const Report = z.object({
   sources: z.array(Citation),
 });
 export type Report = z.infer<typeof Report>;
+
+// Chat contract: the UI sends the whole conversation, the backend answers with a reply,
+// a full report version and the trace of the steps it ran.
+
+export const ChatMessage = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().min(1).max(8000),
+});
+export type ChatMessage = z.infer<typeof ChatMessage>;
+
+export const TraceStep = z.object({
+  step: z.string(),
+  status: z.enum(["ok", "warn", "fail", "skipped"]),
+  ms: z.number().optional(),
+  detail: z.string().optional(),
+});
+export type TraceStep = z.infer<typeof TraceStep>;
+
+export const AssessRequest = z.object({
+  messages: z.array(ChatMessage).min(1).max(40),
+  scenarioId: z.string().optional(),
+});
+export type AssessRequest = z.infer<typeof AssessRequest>;
+
+export const AssessResponse = z.object({
+  reply: z.string(),
+  report: Report,
+  trace: z.array(TraceStep).default([]),
+});
+export type AssessResponse = z.infer<typeof AssessResponse>;
 
 export const statusLabel: Record<DecisionStatus, string> = {
   provisional: "Provisional feasibility assessment",
