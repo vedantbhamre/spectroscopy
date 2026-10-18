@@ -13,11 +13,10 @@ To run the live application on your own computer, you need:
 - Node.js 20 or newer (npm is included with Node.js).
 - Python 3.11.
 - A Groq API key for the live assistant.
-- About 10–15 GB of free disk space is recommended for dependencies and the local embedding model.
 
 You do not need to install a separate database server. The knowledge files are included in the project.
 
-> **Use free-tier quota for the demo:** For the jury demo, create and use API keys under the providers’ free-tier allowance/credits where available. Keep usage within the free quota and do not enable or rely on paid usage for this setup. Free-tier availability, limits, and eligibility can change, so check the current terms on each provider’s website. Do not share your keys or commit them to GitHub.
+> **Use free-tier quota for the demo:** For the jury demo, create and use API keys under the providers’ free-tier allowance/credits where available. Keep usage within the free quota and do not enable or rely on paid usage for this setup. Do not share your keys or commit them to GitHub.
 
 ## 1. Install Node.js and Python
 
