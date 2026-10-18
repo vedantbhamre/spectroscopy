@@ -9,7 +9,7 @@ It was built for the AFS in-line spectroscopy challenge.
 | **Frontend** | Next.js 15 (App Router, TypeScript, Tailwind v4), `frontend/` |
 | **Backend** | FastAPI + LangGraph assessment pipeline, `backend/` |
 | **Retrieval** | Source-guide routing + BM25 fused with local semantic search (BGE-base via fastembed, CPU, no API key) |
-| **LLM** | Groq (`gpt-oss-120b`) or OpenAI (`gpt-4o`), your choice via `.env` |
+| **LLM** | Groq: `gpt-oss-120b` for assessments, `gpt-oss-20b` for the safety gate and as fallback |
 
 ---
 
@@ -85,38 +85,46 @@ In this mode, writing your own enquiry or editing an example returns "No assessm
 
 Run the backend and the frontend in two terminals.
 
-**1. Get a key.** Either:
+**1. Get your API key** (free, about two minutes):
 
-- **Groq** (free tier, the default): create a key at <https://console.groq.com>.
-- **OpenAI**: create a key at <https://platform.openai.com/api-keys>.
+1. Go to <https://console.groq.com> and sign in (Google, GitHub or email).
+2. Open **API Keys** in the left menu, or go straight to <https://console.groq.com/keys>.
+3. Click **Create API Key**, give it a name (e.g. `spectrasense`) and copy the key. It starts with `gsk_` and is shown only once.
 
-**2. Start the backend** (terminal 1, port 8000):
+Optional, only if you want them (each is explained in the settings file):
+
+| Key | Where to get it | What it is for |
+| --- | --- | --- |
+| `GROQ_FALLBACK_API_KEY` | the same steps, signed in with a **different** Groq account | used automatically when the first key reaches its daily limit (keys of one account share that limit) |
+| `JUDGE_GROQ` | the same steps, ideally a third account | lets an independent model mark the answers on the Evals page |
+| `LOGFIRE_TOKEN` | <https://logfire.pydantic.dev> → your project → Settings → Write tokens | traces every pipeline step and LLM call |
+| `LANGSMITH_*` | <https://smith.langchain.com> → Settings → API Keys (set `LANGSMITH_TRACING=true`) | LangSmith tracing |
+| `GEMINI_API_KEY` | <https://aistudio.google.com/apikey> | only for `EMBEDDINGS=gemini`; not needed, search uses local embeddings |
+
+**2. Install the backend** (terminal 1):
 
 ```bash
 cd backend
-
-# create the environment and install dependencies
 uv venv --python 3.11 .venv
 uv pip install --python .venv/bin/python -r requirements.txt
 # no uv? use:  python3.11 -m venv .venv && .venv/bin/pip install -r requirements.txt
-
-# configure
-cp .env.example .env
 ```
 
-Open `backend/.env` and set **one** provider. Everything else can stay as it is.
+**3. Create your settings file.** `.env.example` is the template and stays empty; your keys go into a copy of it called `.env`:
+
+```bash
+cp .env.example .env          # Windows: copy .env.example .env
+```
+
+Open `backend/.env` (not `.env.example`) and paste the key after the `=`, with no quotes or spaces:
 
 ```ini
-# Groq (default)
-LLM_PROVIDER=groq
-GROQ_API_KEY=your-groq-key
-
-# or OpenAI
-# LLM_PROVIDER=openai
-# OPENAI_API_KEY=your-openai-key
+GROQ_API_KEY=gsk_your_key_here
 ```
 
-Then start the server:
+Leave the optional lines empty if you have no extra keys. `.env` is ignored by git, so your key is never committed; never put a real key in `.env.example`.
+
+**4. Start the backend** (port 8000):
 
 ```bash
 .venv/bin/uvicorn app.main:app --reload --port 8000
@@ -126,12 +134,12 @@ Then start the server:
 
 Check that it is up: <http://localhost:8000/health> should show your provider under `"llm"`, `"kb_chunks": 188` and the model route. If `"llm"` is `null`, the key was not picked up (see [Troubleshooting](#troubleshooting)).
 
-**3. Start the frontend** (terminal 2, port 3000):
+**5. Start the frontend** (terminal 2, port 3000). Its settings file works the same way: copy the template to `.env.local`; it only holds the backend address, no keys.
 
 ```bash
 cd frontend
 npm install
-echo 'ASSESS_BACKEND_URL=http://localhost:8000/assess' > .env.local     # Windows PowerShell: Set-Content .env.local 'ASSESS_BACKEND_URL=http://localhost:8000/assess'
+cp .env.example .env.local      # points the frontend at the backend (Windows: copy .env.example .env.local)
 npm run dev
 ```
 
@@ -198,7 +206,7 @@ The frontend talks only to `POST /api/assess`, which resolves in this order: liv
 
 ```bash
 cd backend
-.venv/bin/python -m pytest -q          # 106 tests
+.venv/bin/python -m pytest -q          # 150 tests
 ```
 
 They cover the citation verifier, premise checks on the evaluation enquiries, the safety gate, and the full graph with a scripted LLM (an invented quote is marked `failed`, an over-confident status is lowered, unquoted "facts" are dropped, follow-ups reuse memory).
@@ -256,22 +264,29 @@ spectroscopy/
 
 ## Configuration reference
 
-Backend settings live in `backend/.env` (copy of `.env.example`). Restart the backend after changing it. Only the LLM key is required.
+Backend settings live in `backend/.env` (copy of `backend/.env.example`). Restart the backend after changing it.
+
+| Variable | Needed? | Purpose |
+| --- | --- | --- |
+| `GROQ_API_KEY` | **required** | the Groq key the assistant runs on |
+| `GROQ_FALLBACK_API_KEY` | optional | a key from a second Groq account, used when the first reaches its daily limit |
+| `JUDGE_GROQ` | optional | a key for the evaluation judge, so answers are marked by an independent model |
+| `LOGFIRE_TOKEN`, `LANGSMITH_*` | optional | tracing with Pydantic Logfire and LangSmith |
+| `GEMINI_API_KEY` | optional | only for `EMBEDDINGS=gemini` (local embeddings need no key) |
+
+Advanced settings are not in the example file because their defaults work; add a line to `backend/.env` only to change one
+(all defaults are in `backend/app/config.py`):
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `LLM_PROVIDER` | `groq` in the example file | `groq` or `openai` |
-| `GROQ_API_KEY` / `OPENAI_API_KEY` | none | **Required**: the key for the chosen provider |
-| `GROQ_MODEL` / `GROQ_SMALL_MODEL` | `openai/gpt-oss-120b` / `openai/gpt-oss-20b` | assessment model / fallback and gate model |
-| `OPENAI_MODEL` / `OPENAI_FALLBACK_MODEL` | `gpt-4o` / `gpt-4o-mini` | same, for OpenAI |
-| `*_FALLBACK_API_KEY` | none | optional second key used when the first hits a rate limit |
-| `EMBEDDINGS` | `local` | `local` (BGE-base, no key), `gemini` (needs `GEMINI_API_KEY` + ingested Qdrant index) or `off` |
-| `QDRANT_CLUSTER_ENDPOINT`, `QDRANT_API_KEY` | none | optional Qdrant Cloud; empty means embedded local Qdrant |
-| `GUARD_MODE` | unset | set to `rules` to run the safety gate without an LLM |
+| `GROQ_MODEL` / `GROQ_SMALL_MODEL` | `openai/gpt-oss-120b` / `openai/gpt-oss-20b` | assessment model / fallback and safety-gate model |
 | `FRONTEND_ORIGIN` | `http://localhost:3000` | origin allowed by CORS; change it if the frontend runs elsewhere |
-| `LOGFIRE_TOKEN`, `LANGSMITH_*`, `PORTKEY_API_KEY`, `JUDGE_*` | none | optional observability, gateway and eval-judge settings |
+| `RETRIEVE_TOP_N` | `10` | source pages given to the assessment per enquiry |
+| `EMBEDDINGS` | `local` | `local` (BGE-base on CPU, no key) or `off` |
+| `GUARD_MODE` | LLM gate | `rules` runs the safety gate without an LLM |
+| `EVAL_COOLDOWN_MIN` | `30` | minutes between two Run evals presses |
 
-Frontend settings live in `frontend/.env.local` (restart `npm run dev` after changing it):
+Frontend settings live in `frontend/.env.local` (copy of `frontend/.env.example`; restart `npm run dev` after changing it):
 
 | Variable | Purpose |
 | --- | --- |

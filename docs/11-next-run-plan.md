@@ -17,7 +17,6 @@ cd ../frontend && npx tsc --noEmit && npx next lint
 In `backend/.env` (never committed):
 
 ```
-LLM_PROVIDER=groq
 GROQ_API_KEY=<key from account A>
 GROQ_FALLBACK_API_KEY=<key from account B>     # different Groq account = its own 200K/day
 JUDGE_GROQ=<key from account C, if available>    # judge on its own quota

@@ -14,7 +14,7 @@ def _env(name: str, default: str | None = None) -> str | None:
 
 class Settings:
     # --- LLM provider: "groq" | "openai". Each has a primary and a fallback key, a large and a small model. ---
-    LLM_PROVIDER = (_env("LLM_PROVIDER", "openai") or "openai").lower()
+    LLM_PROVIDER = (_env("LLM_PROVIDER", "groq") or "groq").lower()
     # Other provider tried after every attempt on the active one fails. Empty = none, so testing on
     # one provider never spends credits on the other.
     LLM_FALLBACK_PROVIDER = (_env("LLM_FALLBACK_PROVIDER", "") or "").lower()

@@ -47,11 +47,11 @@ Acceptance properties for any conversation: `evals/acceptance.py` (tests in `tes
 ```bash
 cd backend
 uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python -r requirements.txt
-cp .env.example .env               # LLM_PROVIDER=groq|openai + its keys (embeddings are local, no key)
+cp .env.example .env               # then paste GROQ_API_KEY (the only required setting)
 .venv/bin/uvicorn app.main:app --reload --port 8000
 ```
 
-Frontend: set `ASSESS_BACKEND_URL=http://localhost:8000/assess` in `frontend/.env.local`, then `npm run dev`.
+Frontend: `cp .env.example .env.local` in `frontend/` (sets `ASSESS_BACKEND_URL`), then `npm run dev`.
 
 `GET /health` shows what is configured (LLM route, embeddings, Qdrant mode, KB size, guardrails).
 
