@@ -249,6 +249,10 @@ To look around without any key or backend, start only the website (section 5, sk
 
 ## 8. How it works
 
+![SpectraSense architecture: the language model writes the draft, rules decide what stands](architecture/architecture.png)
+
+The same diagram as a web page: [`architecture/architecture.html`](architecture/architecture.html) (open it in a browser, full screen).
+
 ```
 enquiry ─► safety gate ─► planner ─► analyst ─► retriever ─► premise checks ─► responder ─► report
 ```
@@ -359,9 +363,10 @@ Check that `GROQ_API_KEY` is configured. If you want a separate judge key, add i
 
 ```text
 spectroscopy/
-├── answers/     The assistant's answers for H01–H06 and D01–D08 (readable Markdown)
-├── backend/     Assessment API, AFS knowledge base, retrieval, validation and evaluation tools
-└── frontend/    Website and report display
+├── answers/       The assistant's answers for H01–H06 and D01–D08 (readable Markdown)
+├── architecture/  Architecture diagram (PNG and HTML)
+├── backend/       Assessment API, AFS knowledge base, retrieval, validation and evaluation tools
+└── frontend/      Website and report display
 ```
 
 The backend uses Python and FastAPI. The website uses Next.js and npm. Only the Groq API key (`GROQ_API_KEY`) is required.
