@@ -164,4 +164,4 @@ export const questionStatusLabel: Record<QuestionStatus, string> = {
 };
 
 /** Question text without a leading number or bullet: the ledger order is the only numbering. */
-export const questionText = (q: Pick<Question, "text">) => q.text.replace(/^\s*(?:q?\d+[.):]|[-•*])\s*/i, "");
+export const questionText = (q: Pick<Question, "text">) => q.text.replace(/^(?:\s*(?:\(?(?:q(?:uestion)?\s*)?\d+\s*[.):]|[-•*])\s*)+/i, "");

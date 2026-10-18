@@ -135,7 +135,7 @@ def add_limitations(report: Report, checks: list[PremiseCheck]) -> None:
                 lim.append(f"{c.label}: {c.detail}")
         if r.role == "combination":
             lim.append("Escalation: only after each method has been assessed on its own; the gain is a hypothesis to test.")
-        r.limitations = list(dict.fromkeys(lim))
+        r.limitations = list(dict.fromkeys([*r.limitations, *lim]))
 
 
 # ---------------------------------------------------------------- P8
@@ -299,3 +299,219 @@ def explain_blocked_sections(report: Report) -> int:
                                         "fibre and probe chosen for the defined measurand, confirmed on sample spectra.")
         n += 1
     return n
+
+
+# ---------------------------------------------------------------- calibration and reference method
+KEEP_REFERENCE = "The existing reference method stays in use until the in-line method is validated against it."
+
+
+def keep_reference(report: Report) -> bool:
+    """When the calibration/reference premise fires, the answer, the risks and the plan all say so."""
+    if not any(c.id == "calibration_and_reference" for c in report.premiseChecks):
+        return False
+    if report.answer and not (re.search(r"\breference\b", report.answer.text, re.I) and re.search(r"\buntil\b|\bvalidat", report.answer.text, re.I)
+                              and re.search(r"\b(stays?|keep|remain|continue|alongside|parallel)\w*", report.answer.text, re.I)):
+        report.answer.text = f"{report.answer.text.rstrip()} {KEEP_REFERENCE}"
+    if not any(re.search(r"reference", s, re.I) and re.search(r"until|keep|parallel|alongside|stays", s, re.I) for s in report.feasibility.steps):
+        report.feasibility.steps.append("Keep running the existing reference method alongside the in-line measurement until the "
+                                        "in-line method is validated against it on held-out samples.")
+    risk = "Without a calibration against reference values, or without the reference method, errors of the in-line method go unnoticed."
+    if risk not in report.risks:
+        report.risks.append(risk)
+    return True
+
+
+# ---------------------------------------------------------------- fact guard
+_NUMWORD = {"one": 1, "a single": 1, "single": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6}
+_PORTS = re.compile(r"\b(\d+|one|two|three|four|five|six|a single|single)\s+(?:free\s+|available\s+|spare\s+|open\s+)?"
+                    r"(?:side\s+)?(port|access point|probe position|flange|nozzle|opening)s?\b", re.I)
+_CLARITY = re.compile(r"\b(clear|transparent|translucent|turbid|opaque|cloudy|scattering)\b", re.I)
+_SUBJECT = re.compile(r"\b(stream|liquid|sample|samples|product|medium|broth|melt|oil|solution|blend|powder|line|feed)\b", re.I)
+_DIST = re.compile(r"\b(\d+(?:[.,]\d+)?)\s?(m|metres?|meters?|km)\b", re.I)
+_HEDGED = re.compile(r"\b(assum\w*|if\b|unless|likely|presumably|probably|may\b|might\b|could\b|to be confirmed|unknown|not stated|"
+                     r"not yet known|confirm|whether|e\.g\.|for example)\b", re.I)
+CLARITY_GROUPS = [{"clear", "transparent", "translucent"}, {"turbid", "opaque", "cloudy", "scattering"}]
+
+
+def _count(word: str) -> int | None:
+    w = word.lower()
+    return int(w) if w.isdigit() else _NUMWORD.get(w)
+
+
+def unstated_fact(sentence: str, customer: str) -> str | None:
+    """The customer fact a sentence asserts that the customer never stated (ports, clarity, distance), or None."""
+    if _HEDGED.search(sentence):
+        return None
+    c = customer.lower()
+    for m in _PORTS.finditer(sentence):
+        n = _count(m.group(1))
+        said = {_count(x.group(1)) for x in _PORTS.finditer(c)}
+        if n not in said:
+            return m.group(0)
+    for m in _CLARITY.finditer(sentence):
+        if _SUBJECT.search(sentence):
+            group = next((g for g in CLARITY_GROUPS if m.group(1).lower() in g), {m.group(1).lower()})
+            if not any(re.search(rf"\b{w}", c) for w in group):
+                return m.group(0)
+    from app.services.numbers import numbers_in
+
+    for m in _DIST.finditer(sentence):
+        if numbers_in(m.group(1)) - numbers_in(customer):
+            return m.group(0)
+    return None
+
+
+def guard_facts(report: Report, customer: str) -> int:
+    """Statements of customer facts the customer never gave move to the assumptions, worded as assumptions."""
+    n = 0
+
+    def clean(text: str | None) -> str | None:
+        nonlocal n
+        if not text:
+            return text
+        kept = []
+        for s in sentences(text) or [text]:
+            if unstated_fact(s, customer):
+                note = f"Assumed, not stated by the customer: {s.rstrip('.')}."
+                if note not in report.assumptions:
+                    report.assumptions.append(note)
+                n += 1
+            else:
+                kept.append(s)
+        return " ".join(kept)
+
+    if report.answer:
+        report.answer.text = clean(report.answer.text) or ""
+        report.answer.sayInstead = clean(report.answer.sayInstead) or None
+    report.concept.summary = clean(report.concept.summary) or ""
+    for field in ("location", "fiberLink", "probe", "analyzer"):
+        v = getattr(report.concept, field)
+        if v and unstated_fact(v, customer):
+            report.assumptions.append(f"Assumed, not stated by the customer: {v}.")
+            setattr(report.concept, field, f"{v} (assumed)")
+            n += 1
+    for r in report.recommendations:
+        r.reason = clean(r.reason) or r.reason
+    return n
+
+
+# ---------------------------------------------------------------- cost claims vs S01 Table 1
+_CHEAP = re.compile(r"\b(cheapest|cheaper|lowest[- ]cost|lower[- ]cost|least expensive|less expensive|most economical|most affordable|"
+                    r"simplest|simpler|low[- ]cost|inexpensive)\b", re.I)
+
+
+def check_cost_claims(report: Report) -> int:
+    """'Cheapest' / 'simplest' / 'low-cost' must agree with the Table 1 cost column against the other candidates."""
+    from app.knowledge import table1 as T1
+    from app.knowledge.source_map import METHOD_PATTERNS
+
+    cands = {m for r in report.recommendations if r.role != "not_recommended" for m in r.methodIds}
+    cost = {m: T1.RANK[c] for m in cands if (c := T1.probe_cost(m))}
+    n = 0
+
+    def wrong(sentence: str, methods: set[str]) -> bool:
+        if not _CHEAP.search(sentence):
+            return False
+        named = methods or {m for m, pat in METHOD_PATTERNS.items() if re.search(pat, sentence, re.I)}
+        mine = [cost[m] for m in named if m in cost]
+        others = [cost[m] for m in cost if m not in named]
+        return bool(mine and others) and min(mine) > min(others)
+
+    for r in report.recommendations:
+        kept = []
+        for s in sentences(r.reason) or [r.reason]:
+            if wrong(s, set(r.methodIds)):
+                n += 1
+            else:
+                kept.append(s)
+        r.reason = " ".join(kept) or r.reason
+    if report.answer:
+        kept = [s for s in sentences(report.answer.text) or [report.answer.text] if not wrong(s, set())]
+        n += len(sentences(report.answer.text)) - len(kept)
+        report.answer.text = " ".join(kept)
+    report.concept.summary = " ".join(s for s in sentences(report.concept.summary) if not wrong(s, set())) or report.concept.summary
+    return n
+
+
+# ---------------------------------------------------------------- numbers stated on a retrieved page: cite it
+def cite_numbers(report: Report, documents: list[dict], customer: str) -> int:
+    """A number the report takes from a retrieved page that it did not cite: cite the passage, so the number is sourced
+    (and kept by the number validator). Numbers on no page and not from the customer are left to the validator."""
+    from app.schemas import Citation
+    from app.services.citations import page_text
+    from app.services.numbers import TOKEN, allowed_numbers
+    from app.services.passages import _pieces
+
+    cited = allowed_numbers(customer, [page_text(c.source, c.page) for c in report.sources if c.source != "EXT"])
+    fields = [(report.spectralRange, report.spectralRange.summary), (report.concept, report.concept.summary),
+              *((r, r.reason) for r in report.recommendations)]
+    n = 0
+    for holder, text in fields:
+        for m in TOKEN.finditer(text or ""):
+            from app.services.numbers import _unit, _value
+
+            vals = [v for g in (m.group(1), m.group(3)) if g and (v := _value(g)) is not None]
+            unit = _unit(m.group(4))
+            if not unit or cited.ok(vals, unit):
+                continue
+            for d in documents:
+                if d.get("kind") == "table":
+                    continue
+                a = allowed_numbers("", [d["text"]])
+                if not a.ok(vals, unit):
+                    continue
+                piece = next((p for p in _pieces(d["text"]) if allowed_numbers("", [p]).ok(vals, unit)), None)
+                if piece:
+                    c = Citation(source=d["source"], page=str(d["page"]), quote=piece, check="verified")
+                    holder.citations.append(c)
+                    report.sources.append(c)
+                    cited = allowed_numbers(customer, [*(page_text(x.source, x.page) for x in report.sources if x.source != "EXT")])
+                    n += 1
+                    break
+    return n
+
+
+# ---------------------------------------------------------------- a comparison candidate when the sources support one
+def ensure_comparison(report: Report, documents: list[dict], targets: list[str], access_points: int | None = None) -> bool:
+    """A provisional report with a primary but no comparison gets the best-supported other method from the retrieved
+    application pages, with the passage that names it and its Table 1 limitation."""
+    from app.knowledge import table1 as T1
+    from app.knowledge.optics import METHODS
+    from app.knowledge.page_tags import application_of, quote_methods
+    from app.schemas import Citation, Recommendation
+    from app.services.passages import _pieces
+
+    if report.decisionStatus != "provisional" or any(r.role == "comparison" for r in report.recommendations):
+        return False
+    primary = {m for r in report.recommendations if r.role == "primary" for m in r.methodIds}
+    if not primary:
+        return False
+    if access_points is not None and access_points <= len(primary):
+        return False  # no free access point for a second probe; the access-point check governs sequential testing
+    rejected = {m for r in report.recommendations if r.role == "not_recommended" for m in r.methodIds}
+    target_words = {w for t in targets for w in re.findall(r"[a-z]{4,}", t.lower())}
+    best = None
+    for d in documents:
+        if d.get("kind") == "table" or not application_of(d["source"], str(d["page"])):
+            continue
+        for p in _pieces(d["text"]):
+            for m in quote_methods(p) - primary - rejected:
+                if m not in METHODS:
+                    continue
+                score = len(target_words & set(re.findall(r"[a-z]{4,}", p.lower()))) + 1
+                if best is None or score > best[0]:
+                    best = (score, m, d, p)
+    if best is None:
+        return False
+    _, m, d, p = best
+    cost = T1.probe_cost(m)
+    cite = Citation(source=d["source"], page=str(d["page"]), quote=p, check="verified")
+    report.recommendations.append(Recommendation(
+        method=METHODS[m].label, methodIds=[m], role="comparison",
+        reason=f"The supplied material discusses {METHODS[m].label} for this kind of application: “{p}”",
+        citations=[cite],
+        limitations=[f"Table 1 rates its probe cost as {cost}." if cost else "Not rated in Table 1.",
+                     "Its interferences for this sample have to be checked in the same first experiment as the primary method."],
+    ))
+    report.sources.append(cite)
+    return True

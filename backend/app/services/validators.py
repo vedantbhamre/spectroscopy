@@ -122,6 +122,7 @@ _LATER_STAGE = re.compile(r"\b(animal|human|clinical|patient|in-vivo|in vivo|fir
 _DASHES = str.maketrans({c: "-" for c in "\u2010\u2011\u2012\u2013\u2014"})
 _NUMBERED = re.compile(r"^\s*(?:step\s*)?\d+[.):]\s*", re.I)
 _HELD_OUT = re.compile(r"held[- ]out|unseen|not used (to build|for (building|training|calibration))|independent (test|validation) set"
+                       r"|(validat\w*|test\w*)\b[^.]{0,40}\bindependent (samples|batches|runs|data|lots)"
                        r"|external validation|(new|other|different) (patients|batches|lots|samples) (that|not)|not part of the (model|calibration)", re.I)
 HELD_OUT_STEP = ("Validate the model on samples not used to build it (held-out samples, e.g. from other batches, days or "
                  "production runs) before drawing any conclusion; a model built on few samples can fit them without generalising.")

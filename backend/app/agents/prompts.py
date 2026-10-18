@@ -87,7 +87,9 @@ QUESTION LEDGER lists every question already asked, with its status and the cust
 - Use every answer as a stated fact. Never ask an answered, unknown or declined question again, in any wording.
 - "unknown" answers: plan how the first experiment establishes them (a feasibility step or a risk), do not ask again.
 - New questions: only customer facts (process, access, constraints, available data, requirements) whose answer could change
-  the method, the setup or the answer to the customer's question, at most {max_new}, most decisive first: what decides the
+  the method, the setup or the answer to the customer's question (for example: distance between measuring point and analyzer,
+  window or access details, properties of the mixture, hazardous-area rating, available reference data), at most {max_new},
+  never the assistant's own design parameters (wavelength range, resolution, path length, probe type), never numbered, most decisive first: what decides the
   answer (their own instrument compared with the source's, the reference method available, the required resolution or
   acceptance) before installation details (ports, mounting). Never ask the customer to choose a method or equipment,
   never ask the assistant's own decisions ("which probe fits?"), never ask whether they can buy or acquire equipment.

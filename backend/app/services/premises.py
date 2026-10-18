@@ -41,6 +41,8 @@ class Facts(BaseModel):
     cites_study_as_proof: bool = False
     reuses_existing_calibration: bool = False
     new_formulation_or_matrix: bool = False
+    claims_no_calibration: bool = False  # the enquiry says the method needs no calibration
+    drops_reference_method: bool = False  # the enquiry proposes stopping or replacing the lab / reference method
     asks_for_certainty: bool = False
     combination_requested: bool = False
     access_points: int | None = None  # free process ports / access points the customer stated
@@ -103,6 +105,13 @@ def detect(text: str, facts: Facts, enquiry: str | None = None) -> Facts:
         upd["reuses_existing_calibration"] = True
     if re.search(r"(different|new) (api|formulation|blend|excipient|matrix|product)", t):
         upd["new_formulation_or_matrix"] = True
+    if re.search(r"calibration[- ]free|\b(no|without( any)?|zero)\s+(\w+\s+)?calibration|\b(doesn'?t|does not|won'?t|will not|wouldn'?t|don'?t|do not|never)\s+"
+                 r"(need|require)\s+(\w+\s+)?(calibrat\w*|reference)|\bno need (for|to) (\w+\s+)?calibrat|\bskip (the )?calibrat", t):
+        upd["claims_no_calibration"] = True
+    _ref = r"(lab(oratory)?|reference|off-?line|wet[- ]chem\w*|hplc|titration|karl fischer|gravimetric|manual sampl\w*)\s*(\w+\s+){0,2}(method|test|testing|analys[ie]s|checks?|measurements?|assays?|sampl\w*)?"
+    if re.search(r"\b(replace|stop|stopping|remove|drop|eliminate|get rid of|abandon|phase out|discontinue|switch off|no longer (need|use|run|do))\b(\s+\w+){0,4}\s+" + _ref, t) \
+            or re.search(_ref + r"(\s+\w+){0,3}\s+(can|could|will|would)\s+(then\s+)?(be\s+)?(stopped|dropped|removed|replaced|eliminated|discontinued|go|disappear)", t):
+        upd["drops_reference_method"] = True
     if re.search(r"\b(approve|guarantee|exact (sensor )?configuration|immediately|proof|ready for)\b", t):
         upd["asks_for_certainty"] = True
     if re.search(r"(adding|add|combin\w*)\s+(raman|nir|mir|fluorescence)|both .* and ", t):
@@ -228,6 +237,22 @@ def run_checks(facts: Facts, open_points: int = 0) -> list[PremiseCheck]:
                     "surgical readiness. It differs from that use in: " + "; ".join(d for d, _ in dims) + "."
                     if clinical else "A published application is a reason to test a method, not proof that it will work for this customer."),
             citations=[c.model_copy(update={"check": "verified"}) for _, c in dims],
+        ))
+
+    # 4b. "No calibration needed" / "stop the lab method": spectra become results only through calibration models built
+    #     against reference values (S01 p.5, p.12), so the reference method stays until the in-line method is validated.
+    if facts.claims_no_calibration or facts.drops_reference_method:
+        what = " and ".join(x for x in ("needs no calibration" if facts.claims_no_calibration else "",
+                                        "the reference method can be stopped" if facts.drops_reference_method else "") if x)
+        checks.append(PremiseCheck(
+            id="calibration_and_reference", label="A calibration and the reference method are still needed", status="flag",
+            detail=(f"The enquiry assumes {what}; the supplied material does not support that. Spectra give concentrations or "
+                    "classes only through chemometric calibration models built against reference values, so the existing "
+                    "reference method stays until the in-line method is validated against it."),
+            citations=[
+                Citation(source="S01", page="12", quote="Therefore, Raman spectra (as well as IR absorption spectra) can be used to construct chemometric models—calibration or classification ones.", check="verified"),
+                Citation(source="S01", page="5", quote="Extracting the information necessary for quantitative and qualitative analysis from optical spectra requires special methods for analyzing multidimensional data, called the above-mentioned term chemometrics.", check="verified"),
+            ],
         ))
 
     # 5. Calibration transfer to a new formulation.

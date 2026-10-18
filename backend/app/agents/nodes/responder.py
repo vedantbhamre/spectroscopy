@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pydantic import ValidationError
 
 from app.agents import prompts
-from app.agents.nodes.common import client_text, client_turns, step, transcript
+from app.agents.nodes.common import client_text, client_turns, customer_words, step, transcript
 from app.agents.state import AgentState
 from app.gateway import chat, parse_json
 from app.knowledge import table1 as T1
@@ -226,6 +226,11 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
             report.feasibility.steps.insert(0, "Measure the transmission of the chosen mid-IR fibre over the planned link length, or plan the analyzer close to the measurement point.")
         report.risks.append("The mid-IR fibre link over the required distance is not shown to be feasible in the supplied material.")
 
+    customer = "\n\n".join(customer_words(t) for t in client_turns(messages))  # the customer's own words only
+    stats["facts_guarded"] = RR.guard_facts(report, customer)
+    stats["cost_claims_rejected"] = RR.check_cost_claims(report)
+    stats["comparison_added"] = RR.ensure_comparison(report, documents or [], facts.target_variables, facts.access_points)
+    stats["numbers_cited"] = RR.cite_numbers(report, documents or [], customer)
     stats["later_stage_moved"] = V.validate_feasibility(report)
     stats["hardware_moved"] = RR.validate_hardware(report)
     stats["excitation_fixed"] = RR.fix_excitation(report)
@@ -241,7 +246,7 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
             seen.setdefault((c.source, c.page, c.quote), verify(c) if c.quote else c)
     report.sources = list(seen.values())
 
-    reply, stats["numbers"] = _validate_numbers(report, strip_refs(str(raw.get("reply") or "")) or "", customer=client_text(messages),
+    reply, stats["numbers"] = _validate_numbers(report, strip_refs(str(raw.get("reply") or "")) or "", customer=customer,
                                                 cited_pages=cited_page_texts(report))
 
     # Final mode: provisional unless the checks justify otherwise. Otherwise the checks set the floor.
@@ -249,6 +254,7 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
     stats["answer_written"] = ensure_answer(report)
     stats["sections_explained"] = RR.explain_blocked_sections(report)
     stats["certainty_rejected"] = RR.reject_certainty(report)
+    stats["reference_kept"] = RR.keep_reference(report)
     if report.answer and not (facts.cites_study_as_proof or _CLAIM.search(client_text(messages))):
         report.answer.sayInstead = None  # only when the customer wants to quote, claim or promise something
     stats["missing"] = V.missing_sections(report)
@@ -344,6 +350,8 @@ def responder_node(state: AgentState) -> dict:
                   "certainty_rejected": stats.get("certainty_rejected", 0), "method_mismatch": stats.get("method_mismatch", 0),
                   "recited": stats.get("recited", 0), "decisive_open": stats.get("decisive_open", 0),
                   "hardware_moved": stats.get("hardware_moved", 0), "excitation_fixed": stats.get("excitation_fixed", 0),
+                  "facts_guarded": stats.get("facts_guarded", 0), "cost_claims_rejected": stats.get("cost_claims_rejected", 0),
+                  "comparison_added": bool(stats.get("comparison_added")), "numbers_cited": stats.get("numbers_cited", 0),
                   "citations": {k: stats[k] for k in ("verified", "visual_note", "failed", "unverified")}}
     return {"report": report.model_dump(), "reply": reply, "ledger": [x.model_dump() for x in report.questions], "trace": trace,
             "validation": validation}

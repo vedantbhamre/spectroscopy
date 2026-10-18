@@ -106,7 +106,9 @@ def test_powder_conversation_meets_every_acceptance_property(client):
     assert 2 in rep["requirements"]["factTurns"]
     assert PLACEHOLDER in b2["reply"] and "0.25" not in b2["reply"]
     assert any("fits comfortably" in a for a in rep["assumptions"]) and not any("fits comfortably" in r["reason"] for r in rep["recommendations"])
-    assert [r["method"] for r in rep["recommendations"]] == ["NIR (diffuse reflection)"]  # uncited Raman moved to assumptions
+    # The uncited Raman claim moved to the assumptions; a comparison candidate comes back only with a verified source passage.
+    assert rep["recommendations"][0]["method"] == "NIR (diffuse reflection)"
+    assert all(r["role"] == "comparison" and r["citations"] and all(c["check"] == "verified" for c in r["citations"]) for r in rep["recommendations"][1:])
     assert any(a.startswith("Raman") for a in rep["assumptions"])
     assert any(ct["page"] == "10" for ct in rep["spectralRange"]["citations"])  # nominal NIR range cited with its page
 

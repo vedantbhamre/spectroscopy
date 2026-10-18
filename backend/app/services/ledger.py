@@ -32,10 +32,14 @@ _ASSISTANT_DECISION = re.compile(
     # asks the customer to buy, acquire or install new equipment
     r"|\b(can|could|would|will)\s+you\s+(acquire|buy|purchase|order|procure|rent|lease|invest\s+in|install\s+a\s+new)\b"
     r"|\b(are|is)\s+(you|the\s+customer)\s+(willing|able|prepared)\s+to\s+(buy|purchase|acquire|invest|procure)\b"
-    r"|\bbudget\s+(for|to)\s+(buy|purchase|acquire)\b",
+    r"|\bbudget\s+(for|to)\s+(buy|purchase|acquire)\b"
+    # asks the customer for the assistant's own design parameters (unless about equipment they already have)
+    r"|^(?!.*\b(your|you already|existing|current(ly)?|installed|do you have)\b).*\b(what|which)\s+(\w+\s+){0,3}(wavelength|wavelength range|spectral range|"
+    r"band|resolution|integration time|exposure time|laser power|excitation|path ?length|optical path|probe (type|geometry|design)|"
+    r"fib(er|re) (type|core|diameter)|detector|spectrometer settings?|number of scans|preprocessing|chemometric model|model type)s?\b",
     re.I,
 )
-_NUMBERING = re.compile(r"^\s*(?:q?\d+[.):]|[-•*])\s*", re.I)
+_NUMBERING = re.compile(r"^\s*(?:\(?(?:q(?:uestion)?\s*)?\d+\s*[.):]|[-•*]|\*\*\d+\.\*\*)\s*", re.I)
 IMPACT_RANK = {"method": 0, "setup": 1, "acceptance": 2, None: 3}
 
 # The customer asks for the answer now ("give me the solution, no more questions").
@@ -138,7 +142,10 @@ def merge_new(ledger: list[Question], proposed: list[dict], turn: int, final: bo
 
 def clean(text: str) -> str:
     """Question text without a leading number or bullet: the ledger order is the only numbering."""
-    return _NUMBERING.sub("", text.strip()).strip()
+    text = text.strip()
+    while (stripped := _NUMBERING.sub("", text, count=1).strip()) != text:  # "1. 1) ..." → "..."
+        text = stripped
+    return text
 
 
 def move_unknowns(ledger: list[Question], steps: list[str], risks: list[str]) -> tuple[list[Question], list[str]]:

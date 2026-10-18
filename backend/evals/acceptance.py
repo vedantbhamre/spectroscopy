@@ -93,6 +93,8 @@ def probes_within_access_points(turns: list[dict], access_points: int | None) ->
     out = []
     for i, t in enumerate(turns, 1):
         rep = t["report"]
+        if not re.search(r"\bport|access|position|flange|nozzle", " ".join(rep["requirements"]["stated"]), re.I):
+            continue  # the customer has not stated the access points yet in this turn
         methods = {m for r in rep["recommendations"] if r["role"] in ("primary", "comparison", "combination") for m in r.get("methodIds", [])}
         chk = next((c for c in rep.get("premiseChecks", []) if c["id"] == "access_points"), None)
         if len(methods) > access_points and not (chk and chk["status"] == "pass"):
