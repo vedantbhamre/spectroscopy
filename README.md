@@ -1,342 +1,292 @@
 # SpectraSense
 
-**Cited first assessments for in-line spectroscopy.** SpectraSense turns a customer enquiry ("can we measure X in our process line?") into a structured first assessment: what the customer actually stated, what is still unknown, which spectroscopic method (NIR, Raman, MIR/ATR, UV-Vis, fluorescence) is worth testing, how to set it up, and a first feasibility experiment. Every recommendation is tied to a quoted passage on a specific page of the AFS (Art Fiber Systems) source material, and the system checks those quotes instead of trusting the language model.
+SpectraSense helps a process engineer make an initial assessment of whether spectroscopy could measure something in a production line. It asks for missing details, suggests methods to investigate, and creates a report with source citations, risks, and a first experiment to try.
 
-It was built for the AFS in-line spectroscopy challenge.
+The project was built for the Art Fiber Systems (AFS) in-line spectroscopy challenge. The supplied AFS documents are the main technical reference used by the application.
 
-| | |
-| --- | --- |
-| **Frontend** | Next.js 15 (App Router, TypeScript, Tailwind v4), `frontend/` |
-| **Backend** | FastAPI + LangGraph assessment pipeline, `backend/` |
-| **Retrieval** | Source-guide routing + BM25 fused with local semantic search (BGE-base via fastembed, CPU, no API key) |
-| **LLM** | Groq: `gpt-oss-120b` for assessments, `gpt-oss-20b` for the safety gate and as fallback |
+## Before you start
 
----
+To run the live application on your own computer, you need:
 
-## Contents
+- A computer running Windows 10/11 or macOS.
+- An internet connection.
+- Node.js 20 or newer (npm is included with Node.js).
+- Python 3.11.
+- A Groq API key for the live assistant.
+- About 10–15 GB of free disk space is recommended for dependencies and the local embedding model.
 
-1. [What it does](#what-it-does)
-2. [Run it on your machine](#run-it-on-your-machine)
-   - [Prerequisites](#prerequisites)
-   - [Option A: frontend only, no API key](#option-a-frontend-only-no-api-key-2-minutes)
-   - [Option B: full live pipeline](#option-b-full-live-pipeline-with-an-llm-key)
-3. [What to try](#what-to-try)
-4. [Architecture](#architecture)
-5. [Tests and evaluations](#tests-and-evaluations)
-6. [Project structure](#project-structure)
-7. [Configuration reference](#configuration-reference)
-8. [Troubleshooting](#troubleshooting)
-9. [Limitations](#limitations)
-10. [Acknowledgements](#acknowledgements)
+You do not need to install a separate database server. The knowledge files are included in the project.
 
----
+> **Use free-tier quota for the demo:** For the jury demo, create and use API keys under the providers’ free-tier allowance/credits where available. Keep usage within the free quota and do not enable or rely on paid usage for this setup. Free-tier availability, limits, and eligibility can change, so check the current terms on each provider’s website. Do not share your keys or commit them to GitHub.
 
-## What it does
+## 1. Install Node.js and Python
 
-1. **Describe the enquiry** in the customer's own words.
-2. **Answer up to five questions** that could change the method or setup. "Don't know" and "Skip" are valid answers, and a question that was answered is never asked again.
-3. **Get a versioned report** with: stated facts vs unknowns, recommended methods with verified source citations, measurement concept (analyzer → fibre → probe → process point), spectral range, risks, a first feasibility experiment with a decision basis, and the premise checks that were run.
-4. **Press "Final report"** at any time to stop the questions; open points become assumptions to confirm.
+### Windows
 
-Things that make it different from a plain chatbot:
+1. Open the official Node.js website: <https://nodejs.org/en/download>.
+2. Download the **LTS** installer for Windows and run it. Keep the default installation options. npm is installed with Node.js.
+3. Open <https://www.python.org/downloads/release/python-3119/> and download the Windows installer for Python 3.11. During installation, tick **Add python.exe to PATH**, then complete the installation.
+4. Open **PowerShell** from the Start menu.
+5. Check that the tools are installed by running:
 
-- **Facts vs unknowns.** A "stated fact" is kept only if it is quoted from the customer. Anything else stays an unknown.
-- **Verified citations.** Each quote is checked against the cited page; invented quotes are marked `failed`, and a recommendation sentence without a verified citation is moved to the assumptions.
-- **Premise checks (deterministic, no LLM).** For example, a customer who wants mid-IR through an existing silica fibre is told that this fibre cannot carry that range (scenario H04). Over-confident requests are held at "provisional" or "insufficient information".
-- **Safety gate.** Off-topic, jailbreak and prompt-injection messages are blocked before the pipeline runs.
-- **Number validator.** A number appears in the report only if it is in the conversation or on a cited page.
+   ```powershell
+   node --version
+   npm --version
+   py -3.11 --version
+   ```
 
----
+   The commands should print version numbers. If Windows cannot find `py`, try `python --version` and make sure it reports Python 3.11.
 
-## Run it on your machine
+### macOS
 
-### Prerequisites
+1. Open the official Node.js website: <https://nodejs.org/en/download>.
+2. Download the **LTS** installer for macOS and run it. npm is installed with Node.js.
+3. Download Python 3.11 from <https://www.python.org/downloads/release/python-3119/> and run the macOS installer.
+4. Open **Terminal** (Finder → Applications → Utilities → Terminal).
+5. Check that the tools are installed by running:
 
-| Tool | Version | Needed for |
-| --- | --- | --- |
-| Node.js + npm | 20 or newer (tested on 22) | frontend (both options) |
-| Python | 3.11 | backend (option B) |
-| [`uv`](https://docs.astral.sh/uv/) | any recent | recommended Python installer (a plain `venv` + `pip` also works, shown below) |
-| A Groq **or** OpenAI API key | | live assessments (option B) |
-| `pdftotext` (poppler) | optional | only when re-ingesting PDFs; not needed to run |
+   ```bash
+   node --version
+   npm --version
+   python3.11 --version
+   ```
 
-Clone the repository first:
+   The commands should print version numbers.
+
+If you already have Node.js 20 or newer and Python 3.11 installed, you can skip the installation steps.
+
+## 2. Download the project
+
+If you are using Git, open PowerShell (Windows) or Terminal (macOS) and run:
 
 ```bash
 git clone https://github.com/yashwanth-1341/spectroscopy.git
 cd spectroscopy
 ```
 
-### Option A: frontend only, no API key (2 minutes)
+If you downloaded the project as a ZIP file instead, extract it first. Open a terminal in the extracted `spectroscopy` folder. The folder you open should contain the `backend` and `frontend` folders and this `README.md` file.
 
-This lets you see the whole interface and the stored results for the 14 example enquiries without any key or backend.
+## 3. Get your API keys
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+The live assistant uses a Groq key. You must add your own key on your computer; the project does not include a shared key.
 
-Open <http://localhost:3000>, go to **Assess**, pick an example enquiry (or open <http://localhost:3000/assess?example=H04>) and send it. With no backend configured, the example is answered from the stored batch results in `frontend/outputs/` and the report is badged **Batch run**.
+### Get a Groq API key (required)
 
-In this mode, writing your own enquiry or editing an example returns "No assessment service is connected" by design: the app never invents an answer. For that you need Option B.
+1. Open <https://console.groq.com> and sign in or create an account.
+2. Open the API Keys page: <https://console.groq.com/keys>.
+3. Create a new API key and copy it. Treat it like a password.
 
-### Option B: full live pipeline (with an LLM key)
+### Get a Gemini API key (required)
 
-Run the backend and the frontend in two terminals.
+1. Open Google AI Studio: <https://aistudio.google.com/apikey>.
+2. Sign in with a Google account.
+3. Create or select an API key and copy it.
 
-**1. Get your API key** (free, about two minutes):
+**Important:** You must provide both a Groq API key and a Gemini API key for the jury setup. For the demo, use the providers’ free-tier quota/credits where available and keep your testing within those limits. Add your Gemini key to `GEMINI_API_KEY` in the backend `.env` file, as well as your Groq key in `GROQ_API_KEY`. Check each provider’s current free-tier terms before testing; limits and availability may change.
 
-1. Go to <https://console.groq.com> and sign in (Google, GitHub or email).
-2. Open **API Keys** in the left menu, or go straight to <https://console.groq.com/keys>.
-3. Click **Create API Key**, give it a name (e.g. `spectrasense`) and copy the key. It starts with `gsk_` and is shown only once.
+### Key for the evaluation judge (optional)
 
-Optional, only if you want them (each is explained in the settings file):
+If you want to run the **Evals → Run evals** feature, you can add a Groq key to `JUDGE_GROQ`. You may use the same key as `GROQ_API_KEY`, as requested for the demo setup. A separate key or account can help keep evaluation usage separate, but it is not required by the code.
 
-| Key | Where to get it | What it is for |
-| --- | --- | --- |
-| `GROQ_FALLBACK_API_KEY` | the same steps, signed in with a **different** Groq account | used automatically when the first key reaches its daily limit (keys of one account share that limit) |
-| `JUDGE_GROQ` | the same steps, ideally a third account | lets an independent model mark the answers on the Evals page |
-| `LOGFIRE_TOKEN` | <https://logfire.pydantic.dev> → your project → Settings → Write tokens | traces every pipeline step and LLM call |
-| `LANGSMITH_*` | <https://smith.langchain.com> → Settings → API Keys (set `LANGSMITH_TRACING=true`) | LangSmith tracing |
-| `GEMINI_API_KEY` | <https://aistudio.google.com/apikey> | only for `EMBEDDINGS=gemini`; not needed, search uses local embeddings |
+Running live evaluations sends requests to the model provider and may use your account's quota.
 
-**2. Install the backend** (terminal 1):
+## 4. Set up the backend
 
-```bash
+The backend runs the assessment and connects to Groq. Keep this terminal open while using the application.
+
+### Windows (PowerShell)
+
+From the main `spectroscopy` project folder, run:
+
+```powershell
 cd backend
-uv venv --python 3.11 .venv
-uv pip install --python .venv/bin/python -r requirements.txt
-# no uv? use:  python3.11 -m venv .venv && .venv/bin/pip install -r requirements.txt
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
+notepad .env
 ```
 
-**3. Create your settings file.** `.env.example` is the template and stays empty; your keys go into a copy of it called `.env`:
-
-```bash
-cp .env.example .env          # Windows: copy .env.example .env
-```
-
-Open `backend/.env` (not `.env.example`) and paste the key after the `=`, with no quotes or spaces:
+Notepad will open the backend settings file. Find this line:
 
 ```ini
-GROQ_API_KEY=gsk_your_key_here
+GROQ_API_KEY=
 ```
 
-Leave the optional lines empty if you have no extra keys. `.env` is ignored by git, so your key is never committed; never put a real key in `.env.example`.
+Paste your Groq key after the equals sign, with no quotation marks. For example:
 
-**4. Start the backend** (port 8000):
-
-```bash
-.venv/bin/uvicorn app.main:app --reload --port 8000
+```ini
+GROQ_API_KEY=paste_your_own_key_here
 ```
 
-> **Windows:** use `.venv\Scripts\python.exe` and `.venv\Scripts\uvicorn.exe` instead of `.venv/bin/...`, and `copy .env.example .env`.
+Fill in `GEMINI_API_KEY=` with your Gemini API key. Both `GROQ_API_KEY` and `GEMINI_API_KEY` must be provided. If you plan to run evaluations, fill in `JUDGE_GROQ=` with the Groq key you want to use for judging. You can use the same Groq key for `GROQ_API_KEY` and `JUDGE_GROQ`. Leave other settings unchanged unless you know you need them.
 
-Check that it is up: <http://localhost:8000/health> should show your provider under `"llm"`, `"kb_chunks": 188` and the model route. If `"llm"` is `null`, the key was not picked up (see [Troubleshooting](#troubleshooting)).
+Save and close Notepad. Then start the backend:
 
-**5. Start the frontend** (terminal 2, port 3000). Its settings file works the same way: copy the template to `.env.local`; it only holds the backend address, no keys.
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --reload --port 8000
+```
+
+Keep this PowerShell window open. To check that the backend started, open <http://localhost:8000/health> in your browser. It should show `spectrasense-backend` and a configured language model. If the page does not load or the `llm` value is `null`, see [Troubleshooting](#troubleshooting).
+
+### macOS (Terminal)
+
+From the main `spectroscopy` project folder, run:
 
 ```bash
-cd frontend
+cd backend
+python3.11 -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install -r requirements.txt
+cp .env.example .env
+open -e .env
+```
+
+The settings file will open in TextEdit. Find this line:
+
+```ini
+GROQ_API_KEY=
+```
+
+Paste your Groq key after the equals sign, without quotation marks. For example:
+
+```ini
+GROQ_API_KEY=paste_your_own_key_here
+```
+
+Fill in `GEMINI_API_KEY=` with your Gemini API key. Both `GROQ_API_KEY` and `GEMINI_API_KEY` must be provided. If you plan to run evaluations, fill in `JUDGE_GROQ=` with the Groq key you want to use for judging. You can use the same Groq key for `GROQ_API_KEY` and `JUDGE_GROQ`. Leave other settings unchanged unless you know you need them.
+
+Save the file and close TextEdit. Then start the backend:
+
+```bash
+.venv/bin/python -m uvicorn app.main:app --reload --port 8000
+```
+
+Keep this Terminal window open. To check that the backend started, open <http://localhost:8000/health> in your browser. It should show `spectrasense-backend` and a configured language model. If the page does not load or the `llm` value is `null`, see [Troubleshooting](#troubleshooting).
+
+## 5. Start the website
+
+Open a **second** PowerShell/Terminal window. Leave the backend running in the first one.
+
+### Windows (PowerShell)
+
+If you used the Git instructions, run:
+
+```powershell
+cd spectroscopy\frontend
 npm install
-cp .env.example .env.local      # points the frontend at the backend (Windows: copy .env.example .env.local)
+Copy-Item .env.example .env.local
+notepad .env.local
+```
+
+If you extracted a ZIP, use `cd` to enter the extracted project's `frontend` folder instead. Notepad will open the frontend settings file. It should contain:
+
+```ini
+ASSESS_BACKEND_URL=http://localhost:8000/assess
+```
+
+Save and close the file, then start the website:
+
+```powershell
 npm run dev
 ```
 
-Open <http://localhost:3000/assess>. Enquiries are now answered live by the pipeline (typically 5 to 30 seconds), including enquiries you write yourself.
+### macOS (Terminal)
 
-> The first backend start downloads the BGE-base embedding model (~210 MB) and embeds the knowledge base once (~40 s, cached in `backend/.embeddings/`). If it cannot (offline), retrieval uses routing + BM25 and everything still works.
-
-For a production build instead of the dev server: `npm run build && npm start`.
-
----
-
-## What to try
-
-The 14 example enquiries are built in (Assess page, or `/assess?example=<ID>`). Two good ones for a first run:
-
-| Example | What to look for |
-| --- | --- |
-| **D01**: blend potency in a tablet press feed frame | A *provisional* assessment with NIR as the primary method, cited sources, up to five questions, and a feasibility plan. Answer one question, mark another "Don't know", and watch the report revise without repeating questions. |
-| **H04**: reuse of a silica fibre link for petroleum MIR ATR | The premise check fails: a silica fibre cannot carry the mid-IR range. The status becomes **Insufficient information** and the report explains why. |
-
-Other things worth a click:
-
-- **Citation chips** open the quoted passage with document and page, and show whether it was `verified`, matched a `visual_note`, `unverified` or `failed`.
-- **Final report** button: no question block, open points listed as assumptions.
-- **Copy as text / PDF** export of a report.
-- **Compare with organiser example** (D01, D02) next to the reference answer.
-- **How it works** page: scripted walkthroughs and a legend for reading the report (these walkthroughs are scripted, not live output, and say so).
-- **Evals** page: stored evaluation scores. (The *Run evals* button there calls the LLM and costs tokens; it asks for confirmation first.)
-- Try an off-topic or prompt-injection message, which is stopped by the safety gate.
-- Write your **own enquiry**. Missing details are fine; nothing you leave out is assumed.
-
-| Examples | Meaning |
-| --- | --- |
-| D01 to D08 | Typical enquiries: tablet blending, dairy, bioprocess, fermentation, petroleum, polymer extrusion, tissue |
-| H01 to H06 | Harder cases with a trap: new formulation after an NIR pilot, a requested instrument that cannot measure the target, a silica link for MIR, an undefined contaminant, a lab study requested as clinical proof |
-
----
-
-## Architecture
-
-```
-POST /assess ─► safety gate ─► planner ─┬─► analyst ─► retriever ─► checker ─► responder ─► report
-                (app/guardrails)        └─► conversational (answers from the last report, MemorySaver)
-```
-
-| Node | What it does | LLM? |
-| --- | --- | --- |
-| safety gate | blocks off-topic, jailbreak and injection messages; flags over-confident requests | LLM classifier with a rule-based fallback |
-| planner | assessment turn vs follow-up question, search queries | yes |
-| analyst | stated facts (kept only if quoted from the customer) vs unknowns | yes |
-| retriever | source-guide routing, then BM25 fused with local BGE-base vectors, one chunk per page | no |
-| checker | deterministic premise checks: target named, fibre window vs method range, geometry vs optics, source scope, calibration transfer, certainty, owned equipment | no |
-| responder | composes the report, then deterministic post-processing: verifies every quote on its page, validates numbers, lowers the decision status if a check fails | yes |
-
-The LLM proposes; the deterministic validators decide. The full list of validation rules is in [`backend/README.md`](backend/README.md).
-
-The frontend talks only to `POST /api/assess`, which resolves in this order: live backend (`ASSESS_BACKEND_URL`) → stored batch result for an unedited example → `503` ("not connected"). It never fabricates an answer.
-
----
-
-## Tests and evaluations
-
-**Backend tests** need no API key and take a few seconds:
+If you used the Git instructions, run:
 
 ```bash
-cd backend
-.venv/bin/python -m pytest -q          # 150 tests
+cd spectroscopy/frontend
+npm install
+cp .env.example .env.local
+open -e .env.local
 ```
 
-They cover the citation verifier, premise checks on the evaluation enquiries, the safety gate, and the full graph with a scripted LLM (an invented quote is marked `failed`, an over-confident status is lowered, unquoted "facts" are dropped, follow-ups reuse memory).
+If you extracted a ZIP, enter the extracted project's `frontend` folder instead. The settings file should contain:
 
-**Frontend checks:**
+```ini
+ASSESS_BACKEND_URL=http://localhost:8000/assess
+```
+
+Save and close the file, then start the website:
 
 ```bash
-cd frontend
-npx tsc --noEmit
-npm run lint
-npm run build
+npm run dev
 ```
 
-**Quality evaluation (optional, uses LLM tokens):**
+Open <http://localhost:3000/assess> in your browser. Both terminal windows must remain open while you use the live application.
 
-```bash
-cd backend
-.venv/bin/python -m evals.run_evals --from-cache --no-judge   # free: deterministic metrics on stored outputs
-.venv/bin/python -m evals.run_evals                           # live pipeline + LLM judge on all 14 scenarios
-.venv/bin/python -m scripts.run_batch H04                     # regenerate one stored example (frontend/outputs/H04.json)
-```
+## 6. Try SpectraSense
 
-Metrics are RAGAS-style (faithfulness, answer relevancy, context precision and recall, answer correctness) plus deterministic checks (citation validity, grounding, clarification, feasibility, expected status per scenario). Latest results are in `backend/evals/results/latest.md` and `batch-latest.md`, and are shown on the frontend **Evals** page.
+1. Open the **Assess** page at <http://localhost:3000/assess>.
+2. Enter a process description. For example: “We want to monitor water content in a recovered solvent stream. Our current measurements are done in a laboratory, and we want faster results during production.”
+3. Read the follow-up questions. Answer what you know; **Don't know** and **Skip** are valid answers.
+4. Review the report. It separates customer-provided information from unknowns and assumptions, suggests spectroscopy methods, explains risks, and proposes a feasibility experiment.
+5. Check the source citations. The citation chips show the AFS document and page used for the claim.
+6. Use **Final report** if you want the report without answering more questions.
 
----
+The first backend start may take longer because it downloads a local text-search model and prepares the source index. Keep the backend terminal open and wait for the server to finish starting.
 
-## Project structure
+## 7. Useful pages
 
-```
+- **Assess** — enter a new enquiry and generate a report.
+- **How it works** — see an explanation of the assessment process. Walkthrough examples on this page are scripted demonstrations, not live assessments.
+- **Evals** — view stored evaluation results. **Run evals** runs model-based evaluations and uses API quota.
+
+The app includes development examples labelled D01–D08 and H01–H06. They help demonstrate the interface and assessment process. The jury can also enter a new enquiry to test the live assistant.
+
+## 8. Common problems
+
+### “No LLM configured” or the report cannot be generated
+
+- Check that `GROQ_API_KEY` is filled in inside `backend/.env` (not `.env.example`).
+- Make sure the key was copied correctly and does not contain quotes or extra spaces.
+- Stop and restart the backend after changing `.env`.
+- Check your Groq account's key status, quota and rate limits.
+
+### The website opens, but live assessments do not work
+
+- Check that the backend is running in the first terminal.
+- Open <http://localhost:8000/health> and confirm it responds.
+- Check that `frontend/.env.local` contains `ASSESS_BACKEND_URL=http://localhost:8000/assess`.
+- Restart the frontend after changing `.env.local`.
+
+### “Address already in use” or port 3000/8000 is occupied
+
+Another application may already be using that port. Close the other application or stop the previous SpectraSense process before restarting.
+
+### `node`, `npm` or Python is not recognised
+
+Close and reopen the terminal after installation. If the command still fails, reinstall the tool and ensure it was added to your system's PATH.
+
+### Installation fails while downloading packages or the local search model
+
+Check your internet connection and try again. The first start downloads additional files, so it can take longer than later starts.
+
+### The Evals page cannot run an evaluation
+
+Check that `GROQ_API_KEY` is configured. If you want a separate judge key, add it to `JUDGE_GROQ` in `backend/.env`, then restart the backend. Live evaluations use API quota and may be limited by the provider.
+
+## 9. API key safety
+
+- Never paste a real API key into the README, source code, screenshots, or a public issue.
+- Keep keys in `backend/.env`. Do not put model-provider keys in the frontend settings file.
+- Do not upload or commit your `.env` file. The project is set up to ignore it.
+- If a key is accidentally shared, revoke it with the provider and create a replacement.
+
+## 10. Project folders
+
+```text
 spectroscopy/
-├── backend/
-│   ├── app/
-│   │   ├── main.py            FastAPI app: /assess, /query, /health, /graph, /evals/*
-│   │   ├── agents/            LangGraph pipeline (planner, analyst, retriever, checker, responder)
-│   │   ├── guardrails/        safety gate (LLM + rule-based)
-│   │   ├── services/          retrieval, citations, number and claim validators, premise checks, question ledger
-│   │   ├── knowledge/         method ranges, S01 Table 1, application tags
-│   │   ├── gateway/           LLM client (Groq / OpenAI, keys and model fallbacks)
-│   │   └── ingestion/         PDF/DOCX/PPTX loaders and chunking
-│   ├── processed_data/        pages.json, chunks.json: the knowledge base (committed, no re-ingest needed)
-│   ├── data/                  example scenarios, transcriptions of slide images
-│   ├── evals/                 metrics, judge, golden expectations, results
-│   ├── scripts/               batch runner, multi-turn retest
-│   ├── tests/                 106 tests
-│   └── .env.example           configuration template
-├── frontend/
-│   ├── src/app/               pages (/, /assess, /how-it-works, /evals) and API routes
-│   ├── src/components/        workbench, report view, citation chips, setup sketch
-│   ├── src/data/              example scenarios, reference answers
-│   └── outputs/               stored batch results for the 14 examples
-└── docs/                      status, judge matrix, submission checklist
+├── backend/     Assessment API, source retrieval, validation, and evaluation tools
+├── frontend/    Website and report display
+└── docs/        Project notes and submission information
 ```
 
----
+The backend uses Python and FastAPI. The website uses Next.js and npm. For the jury setup, provide both the Groq API key (`GROQ_API_KEY`) and the Gemini API key (`GEMINI_API_KEY`).
 
-## Configuration reference
+## Official key pages
 
-Backend settings live in `backend/.env` (copy of `backend/.env.example`). Restart the backend after changing it.
+- Groq API keys: <https://console.groq.com/keys>
+- Gemini API keys: <https://aistudio.google.com/apikey>
 
-| Variable | Needed? | Purpose |
-| --- | --- | --- |
-| `GROQ_API_KEY` | **required** | the Groq key the assistant runs on |
-| `GROQ_FALLBACK_API_KEY` | optional | a key from a second Groq account, used when the first reaches its daily limit |
-| `JUDGE_GROQ` | optional | a key for the evaluation judge, so answers are marked by an independent model |
-| `LOGFIRE_TOKEN`, `LANGSMITH_*` | optional | tracing with Pydantic Logfire and LangSmith |
-| `GEMINI_API_KEY` | optional | only for `EMBEDDINGS=gemini` (local embeddings need no key) |
-
-Advanced settings are not in the example file because their defaults work; add a line to `backend/.env` only to change one
-(all defaults are in `backend/app/config.py`):
-
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `GROQ_MODEL` / `GROQ_SMALL_MODEL` | `openai/gpt-oss-120b` / `openai/gpt-oss-20b` | assessment model / fallback and safety-gate model |
-| `FRONTEND_ORIGIN` | `http://localhost:3000` | origin allowed by CORS; change it if the frontend runs elsewhere |
-| `RETRIEVE_TOP_N` | `10` | source pages given to the assessment per enquiry |
-| `EMBEDDINGS` | `local` | `local` (BGE-base on CPU, no key) or `off` |
-| `GUARD_MODE` | LLM gate | `rules` runs the safety gate without an LLM |
-| `EVAL_COOLDOWN_MIN` | `30` | minutes between two Run evals presses |
-
-Frontend settings live in `frontend/.env.local` (copy of `frontend/.env.example`; restart `npm run dev` after changing it):
-
-| Variable | Purpose |
-| --- | --- |
-| `ASSESS_BACKEND_URL` | backend assess URL, e.g. `http://localhost:8000/assess`. Unset = stored examples only. |
-| `EVALS_BACKEND_URL` | optional; defaults to the same host as `ASSESS_BACKEND_URL` |
-| `NEXT_PUBLIC_SITE_URL` | optional; only for a deployed site (absolute canonical and social URLs) |
-
-Behaviour when optional pieces are missing:
-
-| Missing | Result |
-| --- | --- |
-| LLM key | `/assess` returns 503; the frontend serves the stored result for unedited examples, otherwise says "not connected" |
-| embedding model download | routing + BM25 only |
-| Qdrant endpoint | embedded local Qdrant in `backend/.qdrant` |
-| LLM for the gate | rule-based gate (shown as `engine: rules` in the trace) |
-
----
-
-## Troubleshooting
-
-| Symptom | Fix |
-| --- | --- |
-| `/health` shows `"llm": null` | The key is missing or in the wrong place. It must be in `backend/.env` (not `.env.example`), with no quotes or spaces around the value. Restart the backend. |
-| Assess page says "No assessment service is connected" | `ASSESS_BACKEND_URL` is not set. Create `frontend/.env.local` as shown above and restart `npm run dev`. |
-| "The assessment service did not return a valid answer" | The backend is not running, or it returned an error. Check terminal 1 and <http://localhost:8000/health>. |
-| Example works but your own enquiry fails | You are in Option A (no backend/key), or the key has no quota. Use Option B. |
-| `503 llm_unavailable` / rate-limit errors | The provider's quota or daily token limit is used up. Add a `*_FALLBACK_API_KEY`, wait for the reset, or switch `LLM_PROVIDER`. |
-| Browser shows a CORS error | Set `FRONTEND_ORIGIN` in `backend/.env` to the exact address of the frontend and restart the backend. |
-| Port already in use | Change the port (`--port 8001` for the backend, then update `ASSESS_BACKEND_URL`; `npm run dev -- -p 3001` for the frontend, then update `FRONTEND_ORIGIN`). |
-| `uv: command not found` | Install it (`pip install uv`) or use `python3.11 -m venv .venv && .venv/bin/pip install -r requirements.txt`. |
-
----
-
-## Limitations
-
-- SpectraSense produces a **first draft for an expert to review**, not a final engineering recommendation. Statuses are deliberately cautious ("provisional", "insufficient information").
-- The knowledge base is limited to the supplied AFS material (77 pages in 188 chunks). Where the sources show a method only for a different application, the report labels it as a *transfer assumption*.
-- Fibre "coverage" is computed against **nominal** method ranges only; it is not a statement about a particular instrument.
-- Citation checks verify that a quote is on the cited page. They do not prove that the claim is physically correct.
-- Quotes from slide images are checked against the team's own transcriptions (`visual_note`), so the figure itself should be checked.
-- Semantic search runs locally on the committed chunks (no key). The committed batch outputs were generated before it was added; re-run the batch to refresh them.
-- The walkthroughs on the *How it works* page are scripted examples, not live output.
-- Free-tier LLM quotas can slow or stop live runs. The stored examples keep working when the backend or LLM is unavailable.
-- No hosted demo is provided; the project is meant to be run locally as described above.
-
----
-
-## Acknowledgements
-
-- AFS (Art Fiber Systems) source material and the challenge organisers' examples.
-- Backend structure adapted from the [8hr-MARATHON](https://github.com/d-hackmt/8hr-MARATHON) template.
-- UI built with [Next.js](https://nextjs.org), [Tailwind CSS](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com) and [motion-primitives](https://motion-primitives.com) (MIT), with a Carbon-inspired design using IBM Plex type.
-- Backend built on [FastAPI](https://fastapi.tiangolo.com), [LangGraph](https://langchain-ai.github.io/langgraph/), [Qdrant](https://qdrant.tech), [fastembed](https://github.com/qdrant/fastembed) with [BGE-base](https://huggingface.co/BAAI/bge-base-en-v1.5) (MIT).
