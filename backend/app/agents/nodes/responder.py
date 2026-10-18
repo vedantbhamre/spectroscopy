@@ -1,4 +1,5 @@
 import json
+import re
 from datetime import datetime, timezone
 
 from pydantic import ValidationError
@@ -14,7 +15,7 @@ from app.services import validators as V
 from app.services.citations import page_text, verify
 from app.services.numbers import allowed_numbers, scrub
 from app.services.premises import (Facts, access_check, apply_floor, combination_check, combined_probe_applies, cost_check,
-                                   geometry_check, owned_equipment_check, target_qualifier_check)
+                                   geometry_check, mir_link_check, owned_equipment_check, target_qualifier_check)
 
 KNOWN_METHODS = {"NIR", "MIR_ATR", "RAMAN", "FLUO", "UVVIS"}
 VALID = V.VALID
@@ -148,7 +149,7 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
     support = {m: V.passages(r.citations) for r in report.recommendations for m in r.methodIds}
     ids = {c.id for c in report.premiseChecks}
     extra = [access_check(facts, dumped), target_qualifier_check(facts, dumped, support), owned_equipment_check(facts, dumped),
-             geometry_check(facts, dumped), cost_check(dumped)]
+             geometry_check(facts, dumped), cost_check(dumped), mir_link_check(facts, dumped)]
     if "combination" not in ids and any(r.role == "combination" for r in report.recommendations):
         extra.append(combination_check(facts))
     report.premiseChecks += [c for c in extra if c is not None]
@@ -157,6 +158,11 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
         if not any("reference" in s.lower() and any(q["qualifier"] in s.lower() for q in facts.qualified_targets) for s in report.feasibility.steps):
             report.feasibility.steps.append(f"Measure {qts} with an independent reference method that distinguishes it, and test whether the spectral signal follows it rather than the total.")
         report.risks.append(f"The proposed signal may follow a related quantity rather than {qts}.")
+
+    if any(c.id == "mir_link_length" for c in report.premiseChecks):
+        if not any(re.search(r"transmission|loss", s, re.I) and re.search(r"length|distance|link", s, re.I) for s in report.feasibility.steps):
+            report.feasibility.steps.insert(0, "Measure the transmission of the chosen mid-IR fibre over the planned link length, or plan the analyzer close to the measurement point.")
+        report.risks.append("The mid-IR fibre link over the required distance is not shown to be feasible in the supplied material.")
 
     seen: dict[tuple, Citation] = {}
     for c in [*(c for r in report.recommendations for c in r.citations), *report.concept.citations, *report.spectralRange.citations]:

@@ -243,3 +243,28 @@ def test_numbers_need_the_customer_or_a_cited_page_with_the_same_unit():
     assert scrub("NIR 780–2500 nm; see Fig. 5; 95–105% of target", a)[1] == 0
     assert scrub("NIR 780–2500 µm", a)[1] == 1  # right numbers, wrong unit
     assert scrub("slightly beyond 9.5–10.5% w/w", a)[1] == 1  # derived figures are not in the transcript or a page
+
+
+def test_mir_link_over_distance_is_flagged_from_the_enquiry_words():
+    import json
+    from pathlib import Path
+
+    from app.services.premises import Facts, detect, mir_link_check
+
+    h04 = next(s for s in json.loads((Path(__file__).parent.parent / "data" / "scenarios.json").read_text()) if s["id"] == "H04")["enquiry"]
+    facts = detect(h04, Facts(target_variables=["water content"], methods_mentioned=["MIR_ATR"]))
+    assert facts.analyzer_remote
+    chk = mir_link_check(facts, {"recommendations": []})
+    assert chk.status == "flag" and "2 m" in chk.detail and {c.page for c in chk.citations} == {"7", "9", "13"}
+    # NIR is carried by silica: no mid-IR link concern; a short stated link is fine too.
+    assert mir_link_check(detect(h04, Facts(methods_mentioned=["NIR"])), {"recommendations": []}) is None
+    near = detect("MIR ATR probe, the analyzer sits next to the line on a 1.5 m fibre cable.", Facts(methods_mentioned=["MIR_ATR"]))
+    assert near.link_length_m == 1.5 and mir_link_check(near, {"recommendations": []}) is None
+
+
+def test_wavelengths_in_other_units_count_as_the_same_number():
+    from app.services.numbers import allowed_numbers, scrub
+
+    a = allowed_numbers("", ["standard and Al/Cu-coated VIS-NIR silica fibers 350–2400 nm", "mid-IR range (4000–400 cm-1)"])
+    assert scrub("Vis-NIR silica carries 0.35–2.4 µm; MIR ATR needs 2.5–25 µm (4000–400 cm-1).", a)[1] == 0
+    assert scrub("MIR ATR needs 3–30 µm", a)[1] == 1

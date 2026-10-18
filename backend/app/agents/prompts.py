@@ -28,12 +28,16 @@ ANALYST = """Extract what the client stated. Never fill in missing facts. Return
  "answers": [{"id": "q1", "status": "answered | unknown | declined", "answer": "short", "quote": "exact words copied from the client"}],
  "owned_equipment": [{"name": "instrument the client already has", "method": "NIR | MIR_ATR | RAMAN | FLUO | UVVIS | null", "quote": "exact words"}],
  "optical_appearance": {"value": "clear | opaque | changing | unknown", "quote": "exact words or empty"},
- "application_domain": "{domains} | other"
+ "application_domain": "{domains} | other",
+ "analyzer_remote": true | false,
+ "link_length_m": number | null
 }
 Rules: a method mentioned only as the origin of existing equipment is not requested. A silica cable from a visible or NIR setup is "silica_visnir".
 "asks_for_certainty" = the client wants approval, proof, a guarantee or an exact configuration now.
 "access_points" = number of free process ports / access points / probe positions the client stated (null if not stated).
 "single_method_insufficient" = the client states or shows that one method alone is not enough.
+"analyzer_remote" = the client says the analyzer is away from the measuring point (another building, control room, far away).
+"link_length_m" = the fibre link length the client states, in metres (null if not stated).
 "owned_equipment" = instruments the client already has (not cables or fibres; those go in fibers_mentioned).
 "optical_appearance": clear / transparent → "clear"; turbid, cloudy, opaque, high optical density, powders and solids → "opaque";
 a medium that turns from clear to opaque during the process → "changing".
@@ -113,7 +117,8 @@ Return one JSON object:
  "assumptions": ["explicit assumptions this answer rests on"],
  "pointsToConfirm": ["what the expert or customer must still confirm"]
 }
-Leave probe/location/fiberLink/analyzer out when the facts do not support them. With insufficient information, recommendations may be empty or conditional.
+Fill probe, location, fiberLink and analyzer with the setup you propose (e.g. "ATR probe in the line", "chalcogenide fibre"),
+marking anything not stated by the customer as proposed; leave a field out only if you propose nothing for it. With insufficient information, recommendations may be empty or conditional.
 
 Expected level of caution (generic):
 Decision status: provisional unless a check fails. Primary method: one the supplied material shows for the same sample type,

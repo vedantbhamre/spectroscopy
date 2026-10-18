@@ -13,7 +13,8 @@ const style = {
 
 // Click to see the quoted passage. Radix Popover renders it in a portal above the whole page, so later
 // content (question cards, animated sections) can never cover it, and it flips away from screen edges.
-export function CitationChip({ c }: { c: Citation }) {
+export function CitationChip({ c, quotes }: { c: Citation; quotes?: string[] }) {
+  const passages = quotes ?? (c.quote ? [c.quote] : []);
   const s = style[c.check ?? "unverified"];
   const Icon = s.icon;
   return (
@@ -25,6 +26,7 @@ export function CitationChip({ c }: { c: Citation }) {
         >
           <Icon className="h-3 w-3" aria-hidden />
           {citeText(c)}
+          {passages.length > 1 && <span className="text-ink-3">×{passages.length}</span>}
           {c.transfer && <span className="border border-amber px-1 text-xs font-semibold leading-4 text-amber">transfer</span>}
           <span className="sr-only">({s.label}{c.transfer ? "; transfer assumption" : ""}). Show the quoted passage.</span>
         </button>
@@ -39,7 +41,11 @@ export function CitationChip({ c }: { c: Citation }) {
         >
           <span className="block font-medium text-white">{citeFull(c)}</span>
           <span className="mt-1 flex items-center gap-1 text-white/80"><Icon className="h-3.5 w-3.5" aria-hidden /> {s.label}</span>
-          {c.quote ? <span className="mt-1.5 block font-serif text-[13px] text-white">“{c.quote}”</span> : <span className="mt-1.5 block">No quoted passage attached.</span>}
+          {passages.length ? (
+            passages.map((q) => <span key={q} className="mt-1.5 block font-serif text-[13px] text-white">“{q}”</span>)
+          ) : (
+            <span className="mt-1.5 block">No quoted passage attached.</span>
+          )}
           {c.url && <a href={c.url} target="_blank" rel="noreferrer" className="mt-1.5 block break-all text-white underline">{c.url}</a>}
           {c.transfer && <span className="mt-1.5 block text-white"><b className="font-semibold">Transfer assumption:</b> the source shows this for {c.application ?? "another application"}; it has to be tested for this one.</span>}
           <Popover.Arrow className="fill-tooltip" width={10} height={5} />
@@ -49,11 +55,19 @@ export function CitationChip({ c }: { c: Citation }) {
   );
 }
 
+// Several quotes from the same page with the same verification result show as one chip listing all quotes.
 export function Citations({ items }: { items: Citation[] }) {
   if (!items?.length) return null;
+  const groups = new Map<string, { c: Citation; quotes: string[] }>();
+  for (const c of items) {
+    const key = `${c.source}|${c.page}|${c.check}|${c.transfer ? 1 : 0}`;
+    const g = groups.get(key) ?? { c, quotes: [] };
+    if (c.quote && !g.quotes.includes(c.quote)) g.quotes.push(c.quote);
+    groups.set(key, g);
+  }
   return (
     <span className="inline-flex flex-wrap gap-1 align-baseline">
-      {items.map((c, i) => <CitationChip key={i} c={c} />)}
+      {[...groups.values()].map((g, i) => <CitationChip key={i} c={g.c} quotes={g.quotes} />)}
     </span>
   );
 }

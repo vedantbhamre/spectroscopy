@@ -47,6 +47,8 @@ class Facts(BaseModel):
     optical_appearance: str = "unknown"  # clear | opaque | changing | unknown (opaque includes turbid, high OD, powders)
     application_domain: str | None = None  # one of applications.DOMAINS
     qualified_targets: list[dict] = Field(default_factory=list)  # [{"qualifier": "viable", "target": "viable biomass"}]
+    analyzer_remote: bool = False  # the analyzer is stated to be away from the line (another building, control room, far)
+    link_length_m: float | None = None  # stated fibre link length, metres
 
 
 # Qualifiers that a bulk optical signal usually does not distinguish (the total is measured).
@@ -118,6 +120,14 @@ def detect(text: str, facts: Facts, enquiry: str | None = None) -> Facts:
     upd["owned_equipment"] = owned
     if not facts.application_domain:
         upd["application_domain"] = next(iter(app_tags(t)), None)
+
+    # Analyzer location and link length, from the whole transcript.
+    if re.search(r"(another|separate|different|other|next)\s+(building|room|hall|site)|control room|far (away )?from the (line|probe|process)|"
+                 r"remote(ly)?\s+(analy[sz]er|located|spectrometer)|analy[sz]er\s+(is|would be|will be|sits)\s+(far|remote|away)", t):
+        upd["analyzer_remote"] = True
+    if facts.link_length_m is None and (m := re.search(r"(\d+(?:[.,]\d+)?)\s?(m|metres|meters|km)\b[^.]{0,40}\b(fib(er|re)|cable|link|distance|away|long)", t)):
+        n = float(m.group(1).replace(",", "."))
+        upd["link_length_m"] = n * 1000 if m.group(2) == "km" else n
 
     # Qualified targets ("viable biomass", "free fatty acids", "dissolved oxygen").
     qualified = []
@@ -313,6 +323,36 @@ def target_qualifier_check(facts: Facts, report: dict, support: dict[str, str]) 
         f"signal distinguishes '{qt['qualifier']}' from the total; the method may follow a related quantity instead. A reference method that measures "
         f"'{qt['target']}' itself is required to test whether the signal follows it." for qt, blind in limits)
     return PremiseCheck(id="target_qualifier", label="Target qualifier: the method may not distinguish it", status="flag", detail=detail)
+
+
+MIR_SHOWN_LENGTH_M = 2  # mid-IR fibres appear in the supplied material only as 2 m assemblies (S02 p.9)
+LONG_SILICA = Citation(source="S02", page="7", check="verified", quote="Robust 100-300m cables made with Silica fibers of low OH-content")
+MIR_2M = Citation(source="S02", page="9", check="visual_note", quote="both 2 m long (HWG-750-2m, PIR 600/700-2m)")
+MIR_NO_DISTANCE = Citation(source="S02", page="13", check="visual_note", quote="no process installation, fiber length or analyzer distance is shown")
+
+
+def mir_link_check(facts: Facts, report: dict) -> PremiseCheck | None:
+    """A mid-IR method with a remote analyzer or a link longer than the mid-IR fibres the sources show.
+
+    Long (100–300 m) cables appear in the supplied material only for silica (Vis-NIR) fibres; mid-IR fibres appear
+    only as 2 m assemblies, so a longer mid-IR link is not shown to work and must be measured or avoided."""
+    # Methods whose range starts beyond the silica window (silica cannot carry them at all).
+    mid_ir = {m for m, meth in METHODS.items() if meth.range_um and meth.range_um[0] >= FIBERS["silica_visnir"].range_um[1]}
+    proposed = {m for r in _recommended(report) for m in r.get("methodIds", [])} | set(facts.methods_mentioned)
+    methods = sorted(mid_ir & proposed)
+    long_link = facts.link_length_m is not None and facts.link_length_m > MIR_SHOWN_LENGTH_M
+    if not methods or not (facts.analyzer_remote or long_link):
+        return None
+    where = (f"a {facts.link_length_m:g} m link" if long_link else "an analyzer away from the line (length not given)")
+    names = ", ".join(METHODS[m].label for m in methods)
+    return PremiseCheck(
+        id="mir_link_length", label="Mid-IR fibre link: distance not shown to be feasible", status="flag",
+        detail=f"{names} needs mid-IR fibres, and the enquiry implies {where}. In the supplied material, long (100–300 m) cables are "
+               f"shown only for silica fibres, which do not carry the mid-IR; mid-IR fibres appear only as {MIR_SHOWN_LENGTH_M} m assemblies, and the "
+               "application example shows no fibre length or analyzer distance. Measure the transmission over the planned length before "
+               "committing, or plan the analyzer close to the measurement point.",
+        citations=[LONG_SILICA, MIR_2M, MIR_NO_DISTANCE],
+    )
 
 
 def owned_equipment_check(facts: Facts, report: dict) -> PremiseCheck | None:

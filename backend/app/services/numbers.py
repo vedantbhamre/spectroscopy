@@ -48,17 +48,29 @@ def numbers_in(text: str) -> set[float]:
     return {v for _, vals, _ in _tokens(text) for v in vals}
 
 
+# Wavelengths and wavenumbers are the same quantity in different units: 350 nm = 0.35 µm, 4000 cm-1 = 2.5 µm.
+_TO_UM = {"nm": lambda v: v / 1000, "µm": lambda v: v, "mm": lambda v: v * 1000, "cm-1": lambda v: 10000 / v if v else None}
+
+
+def _spectral(v: float, unit: str | None) -> float | None:
+    f = _TO_UM.get(unit or "")
+    out = f(v) if f else None
+    return round(out, 4) if out is not None else None
+
+
 @dataclass
 class Allowed:
     customer: set[float] = field(default_factory=set)  # any unit: the customer's own numbers (and derived ones)
     with_unit: set[tuple[float, str]] = field(default_factory=set)  # source numbers with their unit
     bare: set[float] = field(default_factory=set)  # source numbers without a unit (support bare numbers only)
+    spectral: set[float] = field(default_factory=set)  # source wavelengths / wavenumbers, converted to µm
 
     def ok(self, vals: list[float], unit: str | None) -> bool:
         if all(v in self.customer for v in vals):
             return True
         if unit:
-            return all((v, unit) in self.with_unit for v in vals)
+            return all((v, unit) in self.with_unit or (_spectral(v, unit) is not None and _spectral(v, unit) in self.spectral)
+                       for v in vals)
         return all(v in self.bare or any(v == w for w, _ in self.with_unit) for v in vals)
 
 
@@ -72,6 +84,7 @@ def allowed_numbers(customer_text: str, source_texts: list[str], derive: bool = 
         for _, vals, unit in _tokens(t):
             if unit:
                 a.with_unit |= {(v, unit) for v in vals}
+                a.spectral |= {s for v in vals if (s := _spectral(v, unit)) is not None}
             else:
                 a.bare |= set(vals)
     if derive:

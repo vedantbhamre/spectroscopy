@@ -105,6 +105,8 @@ def analyst_node(state: AgentState) -> dict:
             optical_appearance=(oa.get("value") if isinstance(oa := data.get("optical_appearance"), dict) and oa.get("value") in ("clear", "opaque", "changing")
                                 and _quoted_turn(oa.get("quote", ""), turns_n) else "unknown"),
             application_domain=data.get("application_domain") if data.get("application_domain") in DOMAINS else None,
+            analyzer_remote=bool(data.get("analyzer_remote")),
+            link_length_m=float(data["link_length_m"]) if isinstance(data.get("link_length_m"), (int, float)) else None,
         )
         facts = detect("\n\n".join(turns), facts, enquiry=turns[0] if turns else "")
         # Safety-gate premise flags (approval demand, immediate config, research as proof) feed the checks.

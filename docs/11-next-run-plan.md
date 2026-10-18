@@ -69,6 +69,17 @@ Cheapest first:
 Or press **Run evals** on the Evals page (one run per 30 min). Afterwards rebuild the frontend if serving a production build:
 the home page's evidence numbers are prerendered at build time.
 
+## 3b. H04 review fixes, live (~10K tokens)
+
+```bash
+.venv/bin/python -m scripts.run_batch --single H04
+```
+
+Expect in `frontend/outputs/H04.json`: premise check `mir_link_length` (flag, cites Process Control slides p.7, p.9, p.13),
+a feasibility step to measure transmission over the link length or move the analyzer close to the line, the silica range
+written as 0.35–2.4 µm (not "[to be agreed …]"), one "Process Control slides p.6 ×6" chip instead of six, and the setup
+sketch filled (probe, fibre link, analyzer, process point).
+
 ## 4. Live multi-turn retest (~4 assessments, ~40K tokens)
 
 ```bash
