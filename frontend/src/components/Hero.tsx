@@ -2,113 +2,112 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef } from "react";
-import { ArrowDown, ArrowRight, BookOpen } from "lucide-react";
-import { Reveal } from "./Reveal";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-// Frames from the SpectraSense intro (1280×720), auto-played on a canvas in a loop —
-// same approach as the React portfolio hero, independent of scrolling.
-const TOTAL_FRAMES = 52;
-const FPS = 12;
-// Last frames dissolve into frame 0 so the loop wraps without a hard cut.
-const CROSSFADE_FRAMES = 6;
-// Never upscale the sharp foreground past this multiple of native resolution.
-const MAX_UPSCALE = 1.4;
-// The blurred backdrop is indistinct by design; update it only every few frames.
-const BG_UPDATE_EVERY = 3;
+// Intro frames (1280×720) played as the full-screen hero background. Only frames without text are used —
+// the probe in the line (1–7), the light split into its spectrum (20–30) and the spectrum trace (31–39) — so
+// nothing in the footage competes with the headline. (The dashboard and title-card frames are not shipped.)
+// Smooth playback: redraw at the display refresh rate, cross-fade continuously between neighbouring frames by
+// elapsed time, and dissolve slowly across each scene change and the loop wrap.
+const SEQUENCE = [...range(1, 7), ...range(20, 39)];
+const FPS = 9; // source frames per second; one loop ≈ 3 s
+const SCENE_DISSOLVE = 3; // frames over which one scene dissolves into the next
 
-const framePath = (i: number) => `/frames/ezgif-frame-${String(i + 1).padStart(3, "0")}.jpg`;
+function range(a: number, b: number) {
+  return Array.from({ length: b - a + 1 }, (_, k) => a + k);
+}
+// Index of the last frame of each scene (where the next frame is not the next source frame).
+const SCENE_ENDS = SEQUENCE.map((f, k) => (SEQUENCE[(k + 1) % SEQUENCE.length] !== f + 1 ? k : -1)).filter((k) => k >= 0);
+const TOTAL = SEQUENCE.length;
+
+const framePath = (frame: number) => `/frames/ezgif-frame-${String(frame).padStart(3, "0")}.jpg`;
 
 export function Hero() {
-  const boxRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const bgRef = useRef<HTMLDivElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
-  const currentRef = useRef(0);
-  const bgTickRef = useRef(0);
+  const positionRef = useRef(0); // playback position in frames (fractional)
 
-  const drawSingle = useCallback((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, i: number, alpha: number) => {
+  // Draw a frame scaled to cover the canvas (cropped, never letterboxed).
+  const drawCover = useCallback((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, i: number, alpha: number) => {
     const img = imagesRef.current[i];
-    if (!img?.complete || img.naturalWidth === 0) return;
-    const imgRatio = img.naturalWidth / img.naturalHeight;
-    let w: number, h: number;
-    if (canvas.width / canvas.height > imgRatio) { h = canvas.height; w = h * imgRatio; }
-    else { w = canvas.width; h = w / imgRatio; }
-    if (w / img.naturalWidth > MAX_UPSCALE) { w = img.naturalWidth * MAX_UPSCALE; h = img.naturalHeight * MAX_UPSCALE; }
-    ctx.globalAlpha = alpha;
+    if (!img?.complete || img.naturalWidth === 0 || alpha <= 0) return;
+    const scale = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+    ctx.globalAlpha = Math.min(alpha, 1);
     ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
     ctx.globalAlpha = 1;
   }, []);
 
-  const drawFrame = useCallback((i: number) => {
+  const draw = useCallback((position: number) => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx) return;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawSingle(ctx, canvas, i, 1);
-    const windowStart = TOTAL_FRAMES - CROSSFADE_FRAMES;
-    if (i >= windowStart) drawSingle(ctx, canvas, 0, (i - windowStart + 1) / CROSSFADE_FRAMES);
-    bgTickRef.current += 1;
-    if (bgRef.current && bgTickRef.current % BG_UPDATE_EVERY === 0) bgRef.current.style.backgroundImage = `url(${framePath(i)})`;
-  }, [drawSingle]);
+    const i = Math.floor(position) % TOTAL;
+    const frac = position - Math.floor(position);
+    const end = SCENE_ENDS.find((e) => i <= e && i > e - SCENE_DISSOLVE);
+    if (end === undefined) {
+      drawCover(ctx, canvas, i, 1);
+      drawCover(ctx, canvas, (i + 1) % TOTAL, frac); // continuous blend into the next frame
+    } else {
+      // Across a scene change: hold this scene's frames and fade the next scene's first frame in slowly.
+      drawCover(ctx, canvas, i, 1);
+      drawCover(ctx, canvas, Math.min(i + 1, end), frac);
+      drawCover(ctx, canvas, (end + 1) % TOTAL, (i - (end - SCENE_DISSOLVE + 1) + frac) / SCENE_DISSOLVE);
+    }
+  }, [drawCover]);
 
-  const handleResize = useCallback(() => {
+  const resize = useCallback(() => {
     const canvas = canvasRef.current;
-    const box = boxRef.current;
+    const box = sectionRef.current;
     if (!canvas || !box) return;
     const { width, height } = box.getBoundingClientRect();
     if (!width || !height) return;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
     const ctx = canvas.getContext("2d");
     if (ctx) { ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high"; }
-    drawFrame(currentRef.current);
-  }, [drawFrame]);
+    draw(positionRef.current);
+  }, [draw]);
 
   useEffect(() => {
     let cancelled = false;
     let rafId = 0;
     let visible = true;
-    let loaded = 0;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const start = () => {
+    const play = () => {
       if (cancelled || reduce) return;
       let last = performance.now();
-      const interval = 1000 / FPS;
-      const animate = (now: number) => {
+      const tick = (now: number) => {
         if (cancelled) return;
-        if (visible && !document.hidden && now - last >= interval) {
-          currentRef.current = (currentRef.current + 1) % TOTAL_FRAMES;
-          drawFrame(currentRef.current);
-          last = now;
+        if (visible && !document.hidden) {
+          // Advance by elapsed time; clamp long gaps (tab switches) so playback never jumps.
+          positionRef.current = (positionRef.current + (Math.min(now - last, 100) / 1000) * FPS) % TOTAL;
+          draw(positionRef.current);
         }
-        rafId = requestAnimationFrame(animate);
+        last = now;
+        rafId = requestAnimationFrame(tick);
       };
-      rafId = requestAnimationFrame(animate);
+      rafId = requestAnimationFrame(tick);
     };
 
-    imagesRef.current = Array.from({ length: TOTAL_FRAMES }, (_, i) => {
+    // Decode every frame before playing, so the first loop does not stutter while images decode.
+    imagesRef.current = SEQUENCE.map((frame) => {
       const img = new Image();
-      const done = () => {
-        if (cancelled) return;
-        loaded += 1;
-        if (i === 0) {
-          handleResize();
-          if (bgRef.current) bgRef.current.style.backgroundImage = `url(${framePath(0)})`;
-        }
-        if (loaded === TOTAL_FRAMES) start();
-      };
-      img.onload = done;
-      img.onerror = done;
-      img.src = framePath(i);
+      img.decoding = "async";
+      img.src = framePath(frame);
       return img;
     });
+    imagesRef.current[0].decode().then(resize, resize);
+    Promise.allSettled(imagesRef.current.map((img) => img.decode())).then(() => { if (!cancelled) play(); });
 
-    const ro = new ResizeObserver(handleResize);
-    // Pause playback while the hero is off screen.
+    const ro = new ResizeObserver(resize);
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; });
-    if (boxRef.current) { ro.observe(boxRef.current); io.observe(boxRef.current); }
+    if (sectionRef.current) { ro.observe(sectionRef.current); io.observe(sectionRef.current); }
 
     return () => {
       cancelled = true;
@@ -116,57 +115,49 @@ export function Hero() {
       ro.disconnect();
       io.disconnect();
     };
-  }, [drawFrame, handleResize]);
+  }, [draw, resize]);
 
   return (
-    <section id="home" className="relative flex min-h-screen w-full items-center overflow-hidden bg-night pb-16 pt-28 md:pb-0 md:pt-24">
-      <div className="relative z-20 mx-auto grid w-full max-w-7xl items-center gap-12 px-6 md:grid-cols-[5fr_7fr] md:gap-10 md:px-10 lg:gap-14">
-        {/* Text column — its own space, never on top of the footage */}
-        <div className="order-2 flex flex-col items-start text-left md:order-1">
-          <Reveal>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-md border border-night-line bg-night-2/60 px-3.5 py-1.5 text-xs font-medium text-night-ink-2 backdrop-blur-md">
-              <span className="h-1.5 w-1.5 rounded-md bg-accent-bright" />
-              Art Fiber Systems · AI assessment assistant
-            </div>
-          </Reveal>
-          <Reveal delay={0.08}>
-            <p className="mb-3 text-sm font-medium text-accent-bright">From process challenges to in-line measurement solutions</p>
-          </Reveal>
-          <Reveal delay={0.14}>
-            <h1 className="mb-6 text-4xl font-semibold leading-[1.05] tracking-tight text-night-ink sm:text-5xl lg:text-6xl">SpectraSense AI</h1>
-          </Reveal>
-          <Reveal delay={0.22}>
-            <p className="mb-9 max-w-xl text-base leading-relaxed text-night-ink-2 md:text-lg">
-              Customers know what they need to monitor, not which method, spectral range, fiber probe or setup to test first. SpectraSense turns a short enquiry into a first technical assessment an AFS expert can review in minutes.
-            </p>
-          </Reveal>
-          <Reveal delay={0.3}>
-            <div className="flex flex-row flex-wrap items-center gap-3">
-              <Link href="/assess" className="inline-flex items-center gap-2 rounded-md bg-accent px-6 py-3 text-sm font-semibold text-white transition-all duration-300 hover:bg-accent-dim">
-                Start an assessment <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link href="/how-it-works" className="inline-flex items-center gap-2 rounded-md border border-night-line px-6 py-3 text-sm font-semibold text-night-ink backdrop-blur-md transition-all duration-300 hover:bg-night-3">
-                <BookOpen className="h-4 w-4" /> How it works
-              </Link>            </div>
-          </Reveal>
-        </div>
+    <section
+      ref={sectionRef}
+      id="home"
+      className="relative isolate flex min-h-[calc(100svh-3.5rem)] flex-col justify-end overflow-hidden bg-hero bg-cover bg-center text-hero-ink"
+      style={{ backgroundImage: `url(${framePath(SEQUENCE[0])})` }}
+    >
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 -z-20 h-full w-full contrast-[1.06] saturate-[1.15]"
+        aria-label="Animation: an AFS fibre-optic probe in a process line, its light split into the spectrum"
+        role="img"
+      />
+      {/* Scrims keep the text readable over any frame: from the left on wide screens, from the bottom everywhere. */}
+      <div
+        className="absolute inset-0 -z-10 bg-hero/55 md:bg-transparent md:bg-[linear-gradient(90deg,var(--hero)_0%,color-mix(in_srgb,var(--hero)_82%,transparent)_30%,color-mix(in_srgb,var(--hero)_35%,transparent)_48%,transparent_62%)]"
+        aria-hidden
+      />
+      <div className="absolute inset-x-0 bottom-0 -z-10 h-1/2 bg-linear-to-t from-hero via-hero/40 to-transparent" aria-hidden />
 
-        {/* Frame box — a rounded card on the light hero */}
-        <Reveal variant="left" delay={0.1} className="order-1 w-full md:order-2">
-          <div
-            ref={boxRef}
-            className="relative aspect-video w-full overflow-hidden rounded-2xl bg-[#0b1020] shadow-2xl shadow-slate-900/20 ring-1 ring-line"
-          >
-            <div ref={bgRef} className="absolute -inset-8 z-0 scale-110 bg-cover bg-center blur-3xl brightness-[0.45] saturate-[1.15]" />
-            <canvas ref={canvasRef} className="hero-zoom absolute left-0 top-0 z-[1] h-full w-full contrast-[1.08] saturate-[1.12]" aria-label="SpectraSense intro animation" role="img" />
+      <div className="mx-auto w-full max-w-7xl px-6 pb-20 pt-28 md:px-10 md:pb-28">
+        <div className="max-w-xl lg:max-w-[38rem]">
+          <p className="text-sm text-hero-ink-2">In-line spectroscopy · Art Fiber Systems</p>
+          <h1 className="mt-4 text-[clamp(2.5rem,4.6vw,4rem)] font-light leading-[1.06] tracking-[-0.015em]">
+            Turn a customer enquiry into a cited spectroscopy assessment
+          </h1>
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-hero-ink-2">
+            SpectraSense separates what the customer said from what is still unknown, recommends NIR, Raman, MIR or UV-Vis methods with page
+            citations from the AFS material, and proposes a first feasibility experiment for an expert to review.
+          </p>
+          <div className="mt-9 flex flex-wrap gap-3">
+            <Button asChild size="lg">
+              <Link href="/assess">Start an assessment <ArrowRight aria-hidden /></Link>
+            </Button>
+            <Button asChild size="lg" variant="outline-inverse">
+              <Link href="/how-it-works">See how it works</Link>
+            </Button>
           </div>
-        </Reveal>
+        </div>
       </div>
-
-      <div className="pointer-events-none absolute bottom-8 left-1/2 z-20 hidden -translate-x-1/2 flex-col items-center gap-2 text-night-ink-3 md:flex">
-        <span className="text-[11px]">Scroll</span>
-        <ArrowDown className="h-4 w-4 animate-bounce" />
-      </div>
+      <div className="spectrum-line absolute inset-x-0 bottom-0 h-1.5" aria-hidden />
     </section>
   );
 }

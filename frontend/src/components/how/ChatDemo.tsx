@@ -6,6 +6,7 @@ import { ArrowRight, ArrowUp, Check, Circle, RotateCcw, TriangleAlert, X } from 
 import { demoCases, type DemoCase } from "@/data/demo-conversations";
 import { statusLabel } from "@/lib/report";
 import { Citations } from "../report/CitationChip";
+import { readableSources } from "@/lib/sources";
 
 // Plays a scripted conversation step by step: enquiry, pipeline trace, reply, questions.
 type Stage = { trace: number; reply: number; words: number; questions: boolean; done: boolean };
@@ -72,17 +73,16 @@ export function ChatDemo() {
               onClick={() => { setIdx(i); setRun((r) => r + 1); }}
               className={`min-w-[220px] rounded-lg border px-4 py-3.5 text-left transition-colors lg:min-w-0 ${on ? "border-ink bg-night-2" : "border-line hover:border-line-strong"}`}
             >
-              <div className="flex items-center gap-2">
-                <span className="font-mono text-[11px] tracking-[0.08em] text-ink-3">{d.id}</span>
-                {on && <span className="h-1.5 w-1.5 rounded-full bg-violet" />}
+              <div className="flex items-center gap-2 text-base text-ink">
+                {on && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden />}
+                {d.label}
               </div>
-              <div className="mt-1 text-[16px] tracking-[-0.02em] text-ink" style={{ fontWeight: 450 }}>{d.label}</div>
-              <div className="mt-0.5 text-[13px] text-ink-2">{d.lesson}</div>
+              <div className="mt-0.5 text-sm text-ink-2">{d.lesson}</div>
             </button>
           );
         })}
         <p className="hidden px-1 pt-2 text-xs leading-relaxed text-ink-3 lg:block">
-          Scripted walkthroughs written from the AFS material to show the assistant&apos;s behaviour. Quotes were checked on the cited pages. Run an enquiry in Assess for a real assessment.
+          These are prepared examples that show how the assistant behaves; every quote in them was checked on the cited page. Pick one, watch it play, then try the same enquiry yourself.
         </p>
       </div>
 
@@ -92,7 +92,7 @@ export function ChatDemo() {
           <div className="flex items-center gap-2 text-sm">
             <span className="h-2 w-2 rounded-full bg-violet" />
             <span style={{ fontWeight: 500 }}>SpectraSense</span>
-            <span className="text-ink-3">· {c.id} walkthrough</span>
+            <span className="text-ink-3">· Example: {c.label}</span>
           </div>
           <button onClick={() => setRun((r) => r + 1)} className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-ink-2 hover:bg-panel hover:text-ink">
             <RotateCcw className="h-3.5 w-3.5" /> Replay
@@ -102,7 +102,7 @@ export function ChatDemo() {
         <div ref={thread} className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-6 sm:px-6" aria-live="polite">
           {inView && (
             <div className="ml-auto max-w-[85%] animate-[fadeUp_.4s_ease_both] rounded-2xl rounded-br-md bg-ink px-4 py-3 text-[14.5px] leading-relaxed text-bg">
-              <div className="mb-1 text-[11px] uppercase tracking-[0.12em] opacity-60">Customer · {c.id}</div>
+              <div className="mb-1 text-xs uppercase tracking-[0.12em] opacity-70">Customer</div>
               {c.enquiry}
             </div>
           )}
@@ -112,7 +112,7 @@ export function ChatDemo() {
               {c.trace.slice(0, stage.trace).map((s) => (
                 <li key={s.step} className="flex animate-[fadeUp_.35s_ease_both] items-start gap-2 text-[13px]">
                   <span className="mt-0.5">{traceIcon[s.status]}</span>
-                  <span className="text-ink-2">{s.step}<span className="text-ink-3"> · {s.detail}</span></span>
+                  <span className="text-ink-2">{s.step}<span className="text-ink-3"> · {readableSources(s.detail ?? "")}</span></span>
                 </li>
               ))}
             </ul>
@@ -144,7 +144,7 @@ export function ChatDemo() {
 
           {stage.questions && (
             <div className="max-w-[92%] animate-[fadeUp_.4s_ease_both] rounded-xl border border-line bg-bg p-4">
-              <div className="text-[11px] uppercase tracking-[0.12em] text-violet">Ask the customer next</div>
+              <div className="text-xs uppercase tracking-[0.12em] text-violet">Ask the customer next</div>
               <ol className="mt-2 list-decimal space-y-1 pl-5 text-[14px] text-ink">
                 {c.questions.map((q) => <li key={q}>{q}</li>)}
               </ol>
@@ -156,7 +156,7 @@ export function ChatDemo() {
 
           {stage.done && (
             <Link href={`/assess?example=${c.id}`} className="inline-flex animate-[fadeUp_.4s_ease_both] items-center gap-1.5 text-sm text-ink underline decoration-line-strong underline-offset-4 hover:decoration-violet">
-              Run {c.id} in the assistant <ArrowRight className="h-3.5 w-3.5" />
+              Try this enquiry yourself <ArrowRight className="h-3.5 w-3.5" aria-hidden />
             </Link>
           )}
         </div>

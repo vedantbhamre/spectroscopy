@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import { CheckCircle2, Eye, CircleDashed, XCircle } from "lucide-react";
-import { type Citation, citeText } from "@/lib/report";
+import { Popover } from "radix-ui";
+import { type Citation, citeFull, citeText } from "@/lib/report";
 
 const style = {
   verified: { icon: CheckCircle2, cls: "border-ok/40 text-ok", label: "Quote found on the cited page" },
@@ -11,31 +11,41 @@ const style = {
   failed: { icon: XCircle, cls: "border-bad/50 text-bad", label: "Quote not found on the cited page" },
 } as const;
 
+// Click to see the quoted passage. Radix Popover renders it in a portal above the whole page, so later
+// content (question cards, animated sections) can never cover it, and it flips away from screen edges.
 export function CitationChip({ c }: { c: Citation }) {
-  const [open, setOpen] = useState(false);
   const s = style[c.check ?? "unverified"];
   const Icon = s.icon;
   return (
-    <span className="relative inline-block align-baseline font-sans">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        onBlur={() => setOpen(false)}
-        aria-expanded={open}
-        className={`inline-flex items-center gap-1 whitespace-nowrap rounded border bg-bg px-1.5 py-px text-[12px] leading-5 hover:bg-panel ${s.cls}`}
-      >
-        <Icon className="h-3 w-3" aria-hidden />
-        {citeText(c)}
-        <span className="sr-only">({s.label})</span>
-      </button>
-      {open && (
-        <span role="tooltip" className="absolute left-0 top-full z-30 mt-1 block w-72 rounded-md bg-tooltip p-3 text-left text-xs leading-relaxed text-white/80 shadow-lg">
-          <span className="flex items-center gap-1 font-medium text-white"><Icon className="h-3.5 w-3.5" aria-hidden /> {s.label}</span>
+    <Popover.Root>
+      <Popover.Trigger asChild>
+        <button
+          type="button"
+          className={`inline-flex min-h-6 items-center gap-1 whitespace-nowrap border bg-bg px-1.5 align-baseline font-sans text-xs leading-5 hover:bg-panel data-[state=open]:bg-panel ${s.cls}`}
+        >
+          <Icon className="h-3 w-3" aria-hidden />
+          {citeText(c)}
+          {c.transfer && <span className="border border-amber px-1 text-xs font-semibold leading-4 text-amber">transfer</span>}
+          <span className="sr-only">({s.label}{c.transfer ? "; transfer assumption" : ""}). Show the quoted passage.</span>
+        </button>
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Content
+          side="bottom"
+          align="start"
+          sideOffset={6}
+          collisionPadding={12}
+          className="z-50 w-80 max-w-[calc(100vw-24px)] bg-tooltip p-3 font-sans text-xs leading-relaxed text-white/80 shadow-lg outline-none data-[state=open]:animate-[fadeUp_150ms_ease-out]"
+        >
+          <span className="block font-medium text-white">{citeFull(c)}</span>
+          <span className="mt-1 flex items-center gap-1 text-white/80"><Icon className="h-3.5 w-3.5" aria-hidden /> {s.label}</span>
           {c.quote ? <span className="mt-1.5 block font-serif text-[13px] text-white">“{c.quote}”</span> : <span className="mt-1.5 block">No quoted passage attached.</span>}
-          {c.url && <span className="mt-1.5 block break-all text-[#9ccbe0]">{c.url}</span>}
-        </span>
-      )}
-    </span>
+          {c.url && <a href={c.url} target="_blank" rel="noreferrer" className="mt-1.5 block break-all text-white underline">{c.url}</a>}
+          {c.transfer && <span className="mt-1.5 block text-white"><b className="font-semibold">Transfer assumption:</b> the source shows this for {c.application ?? "another application"}; it has to be tested for this one.</span>}
+          <Popover.Arrow className="fill-tooltip" width={10} height={5} />
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
   );
 }
 

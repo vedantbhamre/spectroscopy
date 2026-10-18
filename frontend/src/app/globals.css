@@ -1,97 +1,112 @@
 @import "tailwindcss";
 
-/* Editorial palette: warm paper, ink, one violet accent used sparingly. */
+/* SpectraSense design tokens — Carbon (IBM's open-source design system) as described in DESIGN.md:
+   Cool Gray canvas, white layers, charcoal ink, one blue accent, flat square geometry, hairline borders.
+   Every text colour is checked at 4.5:1 or better on every surface it sits on (WCAG 2.2 AA). */
 :root {
-  --bg: #f7f8f3;
-  --panel: #eff0e9;
-  --panel-2: #e9eae3;
-  --line: #dcddd2;
-  --line-strong: #c6c7bb;
-  --ink: #25251d;
-  --ink-2: #5c5d52;
-  --ink-3: #7a7b6f;
-  --accent: #25251d;
-  --accent-dim: #3a3a30;
-  --ok: #2f7d4f;
-  --warn: #a2650a;
-  --bad: #b3261e;
-  --violet: #7b3cff;
-  --series-3: #7a7b6f;
-  --ai: #eff0e9;
-  --tooltip: #25251d;
-  --night: #f1f2ec;
-  --night-2: #fbfbf8;
-  --night-3: #e9eae3;
-  --night-line: #dcddd2;
-  --night-ink: #25251d;
-  --night-ink-2: #5c5d52;
-  --night-ink-3: #7a7b6f;
-  --accent-bright: #7b3cff;
-  --amber: #7b3cff;
+  --bg: #f2f4f8;
+  --panel: #ffffff;
+  --panel-2: #e4e8ee;
+  --line: #dde1e6;
+  --line-strong: #878d96;
+  --ink: #121619;
+  --ink-2: #4d5358;
+  --ink-3: #575e66;
+  --accent: #0f62fe;
+  --accent-dim: #0043ce;
+  --ok: #0e6027;
+  --warn: #684e00;
+  --bad: #a2191f;
+  --violet: #6929c4;
+  --series-3: #697077;
+  --ai: #f2f4f8;
+  --tooltip: #121619;
+  /* The conversation panel: a light layer in the light theme. */
+  --night: #ffffff;
+  --night-2: #f2f4f8;
+  --night-3: #e4e8ee;
+  --night-line: #dde1e6;
+  --night-ink: #121619;
+  --night-ink-2: #4d5358;
+  --night-ink-3: #575e66;
+  --accent-bright: #0f62fe;
+  --amber: #0f62fe;
+  /* The one decorative element: the visible spectrum, what the product measures. */
   --spectrum: linear-gradient(90deg, #6d28d9, #2563eb, #0891b2, #059669, #ca8a04, #ea580c, #dc2626);
 
-  --chart-bg: #fbfbf8;
-  --chart-border: #dcddd2;
-  --chart-grid: #e6e7de;
-  --chart-axis: #5c5d52;
-  --chart-material: #25251d;
-  --chart-range: #7b3cff;
-  --chart-full: #2f7d4f;
-  --chart-partial: #b07a1f;
-  --chart-unavailable: #c6c7bb;
-  --chart-tooltip-bg: #25251d;
-  --chart-tooltip-text: #f7f8f3;
-  --chart-table-head: #eff0e9;
-  --chart-divider: #dcddd2;
-  --chart-filter-bg: #efeaff;
-  --chart-filter-border: #7b3cff;
+  /* Inverse surface (footer), the same in both themes. */
+  --inverse: #121619;
+  --inverse-line: #343a3f;
+  --inverse-ink: #ffffff;
+  /* Hero band: the dark stage the intro footage plays on (Carbon Cool Gray 100). */
+  --hero: #121619;
+  --hero-ink: #f2f4f8;
+  --hero-ink-2: #c1c7cd;
+  --hero-line: #343a3f;
+  --inverse-ink-2: #c1c7cd;
+
+  --chart-bg: #ffffff;
+  --chart-border: #dde1e6;
+  --chart-grid: #e4e8ee;
+  --chart-axis: #4d5358;
+  --chart-material: #121619;
+  --chart-range: #0f62fe;
+  --chart-full: #0e6027;
+  --chart-partial: #684e00;
+  --chart-unavailable: #c6c6c6;
+  --chart-tooltip-bg: #161616;
+  --chart-tooltip-text: #ffffff;
+  --chart-table-head: #f2f4f8;
+  --chart-divider: #dde1e6;
+  --chart-filter-bg: #edf5ff;
+  --chart-filter-border: #0f62fe;
 }
 
-/* Dark theme (header toggle). Screen only: printed reports always use the light palette. */
+/* Dark theme (Carbon g100). Screen only: printed reports always use the light palette. */
 @media screen {
   :root[data-theme="dark"] {
     color-scheme: dark;
-    --bg: #13130f;
-    --panel: #1b1b16;
-    --panel-2: #22221c;
-    --line: #2f2f27;
-    --line-strong: #404036;
-    --ink: #ecede6;
-    --ink-2: #a9aa9e;
-    --ink-3: #8b8c80;
-    --accent: #7c4dff;
-    --accent-dim: #6a3cf0;
-    --ok: #5cc28a;
-    --warn: #e0a341;
-    --bad: #f2726f;
-    --violet: #a585ff;
-    --series-3: #9a9b8f;
-    --ai: #1b1b16;
-    --tooltip: #2f2f27;
-    --night: #171713;
-    --night-2: #1e1e19;
-    --night-3: #26261f;
-    --night-line: #2f2f27;
-    --night-ink: #ecede6;
-    --night-ink-2: #a9aa9e;
-    --night-ink-3: #8b8c80;
-    --accent-bright: #a585ff;
-    --amber: #a585ff;
-    --chart-bg: #171713;
-    --chart-border: #2f2f27;
-    --chart-grid: #26261f;
-    --chart-axis: #a9aa9e;
-    --chart-material: #ecede6;
-    --chart-range: #a585ff;
-    --chart-full: #5cc28a;
-    --chart-partial: #d9a15c;
-    --chart-unavailable: #4a4a40;
-    --chart-tooltip-bg: #0b0b09;
+    --bg: #121619;
+    --panel: #21272a;
+    --panel-2: #343a3f;
+    --line: #343a3f;
+    --line-strong: #878d96;
+    --ink: #f2f4f8;
+    --ink-2: #c1c7cd;
+    --ink-3: #a2a9b0;
+    --accent: #0f62fe;
+    --accent-dim: #0043ce;
+    --ok: #42be65;
+    --warn: #f1c21b;
+    --bad: #ff8389;
+    --violet: #be95ff;
+    --series-3: #a2a9b0;
+    --ai: #21272a;
+    --tooltip: #343a3f;
+    --night: #1a1f22;
+    --night-2: #21272a;
+    --night-3: #343a3f;
+    --night-line: #343a3f;
+    --night-ink: #f2f4f8;
+    --night-ink-2: #c1c7cd;
+    --night-ink-3: #a2a9b0;
+    --accent-bright: #78a9ff;
+    --amber: #78a9ff;
+    --chart-bg: #1a1f22;
+    --chart-border: #343a3f;
+    --chart-grid: #21272a;
+    --chart-axis: #c1c7cd;
+    --chart-material: #f2f4f8;
+    --chart-range: #78a9ff;
+    --chart-full: #42be65;
+    --chart-partial: #f1c21b;
+    --chart-unavailable: #525252;
+    --chart-tooltip-bg: #000000;
     --chart-tooltip-text: #ffffff;
-    --chart-table-head: #1e1e19;
-    --chart-divider: #2f2f27;
-    --chart-filter-bg: #241d3a;
-    --chart-filter-border: #a585ff;
+    --chart-table-head: #21272a;
+    --chart-divider: #343a3f;
+    --chart-filter-bg: #001d6c;
+    --chart-filter-border: #78a9ff;
   }
 }
 
@@ -122,9 +137,25 @@
   --color-night-ink-3: var(--night-ink-3);
   --color-accent-bright: var(--accent-bright);
   --color-amber: var(--amber);
-  --font-sans: var(--font-inter-tight);
-  --font-serif: var(--font-source-serif);
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --color-inverse: var(--inverse);
+  --color-inverse-line: var(--inverse-line);
+  --color-inverse-ink: var(--inverse-ink);
+  --color-inverse-ink-2: var(--inverse-ink-2);
+  --color-hero: var(--hero);
+  --color-hero-ink: var(--hero-ink);
+  --color-hero-ink-2: var(--hero-ink-2);
+  --color-hero-line: var(--hero-line);
+  --font-sans: var(--font-plex-sans);
+  --font-serif: var(--font-plex-serif);
+  --font-mono: var(--font-plex-mono);
+  /* Carbon: square corners on every button, card, input and container. Pills and dots keep rounded-full. */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
 }
 
 html {
@@ -133,12 +164,12 @@ html {
 }
 
 body {
+  overflow-x: clip; /* nothing may scroll the page sideways */
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-inter-tight), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-plex-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  letter-spacing: 0.16px; /* Carbon body tracking */
   -webkit-font-smoothing: antialiased;
-  text-rendering: geometricPrecision;
-  font-feature-settings: "tnum" 1;
 }
 
 @keyframes fadeUp {
@@ -152,9 +183,10 @@ body {
 
 /* In the base layer so components with their own focus style (e.g. the chat composer) can override it. */
 @layer base {
+  /* Carbon focus: 2px accent outline. */
   :focus-visible {
-    outline: 2px solid var(--ink);
-    outline-offset: 3px;
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
 }
 

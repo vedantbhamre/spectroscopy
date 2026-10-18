@@ -17,7 +17,7 @@ const OUTPUTS_DIR = path.join(process.cwd(), "outputs");
 export async function POST(req: Request) {
   const parsed = AssessRequest.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: "invalid_request", message: "The request did not contain a valid conversation." }, { status: 400 });
-  const { messages, scenarioId } = parsed.data;
+  const { messages, scenarioId, answers, final } = parsed.data;
 
   const backend = process.env.ASSESS_BACKEND_URL;
   if (backend) {
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       const r = await fetch(backend, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages, scenarioId }),
+        body: JSON.stringify({ messages, scenarioId, answers: answers ?? [], final: final ?? false }),
         signal: AbortSignal.timeout(120_000),
       });
       const body = AssessResponse.safeParse(await r.json());

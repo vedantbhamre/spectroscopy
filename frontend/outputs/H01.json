@@ -1,69 +1,96 @@
 {
- "reply": "The existing NIR calibration may not directly apply to the new API and excipient blend, as calibrations are typically matrix-specific. Adding Raman could provide complementary information, but each method should be assessed independently first. Begin by testing the NIR calibration on the new blend with independent reference assays to determine its applicability. If NIR alone is insufficient, consider Raman as a comparison method to capture additional molecular information.",
+ "reply": "We should first test whether the existing NIR calibration transfers to the new blend. If it fails, we can add Raman as a complementary method, but only after confirming NIR alone is insufficient.",
  "report": {
   "scenarioId": "H01",
-  "title": "Assessing NIR Calibration Transfer for New API Blend",
+  "title": "NIR Calibration Transfer for New API Blend",
   "origin": "live",
-  "generatedAt": "2026-10-17T17:10:50+00:00",
-  "decisionStatus": "insufficient",
+  "generatedAt": "2026-10-17T23:25:22+00:00",
+  "decisionStatus": "provisional",
   "requirements": {
    "stated": [
-    "reuse the calibration",
-    "introducing a different API and excipient blend"
+    "existing NIR pilot measures API concentration in one powder formulation at tablet press feed frame",
+    "introducing a different API and excipient blend",
+    "colleague suggests adding Raman to keep old calibration valid",
+    "seeking first technical assessment and experiment"
    ],
    "unknowns": [
-    "specific API and excipient blend details",
-    "current calibration details",
-    "compatibility of Raman with new formulation"
+    "whether the new formulation is similar enough for NIR calibration reuse",
+    "how Raman will complement NIR for this specific blend"
+   ],
+   "factTurns": [
+    1,
+    1,
+    1,
+    1
    ]
   },
   "questions": [
    {
-    "text": "What are the specific details of the new API and excipient blend?",
-    "impact": "method"
+    "text": "What are the physicochemical differences (e.g., particle size, moisture, excipient composition) between the old and new formulations?",
+    "impact": "method",
+    "id": "q1",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "What are the details of the current NIR calibration?",
-    "impact": "method"
-   },
-   {
-    "text": "Is Raman spectroscopy compatible with the new formulation?",
-    "impact": "method"
+    "text": "Do you have reference analytical data (e.g., HPLC) for the new blend to serve as ground truth?",
+    "impact": "acceptance",
+    "id": "q2",
+    "status": "open",
+    "askedTurn": 1
    }
   ],
-  "recommendations": [],
+  "recommendations": [
+   {
+    "method": "NIR (diffuse reflection)",
+    "methodIds": [
+     "NIR"
+    ],
+    "role": "primary",
+    "reason": "The pilot already uses NIR for powder blends and the probe geometry (diffuse reflection) is suitable for opaque, scattering media.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "Table 1 (p.6)",
+      "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
+      "check": "verified"
+     }
+    ]
+   }
+  ],
   "concept": {
-   "summary": "NIR and Raman spectroscopy are complementary techniques. NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
+   "summary": "Insert the existing NIR diffuse‑reflection probe into the tablet‑press feed frame and acquire spectra while the new blend passes. Compare the spectra to the old calibration model and to independent reference measurements.",
    "citations": [
     {
      "source": "S01",
      "page": "15",
-     "quote": "NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
-     "check": "verified"
+     "quote": "NIR reflectance spectra 900–1700 nm; SNV-corrected spectra of starch, flour and sugar; PLS regression coefficients with selected wavelength bands highlighted.",
+     "check": "failed"
     }
    ]
   },
   "spectralRange": {
-   "summary": "NIR reflectance spectra 900–1700 nm.",
+   "summary": "[to be agreed with the customer] (typical NIR range for powder blends).",
    "citations": [
     {
-     "source": "S02",
-     "page": "12",
+     "source": "S01",
+     "page": "15",
      "quote": "NIR reflectance spectra 900–1700 nm",
-     "check": "visual_note"
+     "check": "failed"
     }
    ]
   },
   "risks": [
-   "Existing NIR calibration may not be valid for the new blend.",
-   "Raman may not provide additional useful information without prior assessment."
+   "Calibration transfer may fail if the new blend’s spectral features differ significantly; Raman may be needed only if NIR is insufficient."
   ],
   "feasibility": {
    "steps": [
-    "Test existing NIR calibration on new blend with reference assays.",
-    "Evaluate Raman spectroscopy independently if NIR is insufficient."
+    "1. Prepare representative samples of the new blend.",
+    "2. Measure spectra with the existing NIR probe in the feed frame.",
+    "3. Compare predicted API concentrations to reference values (e.g., HPLC).",
+    "4. If error > acceptable threshold, evaluate Raman as a complementary method."
    ],
-   "decisionBasis": "Assess each method's applicability to the new blend before considering a combination."
+   "decisionBasis": "Acceptable prediction error agreed with the customer before testing."
   },
   "premiseChecks": [
    {
@@ -82,9 +109,9 @@
    },
    {
     "id": "combination",
-    "label": "A method combination is justified",
+    "label": "Method combination: an escalation option, not justified up front",
     "status": "flag",
-    "detail": "Assess each method on its own first; a gain from combining them is a hypothesis to test for this material.",
+    "detail": "Start with the simplest method that could meet the need and assess each method on its own; combine only if one is shown to be insufficient. A gain from combining is a hypothesis to test for this material.",
     "citations": [
      {
       "source": "S01",
@@ -93,65 +120,114 @@
       "check": "verified"
      }
     ]
+   },
+   {
+    "id": "owned_equipment",
+    "label": "Owned equipment: assessed",
+    "status": "pass",
+    "detail": "The customer's existing equipment (NIR pilot) is assessed in the recommendation or the feasibility plan.",
+    "citations": []
+   },
+   {
+    "id": "geometry_optics",
+    "label": "Probe geometry matches the optical density of the medium",
+    "status": "pass",
+    "detail": "Medium described as opaque; the proposed ATR / reflection geometry suits it.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "16",
+      "quote": "as the media becomes more opaque, turbid, or highly concentrated, the signal in a standard transmission setup becomes saturated because the light cannot penetrate the bulk of the sample",
+      "check": "verified"
+     }
+    ]
    }
   ],
   "sources": [
    {
     "source": "S01",
-    "page": "15",
-    "quote": "NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
+    "page": "Table 1 (p.6)",
+    "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
     "check": "verified"
    },
    {
-    "source": "S02",
-    "page": "12",
+    "source": "S01",
+    "page": "15",
+    "quote": "NIR reflectance spectra 900–1700 nm; SNV-corrected spectra of starch, flour and sugar; PLS regression coefficients with selected wavelength bands highlighted.",
+    "check": "failed"
+   },
+   {
+    "source": "S01",
+    "page": "15",
     "quote": "NIR reflectance spectra 900–1700 nm",
-    "check": "visual_note"
+    "check": "failed"
    },
    {
     "source": "S01",
     "page": "15",
     "quote": "By combining Raman and NIR, these models can predict API potency or coating thickness with higher accuracy and robustness than single-method models.",
     "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "16",
+    "quote": "as the media becomes more opaque, turbid, or highly concentrated, the signal in a standard transmission setup becomes saturated because the light cannot penetrate the bulk of the sample",
+    "check": "verified"
    }
+  ],
+  "mode": "draft",
+  "assumptions": [
+   "The NIR pilot’s diffuse‑reflection probe is compatible with the tablet‑press feed frame.",
+   "Reference analytical data will be available for validation.",
+   "NIR (diffuse reflection): The method is inexpensive and can be tested with the existing equipment. (not supported by the cited page)"
+  ],
+  "pointsToConfirm": [
+   "Exact probe geometry and mounting compatibility with the feed frame.",
+   "Availability of reference analytical data for the new blend."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 720.0,
+   "ms": 2135.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 1881.0,
-   "detail": "4 stated · 3 unknown"
+   "ms": 16845.0,
+   "detail": "4 stated (0 from answers) · 2 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 77.0,
-   "detail": "S01 p.12, S01 p.15, S01 p.16, S02 p.12, S02 p.14, S03 p.12, S03 p.13, S04 p.1 · BM25 · flashrank"
+   "ms": 94.0,
+   "detail": "S01 p.15, S01 p.16, S01 p.9, S02 p.12, S02 p.14 · BM25 · flashrank"
   },
   {
    "step": "Premise checks",
    "status": "warn",
    "ms": 0.0,
-   "detail": "An existing calibration applies to the new material; A method combination is justified"
+   "detail": "An existing calibration applies to the new material; Method combination: an escalation option, not justified up front"
   },
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 4426.0,
-   "detail": "gpt-4o via openai"
+   "ms": 25420.0,
+   "detail": "openai/gpt-oss-20b via groq"
   },
   {
    "step": "Verify citations",
-   "status": "ok",
+   "status": "warn",
    "ms": 0.0,
-   "detail": "2 of 2 quotes found on the cited page"
+   "detail": "1 of 3 quotes found on the cited page · 2 not found"
+  },
+  {
+   "step": "Validate numbers, claims and questions",
+   "status": "warn",
+   "ms": 0.0,
+   "detail": "1 unsupported numbers replaced · 1 unsupported sentences and 0 uncited recommendations moved to assumptions · 2 open questions · all required sections present"
   }
  ]
 }

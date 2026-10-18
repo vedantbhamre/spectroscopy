@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { sourceShort, sourceTitle } from "./sources";
 
 // Contract between the assessment pipeline (engine + LLM compose) and the UI.
 // Section names follow AFS_Examples_and_Reference.docx §3 "Answer structure".
@@ -12,6 +13,9 @@ export const Citation = z.object({
   url: z.string().url().optional(), // required for EXT by the brief
   /** Result of the citation verifier (quote found on cited page). */
   check: z.enum(["verified", "visual_note", "unverified", "failed"]).default("unverified"),
+  /** The cited passage shows this for another application ("transfer assumption"). */
+  transfer: z.boolean().optional(),
+  application: z.string().optional(),
 });
 export type Citation = z.infer<typeof Citation>;
 
@@ -35,6 +39,20 @@ export const PremiseCheck = z.object({
 });
 export type PremiseCheck = z.infer<typeof PremiseCheck>;
 
+export const QuestionStatus = z.enum(["open", "answered", "answered_unknown", "declined", "moved_to_experiment"]);
+export type QuestionStatus = z.infer<typeof QuestionStatus>;
+
+export const Question = z.object({
+  text: z.string(),
+  impact: z.enum(["method", "setup", "acceptance"]).optional(),
+  id: z.string().optional(),
+  status: QuestionStatus.optional(), // missing = "open" (reports from before the ledger)
+  answer: z.string().optional(),
+  askedTurn: z.number().optional(),
+  answeredTurn: z.number().optional(),
+});
+export type Question = z.infer<typeof Question>;
+
 export const Report = z.object({
   scenarioId: z.string().optional(),
   title: z.string(),
@@ -43,8 +61,14 @@ export const Report = z.object({
   originNote: z.string().optional(),
   generatedAt: z.string().optional(),
   decisionStatus: DecisionStatus,
-  requirements: z.object({ stated: z.array(z.string()), unknowns: z.array(z.string()) }),
-  questions: z.array(z.object({ text: z.string(), impact: z.enum(["method", "setup", "acceptance"]).optional() })),
+  requirements: z.object({
+    stated: z.array(z.string()),
+    unknowns: z.array(z.string()),
+    /** Client turn (1 = enquiry) each stated fact was quoted from. */
+    factTurns: z.array(z.number()).optional(),
+  }),
+  /** The question ledger: every question asked so far, with its status. Only "open" ones are still asked. */
+  questions: z.array(Question),
   recommendations: z.array(Recommendation),
   concept: z.object({
     summary: z.string(),
@@ -59,6 +83,10 @@ export const Report = z.object({
   feasibility: z.object({ steps: z.array(z.string()), decisionBasis: z.string() }),
   premiseChecks: z.array(PremiseCheck).default([]),
   sources: z.array(Citation),
+  /** "final": the customer asked for the answer without further questions. */
+  mode: z.enum(["draft", "final"]).optional(),
+  assumptions: z.array(z.string()).optional(),
+  pointsToConfirm: z.array(z.string()).optional(),
 });
 export type Report = z.infer<typeof Report>;
 
@@ -79,9 +107,20 @@ export const TraceStep = z.object({
 });
 export type TraceStep = z.infer<typeof TraceStep>;
 
+/** An answer bound to one ledger question (one input box per question in the UI). */
+export const Answer = z.object({
+  id: z.string().optional(),
+  question: z.string().min(1).max(1000),
+  status: z.enum(["answered", "answered_unknown", "declined"]),
+  answer: z.string().max(2000).optional(),
+});
+export type Answer = z.infer<typeof Answer>;
+
 export const AssessRequest = z.object({
   messages: z.array(ChatMessage).min(1).max(40),
   scenarioId: z.string().optional(),
+  answers: z.array(Answer).max(20).optional(),
+  final: z.boolean().optional(),
 });
 export type AssessRequest = z.infer<typeof AssessRequest>;
 
@@ -98,5 +137,23 @@ export const statusLabel: Record<DecisionStatus, string> = {
   out_of_scope: "Outside the supported scope",
 };
 
+// Readable citation: "Process Control slides p.13"; the full form names the document and its ID for cross-checking.
 export const citeText = (c: Pick<Citation, "source" | "page">) =>
-  c.page.startsWith("Table") ? `${c.source} ${c.page}` : `${c.source} p.${c.page}`;
+  c.page.startsWith("Table") ? `${sourceShort(c.source)}, ${c.page}` : `${sourceShort(c.source)} p.${c.page}`;
+export const citeFull = (c: Pick<Citation, "source" | "page">) =>
+  `${sourceTitle(c.source)} (${c.source}), ${c.page.startsWith("Table") ? c.page : `page ${c.page}`}`;
+
+export const statusOf = (q: Question): QuestionStatus => q.status ?? "open";
+export const openQuestions = (r: Pick<Report, "questions" | "mode">) => (r.mode === "final" ? [] : r.questions.filter((q) => statusOf(q) === "open"));
+export const closedQuestions = (r: Pick<Report, "questions">) => r.questions.filter((q) => statusOf(q) !== "open");
+
+export const questionStatusLabel: Record<QuestionStatus, string> = {
+  open: "open",
+  answered: "answered",
+  answered_unknown: "answered: unknown",
+  declined: "declined",
+  moved_to_experiment: "moved to the experiment",
+};
+
+/** Question text without a leading number or bullet: the ledger order is the only numbering. */
+export const questionText = (q: Pick<Question, "text">) => q.text.replace(/^\s*(?:q?\d+[.):]|[-•*])\s*/i, "");

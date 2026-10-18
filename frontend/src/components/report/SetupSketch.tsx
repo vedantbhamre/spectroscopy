@@ -35,7 +35,7 @@ export function SetupSketch({ analyzer, fiberLink, probe, location }: { analyzer
       <figcaption className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {parts.map((p) => (
           <div key={p.k} className="rounded bg-panel px-2 py-1.5">
-            <div className="text-[11px] text-ink-3">{p.k}</div>
+            <div className="text-xs text-ink-3">{p.k}</div>
             <div className={`text-xs ${p.v ? "text-ink" : "italic text-warn"}`}>{p.v ?? "Not specified"}</div>
           </div>
         ))}

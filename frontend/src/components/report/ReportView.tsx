@@ -2,11 +2,12 @@
 
 import { AlertTriangle, Ban, CheckCircle2, CircleHelp, Download, FlaskConical, ShieldAlert, ShieldCheck, Copy, Check } from "lucide-react";
 import { useState } from "react";
-import { type Report, statusLabel, type PremiseCheck } from "@/lib/report";
+import { type Report, statusLabel, type PremiseCheck, openQuestions, closedQuestions, questionStatusLabel, questionText, statusOf } from "@/lib/report";
 import { toPlainText } from "@/lib/markdown";
 import type { MethodId } from "@/data/optics";
 import { Citations, CitationChip } from "./CitationChip";
 import { SetupSketch } from "./SetupSketch";
+import { Button } from "../ui/button";
 import { SpectralBand } from "../SpectralBand";
 
 const statusStyle = {
@@ -31,12 +32,17 @@ export function ReportView({ report, transcript, toolbar }: { report: Report; tr
   const O = originLabel[report.origin];
   const methodIds = Array.from(new Set(report.recommendations.filter((r) => r.role !== "not_recommended").flatMap((r) => r.methodIds))) as MethodId[];
   const flagged = report.premiseChecks.filter((c) => c.status !== "pass");
+  const open = openQuestions(report);
+  const closed = closedQuestions(report);
+  const assumptions = report.assumptions ?? [];
+  const toConfirm = report.pointsToConfirm ?? [];
   const [copied, setCopied] = useState(false);
 
   const downloadPdf = () => {
     const previous = document.title;
     const restore = () => { document.title = previous; window.removeEventListener("afterprint", restore); };
-    document.title = `${report.scenarioId ?? "assessment"}-assessment`;
+    // The PDF file name comes from the report title ("silica-link-for-mir-atr-assessment.pdf").
+    document.title = `${report.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "spectrasense"}-assessment`;
     window.addEventListener("afterprint", restore);
     window.print();
   };
@@ -66,16 +72,16 @@ export function ReportView({ report, transcript, toolbar }: { report: Report; tr
           <span className={`rounded border px-2 py-0.5 font-medium ${O.cls}`}>{O.text}</span>
           {toolbar && <span className="print-hidden contents">{toolbar}</span>}
           <div className="print-hidden ml-auto flex gap-1.5">
-            <button onClick={copy} className="inline-flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1 text-ink-2 hover:bg-panel hover:text-ink">
-              {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />} {copied ? "Copied" : "Copy as text"}
-            </button>
-            <button onClick={downloadPdf} className="inline-flex items-center gap-1.5 rounded-md border border-line px-2.5 py-1 text-ink-2 hover:bg-panel hover:text-ink">
-              <Download className="h-3.5 w-3.5" /> Download PDF
-            </button>
+            <Button size="sm" variant="ghost" onClick={copy} aria-live="polite">
+              {copied ? <Check aria-hidden /> : <Copy aria-hidden />} {copied ? "Copied" : "Copy as text"}
+            </Button>
+            <Button size="sm" variant="outline" onClick={downloadPdf}>
+              <Download aria-hidden /> Download PDF
+            </Button>
           </div>
         </div>
         <div className="mt-4 rounded-xl bg-accent px-6 py-6 text-white">
-          <h1 className="text-[28px] font-semibold leading-tight tracking-tight">{report.title}</h1>
+          <h2 className="text-[28px] font-semibold leading-tight tracking-tight">{report.title}</h2>
           <div className="mt-4 inline-flex items-center gap-2 rounded-md bg-white px-3 py-1.5 text-sm font-semibold">
             <S.icon className={`h-4 w-4 ${S.cls.split(" ").pop()}`} aria-hidden />
             <span className={S.cls.split(" ").pop()}>{statusLabel[report.decisionStatus]}</span>
@@ -99,7 +105,17 @@ export function ReportView({ report, transcript, toolbar }: { report: Report; tr
         <div className="grid gap-6 md:grid-cols-2">
           <div>
             <h3 className="mb-2 flex items-center gap-1.5 font-sans text-sm font-semibold text-ok"><CheckCircle2 className="h-4 w-4" /> Stated by the client</h3>
-            <ul className="space-y-1.5">{report.requirements.stated.map((s) => <li key={s} className="border-l-2 border-ok/40 pl-3">{s}</li>)}</ul>
+            <ul className="space-y-1.5">
+              {report.requirements.stated.map((s, i) => {
+                const turn = report.requirements.factTurns?.[i];
+                return (
+                  <li key={s} className="border-l-2 border-ok/40 pl-3">
+                    {s}
+                    {turn && turn > 1 && <span className="ml-1.5 whitespace-nowrap rounded bg-panel-2 px-1.5 py-0.5 font-sans text-xs text-ink-3">answer, turn {turn}</span>}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
           <div>
             <h3 className="mb-2 flex items-center gap-1.5 font-sans text-sm font-semibold text-warn"><CircleHelp className="h-4 w-4" /> Unknown, not assumed</h3>
@@ -108,17 +124,50 @@ export function ReportView({ report, transcript, toolbar }: { report: Report; tr
         </div>
       </Section>
 
-      <Section title="Clarification questions" hint="Questions whose answers could change the method or setup come first.">
-        <ol className="space-y-2.5">
-          {report.questions.map((q, i) => (
-            <li key={i} className="flex gap-3">
-              <span className="w-5 shrink-0 font-sans text-sm font-semibold text-accent">{i + 1}.</span>
-              <span className="flex-1">{q.text}</span>
-              {q.impact && <span className="h-fit shrink-0 whitespace-nowrap rounded bg-panel-2 px-1.5 py-0.5 font-sans text-[11px] text-ink-2">{impactLabel[q.impact]}</span>}
-            </li>
-          ))}
-        </ol>
+      <Section title="Clarification questions" hint={report.mode === "final" ? "Final report: the customer asked for the answer, so no further questions are asked." : "Only new questions; answered ones are never asked again. Questions that could change the method or setup come first."}>
+        {open.length > 0 ? (
+          <ol className="space-y-2.5">
+            {open.map((q, i) => (
+              <li key={q.id ?? q.text} className="flex gap-3">
+                <span className="w-5 shrink-0 font-sans text-sm font-semibold text-accent">{i + 1}.</span>
+                <span className="flex-1">{questionText(q)}</span>
+                {q.impact && <span className="h-fit shrink-0 whitespace-nowrap rounded bg-panel-2 px-1.5 py-0.5 font-sans text-xs text-ink-2">{impactLabel[q.impact]}</span>}
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="text-ink-3">{report.mode === "final" ? "None. Open points are listed under assumptions and points to confirm." : "No open questions."}</p>
+        )}
+        {closed.length > 0 && (
+          <div className="mt-5">
+            <h3 className="mb-2 font-sans text-sm font-semibold text-ink-2">Answered in the conversation</h3>
+            <ul className="space-y-1.5 text-ink-2">
+              {closed.map((q) => (
+                <li key={q.id ?? q.text} className="border-l-2 border-line pl-3">
+                  <span>{questionText(q)}</span>{" "}
+                  <span className="whitespace-nowrap rounded bg-panel-2 px-1.5 py-0.5 font-sans text-xs text-ink-3">{questionStatusLabel[statusOf(q)]}</span>
+                  {q.answer && <div className="text-ink">{q.answer}</div>}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </Section>
+
+      {(assumptions.length > 0 || toConfirm.length > 0) && (
+        <Section title="Assumptions and points to confirm" hint="What this assessment rests on without a customer fact or a verified source.">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <h3 className="mb-2 font-sans text-sm font-semibold text-ink-2">Assumptions</h3>
+              {assumptions.length ? <ul className="space-y-1.5">{assumptions.map((a) => <li key={a} className="border-l-2 border-dashed border-violet/50 pl-3">{a}</li>)}</ul> : <p className="text-ink-3">None.</p>}
+            </div>
+            <div>
+              <h3 className="mb-2 font-sans text-sm font-semibold text-ink-2">Points to confirm</h3>
+              {toConfirm.length ? <ul className="space-y-1.5">{toConfirm.map((a) => <li key={a} className="border-l-2 border-dashed border-warn/50 pl-3">{a}</li>)}</ul> : <p className="text-ink-3">None.</p>}
+            </div>
+          </div>
+        </Section>
+      )}
 
       <Section title="Recommendation">
         {report.recommendations.length === 0 ? (
@@ -158,7 +207,7 @@ export function ReportView({ report, transcript, toolbar }: { report: Report; tr
         <ol className="space-y-2.5">
           {report.feasibility.steps.map((s, i) => (
             <li key={i} className="flex gap-3">
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-accent font-sans text-[11px] font-semibold text-accent">{i + 1}</span>
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-accent font-sans text-xs font-semibold text-accent">{i + 1}</span>
               <span>{s}</span>
             </li>
           ))}

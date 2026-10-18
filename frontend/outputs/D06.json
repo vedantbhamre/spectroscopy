@@ -1,149 +1,188 @@
 {
- "reply": "For measuring water content in a petroleum stream, consider using Mid-IR spectroscopy with an ATR probe. This method is suitable for detecting water in petroleum, as shown by laboratory spectra. However, the strong absorption in the mid-IR region limits sample thickness, which is manageable with ATR. The analyzer can be placed outside the process area, using fiber optics to connect to the probe. Initial experiments should establish calibration models and assess the method's sensitivity and accuracy in your specific matrix.",
+ "reply": "We need to confirm the target analyte (water) and the sample state (liquid, possibly turbid). The first experiment should test a simple transmission NIR probe on a representative petroleum sample to see if water absorption bands are detectable and how the signal behaves with varying water content.",
  "report": {
   "scenarioId": "D06",
-  "title": "Water Measurement in Petroleum Stream",
+  "title": "Petroleum Water Monitoring – First Feasibility",
   "origin": "live",
-  "generatedAt": "2026-10-17T17:10:24+00:00",
-  "decisionStatus": "provisional",
+  "generatedAt": "2026-10-17T23:20:51+00:00",
+  "decisionStatus": "insufficient",
   "requirements": {
    "stated": [
-    "handles a petroleum stream",
-    "currently send samples to a laboratory for water determination",
-    "want to investigate a fiber based measurement closer to the process",
-    "analyzer would be outside the process area",
-    "need to know what to clarify and what a first comparison experiment should establish"
+    "client handles petroleum stream and sends samples to lab for water determination",
+    "client wants to investigate fiber based measurement closer to process",
+    "analyzer would be outside process area",
+    "client needs to know what to clarify before selecting equipment and what a first comparison experiment should establish"
    ],
    "unknowns": [
-    "specific method to use for fiber based measurement",
-    "details of the petroleum stream composition",
-    "specific location for the analyzer",
-    "requirements for the analyzer's performance"
+    "water concentration range, sample turbidity, temperature, pressure, flow rate, probe access points"
+   ],
+   "factTurns": [
+    1,
+    1,
+    1,
+    1
    ]
   },
   "questions": [
    {
-    "text": "What is the composition of the petroleum stream?",
-    "impact": "method"
+    "text": "What is the expected water concentration range in the petroleum stream?",
+    "impact": "method",
+    "id": "q1",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "What are the performance requirements for the analyzer?",
-    "impact": "acceptance"
+    "text": "Is the petroleum stream clear or does it contain suspended solids or emulsions that could scatter light?",
+    "impact": "method",
+    "id": "q2",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "Where exactly will the analyzer be located?",
-    "impact": "setup"
-   }
-  ],
-  "recommendations": [
+    "text": "What are the operating temperature and pressure conditions of the stream?",
+    "impact": "setup",
+    "id": "q3",
+    "status": "open",
+    "askedTurn": 1
+   },
    {
-    "method": "Mid-IR (ATR)",
-    "methodIds": [],
-    "role": "primary",
-    "reason": "Suitable for measuring water content in petroleum with ATR probes.",
-    "citations": [
-     {
-      "source": "S02",
-      "page": "13",
-      "quote": "Application: measurement of water content in petroleum",
-      "check": "verified"
-     }
-    ]
+    "text": "How many free fibre‑optic ports are available on the process side for probe installation?",
+    "impact": "setup",
+    "id": "q4",
+    "status": "open",
+    "askedTurn": 1
+   },
+   {
+    "text": "What is the acceptable response time for detecting changes in water content?",
+    "impact": "acceptance",
+    "id": "q5",
+    "status": "open",
+    "askedTurn": 1
    }
   ],
+  "recommendations": [],
   "concept": {
-   "summary": "Mid-IR spectroscopy with ATR probes is recommended for measuring water content in petroleum streams.",
+   "summary": "Install a NIR transmission fibre probe in the process line, sample the liquid directly, route the fibre to an external analyser, and collect spectra to correlate water content with absorbance at the –OH overtone region.",
    "citations": [
     {
-     "source": "S02",
-     "page": "13",
-     "quote": "Application: measurement of water content in petroleum",
-     "check": "verified"
+     "source": "S01",
+     "page": "S01 5",
+     "quote": "Near-IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
+     "check": "failed"
     }
    ]
   },
   "spectralRange": {
-   "summary": "Mid-IR region, typically 4000–2000 cm-1 for water detection in petroleum.",
+   "summary": "NIR 780–2500 nm, focusing on the [to be agreed with the customer] region for water overtone absorption.",
    "citations": [
     {
-     "source": "S02",
-     "page": "13",
-     "quote": "absorbance versus wavenumber 4000–2000 cm-1",
-     "check": "visual_note"
+     "source": "S01",
+     "page": "S01 5",
+     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of molecules and atomic groups such as –OH.",
+     "check": "failed"
+    },
+    {
+     "source": "S01",
+     "page": "10",
+     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+     "check": "verified"
     }
    ]
   },
   "risks": [
-   "Strong absorption in mid-IR limits sample thickness."
+   "Potential scattering if the stream is turbid; probe fouling; temperature effects on baseline"
   ],
   "feasibility": {
    "steps": [
-    "Establish calibration models using representative samples.",
-    "Assess sensitivity and accuracy in the specific matrix.",
-    "Validate with independent reference assays."
+    "1. Obtain a representative petroleum sample with known water content.",
+    "2. Measure spectra with a NIR transmission probe in a lab setting.",
+    "3. Build a calibration model correlating absorbance to water concentration.",
+    "4. Validate on held‑out samples.",
+    "5. Install probe in process line and compare online readings to lab results."
    ],
-   "decisionBasis": "Initial experiments should confirm method suitability and performance in the specific application context."
+   "decisionBasis": "Simple, cost‑effective method that directly probes the liquid; if turbidity or temperature issues arise, alternative ATR or diffuse reflection can be considered."
   },
   "premiseChecks": [
    {
     "id": "target_defined",
     "label": "The variable to measure is named",
-    "status": "pass",
-    "detail": "Target: water.",
+    "status": "fail",
+    "detail": "The enquiry does not name the variable or substance to measure, so no method can be chosen yet. Ask for it first.",
     "citations": []
    }
   ],
   "sources": [
    {
-    "source": "S02",
-    "page": "13",
-    "quote": "Application: measurement of water content in petroleum",
-    "check": "verified"
+    "source": "S01",
+    "page": "S01 5",
+    "quote": "Near-IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
+    "check": "failed"
    },
    {
-    "source": "S02",
-    "page": "13",
-    "quote": "absorbance versus wavenumber 4000–2000 cm-1",
-    "check": "visual_note"
+    "source": "S01",
+    "page": "S01 5",
+    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of molecules and atomic groups such as –OH.",
+    "check": "failed"
+   },
+   {
+    "source": "S01",
+    "page": "10",
+    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+    "check": "verified"
    }
+  ],
+  "mode": "draft",
+  "assumptions": [
+   "The petroleum stream is sufficiently clear for transmission NIR; water absorption bands are not masked by hydrocarbons; probe can be mounted on available ports.",
+   "NIR (transmission): Transmission probes are suitable for clear or semi‑transparent liquids and are listed as average cost, matching the need for a simple, inexpensive first test. (not supported by the cited page)",
+   "NIR (transmission): The NIR range (780–2500 nm) contains overtone bands of –OH that can be used for water detection in hydrocarbons. (not supported by the cited page)"
+  ],
+  "pointsToConfirm": [
+   "Actual water concentration range; sample turbidity; temperature/pressure compatibility; probe mounting feasibility; acceptable response time."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 1101.0,
+   "ms": 304.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 2664.0,
-   "detail": "5 stated · 4 unknown"
+   "ms": 2790.0,
+   "detail": "4 stated (0 from answers) · 2 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 138.0,
-   "detail": "S01 p.1, S01 p.11, S01 p.12, S01 p.5, S02 p.10, S02 p.13, S02 p.18 · BM25 · flashrank"
+   "ms": 67.0,
+   "detail": "S01 p.10, S01 p.16, S01 p.18, S02 p.13, S03 p.4 · BM25 · flashrank"
   },
   {
    "step": "Premise checks",
-   "status": "ok",
+   "status": "fail",
    "ms": 0.0,
-   "detail": "nothing contradicted"
+   "detail": "The variable to measure is named"
   },
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 6643.0,
-   "detail": "gpt-4o via openai"
+   "ms": 24186.0,
+   "detail": "openai/gpt-oss-20b via groq"
   },
   {
    "step": "Verify citations",
-   "status": "ok",
+   "status": "warn",
    "ms": 0.0,
-   "detail": "3 of 3 quotes found on the cited page"
+   "detail": "2 of 4 quotes found on the cited page · 2 not found"
+  },
+  {
+   "step": "Validate numbers, claims and questions",
+   "status": "warn",
+   "ms": 0.0,
+   "detail": "1 unsupported numbers replaced · 2 unsupported sentences and 1 uncited recommendations moved to assumptions · 5 open questions · all required sections present"
   }
  ]
 }

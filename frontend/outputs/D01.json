@@ -1,101 +1,148 @@
 {
- "reply": "For assessing API concentration in a powder blend within the feed frame, NIR (diffuse reflection) and Raman spectroscopy are promising methods. NIR is suitable for online applications due to its penetration depth and compatibility with fiber optics. Raman can provide complementary information, especially for symmetric vibrations. A pilot should test each method individually before considering a combined approach.",
+ "reply": "We recommend starting with a NIR diffuse‑reflection probe for the powder blend, and adding a Raman probe as a complementary method. Both are suitable for opaque, scattering media and can be mounted in the feed frame. The pilot should test each method separately before fusing the data.",
  "report": {
   "scenarioId": "D01",
-  "title": "In-line API Concentration Monitoring in Tablet Manufacturing",
+  "title": "Tablet‑blend in‑line API monitoring",
   "origin": "live",
-  "generatedAt": "2026-10-17T17:09:39+00:00",
+  "generatedAt": "2026-10-17T23:12:36+00:00",
   "decisionStatus": "provisional",
   "requirements": {
    "stated": [
-    "manufacture tablets from a powder blend",
-    "laboratory checks are too slow",
-    "want to assess fiber based measurement in the feed frame",
-    "first pilot should compare measurement options"
+    "manufacture tablets from powder blend with API and excipients",
+    "laboratory checks confirm blend target but results arrive after material has moved through press",
+    "want to assess whether a fiber based measurement in the feed frame could follow API concentration changes",
+    "first pilot should compare reasonable measurement options before committing to production equipment"
    ],
    "unknowns": [
-    "specific measurement methods the client is considering",
-    "specific API or excipients in the blend"
+    "which specific measurement methods are being considered",
+    "which fiber types are available or preferred",
+    "whether existing equipment can be used"
+   ],
+   "factTurns": [
+    1,
+    1,
+    1,
+    1
    ]
   },
   "questions": [
    {
-    "text": "What is the specific API and excipients in the blend?",
-    "impact": "method"
+    "text": "What fiber‑optic spectrometer(s) are currently available or planned for use in the pilot?",
+    "impact": "setup",
+    "id": "q1",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "What are the acceptance criteria for API concentration measurement?",
-    "impact": "acceptance"
+    "text": "What probe geometry (diameter, length) can be accommodated in the tablet press feed frame?",
+    "impact": "setup",
+    "id": "q2",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "Are there any known fluorescence issues with the API or excipients?",
-    "impact": "method"
+    "text": "Do you have a Raman spectrometer with 785 nm excitation that can be coupled to a fiber probe?",
+    "impact": "setup",
+    "id": "q3",
+    "status": "open",
+    "askedTurn": 1
+   },
+   {
+    "text": "Is there a NIR spectrometer capable of diffuse‑reflection measurements that can be mounted in the feed frame?",
+    "impact": "setup",
+    "id": "q4",
+    "status": "open",
+    "askedTurn": 1
+   },
+   {
+    "text": "What are the acceptable response time and calibration range for the API concentration measurement?",
+    "impact": "acceptance",
+    "id": "q5",
+    "status": "open",
+    "askedTurn": 1
    }
   ],
   "recommendations": [
    {
-    "method": "NIR (diffuse reflection)",
+    "method": "NIR diffuse reflection",
     "methodIds": [
      "NIR"
     ],
     "role": "primary",
-    "reason": "NIR is ideal for online applications due to its penetration depth and compatibility with fiber optics.",
+    "reason": "Diffuse‑reflection probes are suitable for scattering media such as powder blends and are listed as average cost in Table 1 (p.6).",
     "citations": [
      {
       "source": "S01",
-      "page": "5",
-      "quote": "NIR spectroscopy, with its relatively large penetration depth...",
+      "page": "Table 1 (p.6)",
+      "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
       "check": "verified"
      }
     ]
    },
    {
-    "method": "Raman spectroscopy",
-    "methodIds": [],
+    "method": "Raman",
+    "methodIds": [
+     "RAMAN"
+    ],
     "role": "comparison",
-    "reason": "Raman provides complementary information, especially for symmetric vibrations.",
+    "reason": "Raman spectroscopy complements NIR by probing symmetric vibrations and the molecular backbone, improving chemometric robustness. The 785 nm excitation is compatible with tablet‑blend powders and can be mounted in the feed frame.",
     "citations": [
      {
       "source": "S01",
-      "page": "12",
-      "quote": "Raman spectra (as well as IR absorption spectra) can be used...",
+      "page": "15",
+      "quote": "Raman provides information on the molecular backbone and symmetrical non‑polar groups.",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "15",
+      "quote": "Raman spectrometer and Raman fiber probe for contact measurements with 785 nm excitation wavelength",
       "check": "verified"
      }
     ]
    }
   ],
   "concept": {
-   "summary": "Assessing API concentration in a powder blend using fiber-based spectroscopy in the feed frame.",
+   "summary": "Mount a NIR diffuse‑reflection probe and a Raman fiber probe in the tablet press feed frame. The probes will contact the powder blend as it passes, delivering spectra to their respective spectrometers located outside the press. Data from both instruments will be fused offline using PLS to predict API concentration.",
    "citations": [
     {
      "source": "S01",
-     "page": "14",
-     "quote": "In-line monitoring of critical manufacturing stages, such as powder blending...",
+     "page": "15",
+     "quote": "During the experimental action, the probes are inserted directly into the process environment, such as the feed frame of a rotary tablet press.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "15",
+     "quote": "Data processing for pharmaceutical tasks relies on \"low‑level data fusion,\" where the synchronized NIR and Raman spectra are merged into a single augmented matrix.",
      "check": "verified"
     }
    ]
   },
   "spectralRange": {
-   "summary": "NIR nominal 780–2500 nm; Raman shift in cm-1 with visible to NIR excitation.",
+   "summary": "NIR: 780–2500 nm; Raman: 785 nm excitation with Stokes shift up to ~[to be agreed with the customer].",
    "citations": [
     {
      "source": "S01",
-     "page": "5",
-     "quote": "NIR spectroscopy, with its relatively large penetration depth...",
+     "page": "10",
+     "quote": "Near‑IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes. NIR spectra (780–2500 nm) contain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups.",
      "check": "verified"
     }
    ]
   },
   "risks": [
-   "Potential fluorescence interference with Raman measurements."
+   "Potential probe fouling by dust or powder; requires regular cleaning or protective coatings.",
+   "Interference from excipients with overlapping spectral features; may need chemometric discrimination."
   ],
   "feasibility": {
    "steps": [
-    "Conduct laboratory tests to establish calibration models for NIR and Raman.",
-    "Evaluate each method's performance in the feed frame environment.",
-    "Validate models with independent reference assays."
+    "1. Acquire or confirm availability of a NIR diffuse‑reflection probe and a Raman fiber probe compatible with 785 nm.",
+    "2. Install probes in a pilot tablet press feed frame and connect to existing spectrometers.",
+    "3. Run a series of blend batches with known API concentrations (reference method) to build calibration models.",
+    "4. Validate models on held‑out batches and assess response time and accuracy.",
+    "5. If single‑method performance is insufficient, fuse NIR and Raman data and re‑validate."
    ],
-   "decisionBasis": "Test each method individually to determine suitability before considering a combined approach."
+   "decisionBasis": "Both methods are listed in Table 1 (p.6) as suitable for powder blends and are inexpensive enough for a pilot. The combination is supported by literature (S01 p.15)."
   },
   "premiseChecks": [
    {
@@ -104,47 +151,115 @@
     "status": "pass",
     "detail": "Target: API concentration.",
     "citations": []
+   },
+   {
+    "id": "geometry_optics",
+    "label": "Probe geometry matches the optical density of the medium",
+    "status": "pass",
+    "detail": "Medium described as opaque; the proposed ATR / reflection geometry suits it.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "16",
+      "quote": "as the media becomes more opaque, turbid, or highly concentrated, the signal in a standard transmission setup becomes saturated because the light cannot penetrate the bulk of the sample",
+      "check": "verified"
+     }
+    ]
+   },
+   {
+    "id": "cost",
+    "label": "Simplest method first: the primary is the cheapest candidate",
+    "status": "pass",
+    "detail": "Table 1 cost of the probe options: primary NIR (average), others Raman (high).",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "Table 1 (p.6)",
+      "check": "unverified"
+     }
+    ]
    }
   ],
   "sources": [
    {
     "source": "S01",
-    "page": "5",
-    "quote": "NIR spectroscopy, with its relatively large penetration depth...",
+    "page": "Table 1 (p.6)",
+    "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
     "check": "verified"
    },
    {
     "source": "S01",
-    "page": "12",
-    "quote": "Raman spectra (as well as IR absorption spectra) can be used...",
+    "page": "15",
+    "quote": "Raman provides information on the molecular backbone and symmetrical non‑polar groups.",
     "check": "verified"
    },
    {
     "source": "S01",
-    "page": "14",
-    "quote": "In-line monitoring of critical manufacturing stages, such as powder blending...",
+    "page": "15",
+    "quote": "Raman spectrometer and Raman fiber probe for contact measurements with 785 nm excitation wavelength",
     "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "15",
+    "quote": "During the experimental action, the probes are inserted directly into the process environment, such as the feed frame of a rotary tablet press.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "15",
+    "quote": "Data processing for pharmaceutical tasks relies on \"low‑level data fusion,\" where the synchronized NIR and Raman spectra are merged into a single augmented matrix.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "10",
+    "quote": "Near‑IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes. NIR spectra (780–2500 nm) contain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "16",
+    "quote": "as the media becomes more opaque, turbid, or highly concentrated, the signal in a standard transmission setup becomes saturated because the light cannot penetrate the bulk of the sample",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "Table 1 (p.6)",
+    "check": "unverified"
    }
+  ],
+  "mode": "draft",
+  "assumptions": [
+   "The tablet press feed frame can accommodate the probe geometry.",
+   "The spectrometers can be positioned outside the press and connected via fiber.",
+   "The powder blend is opaque and scattering, making diffuse‑reflection appropriate.",
+   "NIR diffuse reflection: They provide rapid, in‑line spectra in the 780–2500 nm range, which is ideal for detecting overtones of functional groups present in APIs and excipients. (not supported by the cited page)"
+  ],
+  "pointsToConfirm": [
+   "Confirm probe size and mounting constraints in the feed frame.",
+   "Verify that the existing spectrometers support the required fiber inputs.",
+   "Determine acceptable calibration range and response time for API concentration."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 1295.0,
+   "ms": 601.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 1944.0,
-   "detail": "4 stated · 2 unknown"
+   "ms": 789.0,
+   "detail": "4 stated (0 from answers) · 3 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 565.0,
-   "detail": "S01 p.1, S01 p.11, S01 p.12, S01 p.14, S01 p.15, S01 p.5, S02 p.10, S02 p.14 · BM25 · flashrank"
+   "ms": 178.0,
+   "detail": "S01 p.10, S01 p.15, S02 p.20, S02 p.6 · BM25 · flashrank"
   },
   {
    "step": "Premise checks",
@@ -155,14 +270,20 @@
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 4457.0,
-   "detail": "gpt-4o via openai"
+   "ms": 1496.0,
+   "detail": "openai/gpt-oss-20b via groq"
   },
   {
    "step": "Verify citations",
    "status": "ok",
    "ms": 0.0,
-   "detail": "4 of 4 quotes found on the cited page"
+   "detail": "6 of 6 quotes found on the cited page"
+  },
+  {
+   "step": "Validate numbers, claims and questions",
+   "status": "warn",
+   "ms": 0.0,
+   "detail": "1 unsupported numbers replaced · 1 unsupported sentences and 0 uncited recommendations moved to assumptions · 5 open questions · all required sections present"
   }
  ]
 }

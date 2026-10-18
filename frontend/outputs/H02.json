@@ -1,98 +1,87 @@
 {
- "reply": "For the whey stream, NIR Transmission is suitable due to its ability to handle transparent or semi-transparent liquids, offering higher accuracy for low-concentration components. For the opaque milk concentrate, NIR (diffuse reflection) is recommended as it can handle highly scattering environments. Each method should be tested individually before considering a combination, as the gain from combining them is a hypothesis to test. Use laboratory protein and fat results for calibration and validation.",
+ "reply": "For the clear whey, a NIR transmission probe is the simplest, most accurate choice; for the opaque milk concentrate, a NIR diffuse‑reflection probe will give a representative spectrum without needing dilution. A side‑by‑side lab experiment using both probes on the same samples, calibrated against lab protein/fat data, will let you compare accuracy, repeatability and ease of use before deciding on a production sensor.",
  "report": {
   "scenarioId": "H02",
-  "title": "Pilot for Dairy Composition Monitoring",
+  "title": "Pilot comparison of NIR transmission vs. diffuse‑reflection for whey and milk concentrate",
   "origin": "live",
-  "generatedAt": "2026-10-17T17:10:59+00:00",
+  "generatedAt": "2026-10-17T23:27:54+00:00",
   "decisionStatus": "provisional",
   "requirements": {
    "stated": [
-    "handles a relatively clear whey stream",
-    "handles an opaque milk concentrate",
-    "wants a pilot for composition monitoring",
-    "will use laboratory protein and fat results",
-    "can compare different measurement interfaces"
+    "process handles clear whey and opaque milk concentrate",
+    "wants pilot for composition monitoring using lab protein and fat results",
+    "wants to compare different measurement interfaces before choosing installation",
+    "asks what first measurement concepts and comparison experiment would make sense for these two streams"
    ],
    "unknowns": [
-    "specific measurement methods the client is considering",
-    "exact composition variables to measure"
+    "optical pathlength for transmission probe",
+    "acceptable calibration range for diffuse‑reflection"
+   ],
+   "factTurns": [
+    1,
+    1,
+    1,
+    1
    ]
   },
   "questions": [
    {
-    "text": "What are the specific composition variables to measure beyond protein and fat?",
-    "impact": "method"
+    "text": "What optical pathlength (mm) can be reliably maintained in the transmission probe for the whey stream?",
+    "impact": "setup",
+    "id": "q1",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "Are there any specific measurement methods the client is considering?",
-    "impact": "method"
-   },
-   {
-    "text": "What are the expected concentration ranges for protein and fat in each stream?",
-    "impact": "setup"
+    "text": "What is the maximum acceptable pathlength for the diffuse‑reflection probe to avoid signal saturation in the milk concentrate?",
+    "impact": "setup",
+    "id": "q2",
+    "status": "open",
+    "askedTurn": 1
    }
   ],
-  "recommendations": [
-   {
-    "method": "NIR Transmission",
-    "methodIds": [
-     "NIR"
-    ],
-    "role": "primary",
-    "reason": "Preferred for transparent or semi-transparent liquids like whey, offering higher accuracy for low-concentration components.",
-    "citations": [
-     {
-      "source": "S01",
-      "page": "18",
-      "quote": "NIR Transmission is the preferred method for transparent or semi-transparent liquids, such as skim milk, whey, or permeate.",
-      "check": "verified"
-     }
-    ]
-   },
-   {
-    "method": "NIR (diffuse reflection)",
-    "methodIds": [
-     "NIR"
-    ],
-    "role": "primary",
-    "reason": "Suitable for highly scattering environments like opaque milk concentrate.",
-    "citations": [
-     {
-      "source": "S01",
-      "page": "17",
-      "quote": "sensitive to the surface characteristics and fat globule size.",
-      "check": "verified"
-     }
-    ]
-   }
-  ],
+  "recommendations": [],
   "concept": {
-   "summary": "Pilot for in-line composition monitoring of whey and milk concentrate using NIR spectroscopy.",
+   "summary": "Use a NIR transmission probe for whey and a NIR diffuse‑reflection probe for milk concentrate, both in a laboratory setting with controlled pathlengths and reference lab analyses for protein and fat.",
    "citations": [
     {
-     "source": "S02",
-     "page": "3",
-     "quote": "Multi-Spectral Fiber Systems allow to test 4 spectroscopy methods in 0.3-16µm range using robust fiber probes for remote monitoring of chemical reaction in-line.",
-     "check": "verified"
+     "source": "S01",
+     "page": "S01 18",
+     "quote": "NIR Transmission is the preferred method for transparent or semi-transparent liquids, such as skim milk, whey, or permeate.",
+     "check": "failed"
+    },
+    {
+     "source": "S01",
+     "page": "S01 18",
+     "quote": "Reflection can work well in highly scattering environments but can be less representative for clear liquids.",
+     "check": "failed"
     }
    ]
   },
   "spectralRange": {
-   "summary": "NIR nominal range 780–2500 nm; specify usable range based on selected system.",
-   "citations": []
+   "summary": "NIR [to be agreed with the customer] for both methods; transmission uses the full band, diffuse‑reflection focuses on [to be agreed with the customer] where protein and fat bands are prominent.",
+   "citations": [
+    {
+     "source": "S03",
+     "page": "S03 16",
+     "quote": "Selecting optimal wavelength intervals for an optical sensor: A case study of milk fat and total protein analysis in the region 400–1100 nm.",
+     "check": "failed"
+    }
+   ]
   },
   "risks": [
-   "Potential for high scattering in milk concentrate affecting measurement accuracy.",
-   "Need for precise control of optical pathlength in NIR Transmission for whey."
+   "Inadequate pathlength control may bias transmission results; diffuse‑reflection may be less sensitive to low‑concentration components; optical density changes during process may shift optimal probe choice."
   ],
   "feasibility": {
    "steps": [
-    "Conduct multi-method lab trials to identify key spectral features.",
-    "Develop chemometric models using laboratory protein and fat results.",
-    "Test each method individually before considering a combination."
+    "1. Install a NIR transmission probe with a 1–5 mm pathlength in a lab cuvette for whey samples.",
+    "2. Install a NIR diffuse‑reflection probe on a flat sample holder for milk concentrate.",
+    "3. Measure a set of whey and milk concentrate samples with both probes.",
+    "4. Calibrate each method against lab protein/fat reference data.",
+    "5. Compare RMSEP, bias and repeatability for each method.",
+    "6. Decide on the probe that meets accuracy and operational criteria."
    ],
-   "decisionBasis": "Agree on numerical acceptance criteria with the client before testing; choose the simplest configuration that meets them."
+   "decisionBasis": "Both methods are supported by the literature for dairy liquids; the simplest, cheapest sufficient method is chosen for each stream."
   },
   "premiseChecks": [
    {
@@ -104,9 +93,9 @@
    },
    {
     "id": "combination",
-    "label": "A method combination is justified",
-    "status": "flag",
-    "detail": "Assess each method on its own first; a gain from combining them is a hypothesis to test for this material.",
+    "label": "Method combination: justified, one method is stated to be insufficient",
+    "status": "pass",
+    "detail": "The customer states that a single method does not meet the need, so a combination is a reasonable next step; its gain is still tested.",
     "citations": [
      {
       "source": "S01",
@@ -115,71 +104,120 @@
       "check": "verified"
      }
     ]
+   },
+   {
+    "id": "geometry_optics",
+    "label": "Probe geometry: the medium changes from clear to opaque",
+    "status": "flag",
+    "detail": "The medium changes from clear to opaque, so a single transmission path may saturate. Plan ATR or reflection for the opaque phase, or check the path length on samples from both phases.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "16",
+      "quote": "as the media becomes more opaque, turbid, or highly concentrated, the signal in a standard transmission setup becomes saturated because the light cannot penetrate the bulk of the sample",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "16",
+      "quote": "In these high-OD scenarios, a UV-ATR (Attenuated Total Reflection) probe is used.",
+      "check": "verified"
+     }
+    ]
    }
   ],
   "sources": [
    {
     "source": "S01",
-    "page": "18",
+    "page": "S01 18",
     "quote": "NIR Transmission is the preferred method for transparent or semi-transparent liquids, such as skim milk, whey, or permeate.",
-    "check": "verified"
+    "check": "failed"
    },
    {
     "source": "S01",
-    "page": "17",
-    "quote": "sensitive to the surface characteristics and fat globule size.",
-    "check": "verified"
+    "page": "S01 18",
+    "quote": "Reflection can work well in highly scattering environments but can be less representative for clear liquids.",
+    "check": "failed"
    },
    {
-    "source": "S02",
-    "page": "3",
-    "quote": "Multi-Spectral Fiber Systems allow to test 4 spectroscopy methods in 0.3-16µm range using robust fiber probes for remote monitoring of chemical reaction in-line.",
-    "check": "verified"
+    "source": "S03",
+    "page": "S03 16",
+    "quote": "Selecting optimal wavelength intervals for an optical sensor: A case study of milk fat and total protein analysis in the region 400–1100 nm.",
+    "check": "failed"
    },
    {
     "source": "S01",
     "page": "15",
     "quote": "By combining Raman and NIR, these models can predict API potency or coating thickness with higher accuracy and robustness than single-method models.",
     "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "16",
+    "quote": "as the media becomes more opaque, turbid, or highly concentrated, the signal in a standard transmission setup becomes saturated because the light cannot penetrate the bulk of the sample",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "16",
+    "quote": "In these high-OD scenarios, a UV-ATR (Attenuated Total Reflection) probe is used.",
+    "check": "verified"
    }
+  ],
+  "mode": "draft",
+  "assumptions": [
+   "The whey stream remains optically clear enough for transmission; the milk concentrate is sufficiently scattering for diffuse‑reflection; the lab has access to a NIR spectrometer capable of both probe types.",
+   "NIR Transmission (primary candidate, no verified page citation): NIR transmission is preferred for transparent or semi‑transparent liquids such as whey, providing higher accuracy for low‑concentration components by sampling the entire volume.",
+   "NIR Diffuse Reflection (primary candidate, no verified page citation): Diffuse‑reflection probes are suitable for scattering, opaque media like milk concentrate, avoiding the need for dilution and providing a representative chemical signature."
+  ],
+  "pointsToConfirm": [
+   "Exact optical pathlength that can be maintained in the transmission probe.",
+   "Maximum pathlength before saturation in the diffuse‑reflection probe.",
+   "Availability of a NIR spectrometer that can switch between transmission and diffuse‑reflection probes."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 645.0,
+   "ms": 247.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 1981.0,
-   "detail": "5 stated · 2 unknown"
+   "ms": 1238.0,
+   "detail": "4 stated (0 from answers) · 1 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 70.0,
-   "detail": "S01 p.17, S01 p.18, S01 p.4, S01 p.9, S02 p.20, S02 p.3, S05 p.2 · BM25 · flashrank"
+   "ms": 92.0,
+   "detail": "S01 p.16, S01 p.18, S03 p.16, S03 p.3, S04 p.3 · BM25 · flashrank"
   },
   {
    "step": "Premise checks",
-   "status": "warn",
+   "status": "ok",
    "ms": 0.0,
-   "detail": "A method combination is justified"
+   "detail": "nothing contradicted"
   },
   {
    "step": "Compose the assessment",
-   "status": "ok",
-   "ms": 6053.0,
-   "detail": "gpt-4o via openai"
+   "status": "warn",
+   "ms": 69809.0,
+   "detail": "openai/gpt-oss-20b via groq · repaired once"
   },
   {
    "step": "Verify citations",
-   "status": "ok",
+   "status": "warn",
    "ms": 0.0,
-   "detail": "3 of 3 quotes found on the cited page"
+   "detail": "0 of 5 quotes found on the cited page · 5 not found"
+  },
+  {
+   "step": "Validate numbers, claims and questions",
+   "status": "warn",
+   "ms": 0.0,
+   "detail": "2 unsupported numbers replaced · 0 unsupported sentences and 2 uncited recommendations moved to assumptions · 2 open questions · missing sections: recommendation with citations"
   }
  ]
 }

@@ -1,76 +1,89 @@
 {
- "reply": "The client's request lacks specific details about the variable or substance to measure, which is crucial for selecting an appropriate optical method. Without this information, we cannot recommend a specific technique. It's essential to identify the exact composition changes or analytes of interest in the polymer extrusion process.",
+ "reply": "We need to know what you are measuring – the API identity or its concentration – and the melt’s optical properties. Once those are clear we can pick a probe that survives the hot, fouling environment and gives a usable signal.",
  "report": {
   "scenarioId": "D07",
-  "title": "Optical Measurement for Polymer Extrusion",
+  "title": "Hot Polymer Extrusion – Initial Probe Selection",
   "origin": "live",
-  "generatedAt": "2026-10-17T17:10:33+00:00",
+  "generatedAt": "2026-10-17T23:23:02+00:00",
   "decisionStatus": "insufficient",
   "requirements": {
    "stated": [
-    "developing a hot polymer extrusion process",
-    "incorporates an active pharmaceutical ingredient",
-    "want to investigate optical measurement for composition changes",
-    "have offline assays",
-    "process interface is hot and may have material build up",
-    "need an initial comparison plan and questions for probe choice"
+    "developing hot polymer extrusion process with active pharmaceutical ingredient",
+    "want to investigate if optical measurement can detect composition changes while melt is processed",
+    "have offline assays but process interface is hot and may be exposed to material build up",
+    "need initial comparison plan and questions required before choosing a probe"
    ],
    "unknowns": [
-    "specific optical methods considered",
-    "exact temperature of the process",
-    "specific composition changes to detect",
-    "details of the active pharmaceutical ingredient",
-    "type of polymer used"
+    "API identity and concentration range",
+    "melt optical density and scattering",
+    "temperature and pressure at probe location",
+    "available port size and access points"
+   ],
+   "factTurns": [
+    1,
+    1,
+    1,
+    1
    ]
   },
   "questions": [
    {
-    "text": "What specific composition changes or analytes are you interested in detecting during the extrusion process?",
-    "impact": "method"
+    "text": "What is the active pharmaceutical ingredient (API) and its expected concentration range in the polymer melt?",
+    "impact": "method",
+    "id": "q1",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "What is the exact temperature range of the extrusion process?",
-    "impact": "setup"
+    "text": "What is the approximate optical density (OD) or scattering level of the melt at the measurement wavelength range?",
+    "impact": "method",
+    "id": "q2",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "Can you provide details about the active pharmaceutical ingredient and the type of polymer used?",
-    "impact": "method"
+    "text": "What are the temperature and pressure conditions at the intended probe location?",
+    "impact": "setup",
+    "id": "q3",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "Are there any specific optical methods you have considered or prefer?",
-    "impact": "method"
+    "text": "What is the size and type of the available port or interface for probe installation?",
+    "impact": "setup",
+    "id": "q4",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "What are the characteristics of the material build-up at the process interface?",
-    "impact": "setup"
+    "text": "Do you have any constraints on probe material (e.g., must withstand high temperature and chemical exposure)?",
+    "impact": "setup",
+    "id": "q5",
+    "status": "open",
+    "askedTurn": 1
    }
   ],
   "recommendations": [],
   "concept": {
-   "summary": "The client is exploring optical measurement for detecting composition changes in a hot polymer extrusion process involving an active pharmaceutical ingredient.",
+   "summary": "None yet – requires clarification of target and melt properties",
    "citations": []
   },
   "spectralRange": {
-   "summary": "Optical spectroscopy covers UV, visible, near- and mid-infrared ranges, each suitable for different types of analysis.",
-   "citations": [
-    {
-     "source": "S04",
-     "page": "1",
-     "quote": "chalcogenide glasses and polycrystalline silver halides1,9 having suﬃciently high transmittance in diﬀerent intervals of the midinfrared (IR) spectral region (4000−400 cm−1).",
-     "check": "verified"
-    }
-   ]
+   "summary": "None yet – depends on API and melt optical properties",
+   "citations": []
   },
   "risks": [
-   "Without identifying the specific variable to measure, selecting an appropriate method is not feasible."
+   "Uncertain API absorption features may overlap with polymer background",
+   "High temperature may damage probe optics",
+   "Fouling could block optical path"
   ],
   "feasibility": {
    "steps": [
-    "Identify the specific composition changes or analytes of interest.",
-    "Determine the temperature and material characteristics of the process.",
-    "Select suitable optical methods based on the identified variables."
+    "1. Obtain representative melt samples and measure their optical density and temperature.",
+    "2. Perform laboratory ATR or diffuse‑reflection spectroscopy on the melt to identify usable spectral windows.",
+    "3. Test probe durability in a mock‑up extrusion environment."
    ],
-   "decisionBasis": "The decision to recommend a method depends on identifying the specific variable or substance to measure."
+   "decisionBasis": "Awaiting answers to the above questions"
   },
   "premiseChecks": [
    {
@@ -81,33 +94,36 @@
     "citations": []
    }
   ],
-  "sources": [
-   {
-    "source": "S04",
-    "page": "1",
-    "quote": "chalcogenide glasses and polycrystalline silver halides1,9 having suﬃciently high transmittance in diﬀerent intervals of the midinfrared (IR) spectral region (4000−400 cm−1).",
-    "check": "verified"
-   }
+  "sources": [],
+  "mode": "draft",
+  "assumptions": [
+   "Assumes the API is detectable by IR or Raman in the melt"
+  ],
+  "pointsToConfirm": [
+   "API identity and concentration range",
+   "Melt optical properties",
+   "Process temperature/pressure",
+   "Port dimensions and material compatibility"
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 682.0,
+   "ms": 1257.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 2392.0,
-   "detail": "6 stated · 5 unknown"
+   "ms": 14682.0,
+   "detail": "4 stated (0 from answers) · 0 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 72.0,
-   "detail": "S01 p.12, S01 p.16, S01 p.3, S02 p.14, S04 p.1, S04 p.2 · BM25 · flashrank"
+   "ms": 61.0,
+   "detail": "S01 p.16, S02 p.14, S04 p.1, S04 p.2 · BM25 · flashrank"
   },
   {
    "step": "Premise checks",
@@ -118,14 +134,20 @@
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 5249.0,
-   "detail": "gpt-4o via openai"
+   "ms": 38121.0,
+   "detail": "openai/gpt-oss-20b via groq"
   },
   {
    "step": "Verify citations",
    "status": "ok",
    "ms": 0.0,
-   "detail": "1 of 1 quotes found on the cited page"
+   "detail": "0 of 0 quotes found on the cited page"
+  },
+  {
+   "step": "Validate numbers, claims and questions",
+   "status": "ok",
+   "ms": 0.0,
+   "detail": "all numbers traced to the customer or a cited page · every recommendation sentence cited · 5 open questions · all required sections present"
   }
  ]
 }

@@ -1,16 +1,19 @@
-import { type Citation, type Report, citeText, statusLabel } from "./report";
+import { type Citation, type Report, citeText, closedQuestions, openQuestions, questionStatusLabel, questionText, statusLabel, statusOf } from "./report";
 
 const cites = (cs: Citation[]) => (cs.length ? ` [${cs.map(citeText).join("; ")}]` : "");
 
 export function toMarkdown(r: Report, enquiry: string): string {
   const L: string[] = [];
-  L.push(`# ${r.scenarioId ? `${r.scenarioId} · ` : ""}${r.title}`, "");
+  L.push(`# ${r.title}`, "");
   if (r.originNote) L.push(`> ${r.originNote}`, "");
   L.push(`**Decision status:** ${statusLabel[r.decisionStatus]}`, "");
   L.push("## Enquiry", "", enquiry, "");
   L.push("## Requirements", "", "**Stated by the client**", ...r.requirements.stated.map((s) => `- ${s}`), "");
   L.push("**Key unknowns**", ...r.requirements.unknowns.map((s) => `- ${s}`), "");
-  L.push("## Clarification questions", "", ...r.questions.map((q, i) => `${i + 1}. ${q.text}`), "");
+  L.push("## Clarification questions", "", ...openQuestions(r).map((q, i) => `${i + 1}. ${questionText(q)}`), "");
+  if (closedQuestions(r).length) L.push("**Answered in the conversation**", ...closedQuestions(r).map((q) => `- ${q.text} (${questionStatusLabel[statusOf(q)]})${q.answer ? `: ${q.answer}` : ""}`), "");
+  if (r.assumptions?.length) L.push("## Assumptions", "", ...r.assumptions.map((s) => `- ${s}`), "");
+  if (r.pointsToConfirm?.length) L.push("## Points to confirm", "", ...r.pointsToConfirm.map((s) => `- ${s}`), "");
   L.push("## Recommendation", "");
   for (const rec of r.recommendations) L.push(`- **${rec.method}** (${rec.role.replace("_", " ")}). ${rec.reason}${cites(rec.citations)}`);
   L.push("", "## Measurement concept", "", r.concept.summary + cites(r.concept.citations), "");
@@ -38,7 +41,7 @@ export function toPlainText(r: Report, transcript: string): string {
   const section = (title: string) => L.push("", "", title, "─".repeat(title.length), "");
   const bullets = (items: string[]) => (items.length ? items.forEach((s) => L.push(`• ${s}`)) : L.push("• None"));
 
-  const heading = `${r.scenarioId ? `${r.scenarioId} · ` : ""}${r.title}`;
+  const heading = r.title;
   L.push(heading, "═".repeat(Math.min(heading.length, 72)), "");
   L.push(`Decision status: ${statusLabel[r.decisionStatus]}`);
   if (r.originNote) L.push(`Note: ${r.originNote}`);
@@ -60,8 +63,20 @@ export function toPlainText(r: Report, transcript: string): string {
   bullets(r.requirements.unknowns);
 
   section("Clarification questions");
-  if (r.questions.length) r.questions.forEach((q, i) => L.push(`${i + 1}. ${q.text}${q.impact ? ` (${plainImpact[q.impact]})` : ""}`));
-  else L.push("None.");
+  const open = openQuestions(r);
+  if (open.length) open.forEach((q, i) => L.push(`${i + 1}. ${questionText(q)}${q.impact ? ` (${plainImpact[q.impact]})` : ""}`));
+  else L.push(r.mode === "final" ? "None (final report)." : "None.");
+  if (closedQuestions(r).length) {
+    L.push("", "Answered in the conversation");
+    closedQuestions(r).forEach((q) => L.push(`• ${q.text} (${questionStatusLabel[statusOf(q)]})${q.answer ? `: ${q.answer}` : ""}`));
+  }
+  if (r.assumptions?.length || r.pointsToConfirm?.length) {
+    section("Assumptions and points to confirm");
+    L.push("Assumptions");
+    bullets(r.assumptions ?? []);
+    L.push("", "Points to confirm");
+    bullets(r.pointsToConfirm ?? []);
+  }
 
   section("Recommendation");
   if (r.recommendations.length === 0) {

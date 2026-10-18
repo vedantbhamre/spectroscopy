@@ -7,7 +7,7 @@ import { arrive, hexToRgb, OUT, pipelineAnimation } from "@/lib/lottie-pipeline"
 const STEPS = [
   { title: "Read the enquiry", text: "What the client said is kept apart from everything they did not say." },
   { title: "Facts and unknowns", text: "Stated facts keep their wording; missing facts stay unknown, never guessed." },
-  { title: "Retrieve AFS pages", text: "Relevant pages of S01–S06 and the S01 method table are pulled in." },
+  { title: "Retrieve AFS pages", text: "The relevant pages of the AFS guides, slides and studies are found, with the method comparison table." },
   { title: "Premise checks", text: "Does the fibre transmit the method's range? Is a lab study being used as proof?" },
   { title: "Cited report", text: "Questions, methods, concept and a first experiment, each claim with its page." },
 ];
