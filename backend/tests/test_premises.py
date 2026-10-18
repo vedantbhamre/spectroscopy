@@ -60,3 +60,8 @@ def test_every_check_citation_is_on_its_page():
     for check in run_checks(facts):
         for cite in check.citations:
             assert verify(cite).check in ("verified", "visual_note"), (check.id, cite)
+
+
+def test_classification_study_has_a_target():
+    f = detect("We want to classify tissue samples as muscle, fat or liver in a laboratory study.", Facts())
+    assert f.target_variables and {c.id: c for c in run_checks(f)}["target_defined"].status == "pass"

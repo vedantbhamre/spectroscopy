@@ -1,20 +1,41 @@
 {
- "reply": "We need to confirm the target analyte (water) and the sample state (liquid, possibly turbid). The first experiment should test a simple transmission NIR probe on a representative petroleum sample to see if water absorption bands are detectable and how the signal behaves with varying water content.",
+ "reply": "We suggest starting with an in‑line NIR transmission probe (average cost) to monitor water in the petroleum stream, and run a parallel lab‑scale MIR‑ATR measurement for comparison. First experiments should define detection limits, temperature effects, and calibration robustness.",
  "report": {
   "scenarioId": "D06",
-  "title": "Petroleum Water Monitoring – First Feasibility",
+  "title": "In‑line water monitoring for petroleum stream",
   "origin": "live",
-  "generatedAt": "2026-10-17T23:20:51+00:00",
-  "decisionStatus": "insufficient",
+  "generatedAt": "2026-10-18T14:22:08+00:00",
+  "decisionStatus": "provisional",
+  "answer": {
+   "text": "It depends on the optical appearance of the stream; a transmission‑type NIR probe is the simplest likely‑sufficient option, with MIR‑ATR as a higher‑cost comparison.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "Table 1 (p.6)",
+     "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "Table 1 (p.6)",
+     "quote": "MIR_ATR: ATR probe (absorption); sample: liquid, paste, soft; cost: high",
+     "check": "verified"
+    }
+   ]
+  },
   "requirements": {
    "stated": [
     "client handles petroleum stream and sends samples to lab for water determination",
-    "client wants to investigate fiber based measurement closer to process",
-    "analyzer would be outside process area",
-    "client needs to know what to clarify before selecting equipment and what a first comparison experiment should establish"
+    "client wants fiber‑based measurement closer to process to notice changes sooner",
+    "analyzer would be outside the process area",
+    "client needs to know what to clarify and what a first comparison experiment should establish"
    ],
    "unknowns": [
-    "water concentration range, sample turbidity, temperature, pressure, flow rate, probe access points"
+    "optical clarity / scattering of the stream (clear vs opaque)",
+    "process temperature and pressure",
+    "required detection limit and accuracy for water",
+    "available access point geometry (port size, flow cell)",
+    "desired measurement frequency / response time"
    ],
    "factTurns": [
     1,
@@ -25,164 +46,306 @@
   },
   "questions": [
    {
-    "text": "What is the expected water concentration range in the petroleum stream?",
+    "text": "Is the petroleum stream optically clear enough for a transmission path (i.e., low turbidity and low absorbance in the NIR region)?",
     "impact": "method",
     "id": "q1",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "Is the petroleum stream clear or does it contain suspended solids or emulsions that could scatter light?",
-    "impact": "method",
+    "text": "What are the typical temperature and pressure conditions at the proposed probe location?",
+    "impact": "setup",
     "id": "q2",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What are the operating temperature and pressure conditions of the stream?",
+    "text": "What type of access point is available (port size, ability to install an immersion probe or flow‑through cell)?",
     "impact": "setup",
     "id": "q3",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "How many free fibre‑optic ports are available on the process side for probe installation?",
-    "impact": "setup",
+    "text": "What detection limit and accuracy are required for water content (e.g., ppm, %)?",
+    "impact": "acceptance",
     "id": "q4",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What is the acceptable response time for detecting changes in water content?",
+    "text": "How often must the water measurement be updated (seconds, minutes, batch‑wise)?",
     "impact": "acceptance",
     "id": "q5",
     "status": "open",
     "askedTurn": 1
    }
   ],
-  "recommendations": [],
+  "recommendations": [
+   {
+    "method": "NIR transmission",
+    "methodIds": [
+     "NIR"
+    ],
+    "role": "primary",
+    "reason": "NIR transmission probes work with liquid and colloidal samples, match the petroleum stream’s likely clear appearance, and have average cost, making them the simplest sufficient choice.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "Table 1 (p.6)",
+      "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+      "check": "verified"
+     }
+    ]
+   },
+   {
+    "method": "MIR‑ATR",
+    "methodIds": [
+     "MIR_ATR"
+    ],
+    "role": "comparison",
+    "reason": "MIR‑ATR provides strong O‑H absorption for water and high selectivity; useful as a laboratory reference to benchmark the NIR model.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "Table 1 (p.6)",
+      "quote": "MIR_ATR: ATR probe (absorption); sample: liquid, paste, soft; cost: high",
+      "check": "verified"
+     }
+    ]
+   }
+  ],
   "concept": {
-   "summary": "Install a NIR transmission fibre probe in the process line, sample the liquid directly, route the fibre to an external analyser, and collect spectra to correlate water content with absorbance at the –OH overtone region.",
+   "summary": "Install an immersion ATR probe for lab reference and a transmission fiber probe in the process line; fiber runs to an external NIR spectrometer; use chemometric calibration to predict water content.",
+   "probe": "Transmission fiber probe (immersion) for NIR; ATR probe (lab reference)",
+   "location": "In‑line within the petroleum stream (probe tip in flow), analyzer in adjacent control room",
+   "fiberLink": "Low‑OH silica fiber (compatible with NIR, up to 100 m) as described for industrial process control",
+   "analyzer": "NIR spectrometer covering 780–2500 nm (overtones of O‑H)",
    "citations": [
     {
      "source": "S01",
-     "page": "S01 5",
-     "quote": "Near-IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
-     "check": "failed"
+     "page": "5",
+     "quote": "Immersible fiber optic probes operating in various spectral regions from UV to mid-IR are increasingly being used for measuring liquid and soft or powdered solid samples.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "They can be used to obtain absorption, diffuse reflectance or transmission, Raman, and ATR spectra.",
+     "check": "verified"
+    },
+    {
+     "source": "S02",
+     "page": "7",
+     "quote": "Spectral Vis-NIR-Cables & for Industrial Process Control Robust 100-300m cables made with Silica fibers of low OH-content (<0.1ppm OH) enable remote industrial process-control Alu- & Cu-alloy coated fibers - High temperature resistance - Increased durability, high strength,",
+     "check": "verified"
     }
    ]
   },
   "spectralRange": {
-   "summary": "NIR 780–2500 nm, focusing on the [to be agreed with the customer] region for water overtone absorption.",
+   "summary": "NIR: 780–2500 nm (overtones of O‑H); MIR‑ATR: 4000–400 cm⁻¹ (fundamental O‑H stretch).",
    "citations": [
     {
      "source": "S01",
-     "page": "S01 5",
-     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of molecules and atomic groups such as –OH.",
-     "check": "failed"
+     "page": "10",
+     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups, such as -OH, -NH2=NH, -CH3, =CH2, ≥CH, etc., found in many organic and inorganic compounds.",
+     "check": "verified"
     },
     {
      "source": "S01",
-     "page": "10",
-     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+     "page": "9",
+     "quote": "Mid-IR Spectrometry (includes FTIR Mid-IR spectrometer, ATR fiber probe) Vibrational spectroscopy in the mid-IR range (4000–400 cm-1) is one of the most informative methods of chemical analysis.",
      "check": "verified"
     }
    ]
   },
   "risks": [
-   "Potential scattering if the stream is turbid; probe fouling; temperature effects on baseline"
+   "If the stream is turbid or contains emulsified water droplets, transmission may be attenuated, reducing signal.",
+   "High temperature may affect fiber durability and probe materials; need temperature‑rated fiber.",
+   "Water content may be below the detection capability of a simple NIR model without extensive calibration.",
+   "The mid-IR fibre link over the required distance is not shown to be feasible in the supplied material."
   ],
   "feasibility": {
    "steps": [
-    "1. Obtain a representative petroleum sample with known water content.",
-    "2. Measure spectra with a NIR transmission probe in a lab setting.",
-    "3. Build a calibration model correlating absorbance to water concentration.",
-    "4. Validate on held‑out samples.",
-    "5. Install probe in process line and compare online readings to lab results."
+    "Measure the transmission of the chosen mid-IR fibre over the planned link length, or plan the analyzer close to the measurement point.",
+    "Collect representative petroleum samples with known water contents (lab‑determined).",
+    "Measure each sample with the NIR transmission probe and with a laboratory MIR‑ATR setup (as in).",
+    "Develop separate chemometric calibration models for NIR and MIR‑ATR.",
+    "Validate each model on held‑out samples covering the expected water range.",
+    "Compare prediction errors and robustness to temperature variations."
    ],
-   "decisionBasis": "Simple, cost‑effective method that directly probes the liquid; if turbidity or temperature issues arise, alternative ATR or diffuse reflection can be considered."
+   "decisionBasis": "If the NIR model meets the agreed detection limit and accuracy on validation samples, it can be deployed in‑line; otherwise consider MIR‑ATR or a combined approach."
   },
   "premiseChecks": [
    {
     "id": "target_defined",
     "label": "The variable to measure is named",
-    "status": "fail",
-    "detail": "The enquiry does not name the variable or substance to measure, so no method can be chosen yet. Ask for it first.",
+    "status": "pass",
+    "detail": "Target: water.",
     "citations": []
+   },
+   {
+    "id": "cost",
+    "label": "Simplest method first: the primary is the cheapest candidate",
+    "status": "pass",
+    "detail": "Table 1 cost of the probe options: primary NIR (average), others MIR (ATR) (high).",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "Table 1 (p.6)",
+      "check": "unverified"
+     }
+    ]
+   },
+   {
+    "id": "mir_link_length",
+    "label": "Mid-IR fibre link: distance not shown to be feasible",
+    "status": "flag",
+    "detail": "MIR (ATR) needs mid-IR fibres, and the enquiry implies an analyzer away from the line (length not given). In the supplied material, long (100–300 m) cables are shown only for silica fibres, which do not carry the mid-IR; mid-IR fibres appear only as 2 m assemblies, and the application example shows no fibre length or analyzer distance. Measure the transmission over the planned length before committing, or plan the analyzer close to the measurement point.",
+    "citations": [
+     {
+      "source": "S02",
+      "page": "7",
+      "quote": "Robust 100-300m cables made with Silica fibers of low OH-content",
+      "check": "verified"
+     },
+     {
+      "source": "S02",
+      "page": "9",
+      "quote": "both 2 m long (HWG-750-2m, PIR 600/700-2m)",
+      "check": "visual_note"
+     },
+     {
+      "source": "S02",
+      "page": "13",
+      "quote": "no process installation, fiber length or analyzer distance is shown",
+      "check": "visual_note"
+     }
+    ]
    }
   ],
   "sources": [
    {
     "source": "S01",
-    "page": "S01 5",
-    "quote": "Near-IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
-    "check": "failed"
+    "page": "Table 1 (p.6)",
+    "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+    "check": "verified"
    },
    {
     "source": "S01",
-    "page": "S01 5",
-    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of molecules and atomic groups such as –OH.",
-    "check": "failed"
+    "page": "Table 1 (p.6)",
+    "quote": "MIR_ATR: ATR probe (absorption); sample: liquid, paste, soft; cost: high",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "Immersible fiber optic probes operating in various spectral regions from UV to mid-IR are increasingly being used for measuring liquid and soft or powdered solid samples.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "They can be used to obtain absorption, diffuse reflectance or transmission, Raman, and ATR spectra.",
+    "check": "verified"
+   },
+   {
+    "source": "S02",
+    "page": "7",
+    "quote": "Spectral Vis-NIR-Cables & for Industrial Process Control Robust 100-300m cables made with Silica fibers of low OH-content (<0.1ppm OH) enable remote industrial process-control Alu- & Cu-alloy coated fibers - High temperature resistance - Increased durability, high strength,",
+    "check": "verified"
    },
    {
     "source": "S01",
     "page": "10",
-    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups, such as -OH, -NH2=NH, -CH3, =CH2, ≥CH, etc., found in many organic and inorganic compounds.",
     "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "9",
+    "quote": "Mid-IR Spectrometry (includes FTIR Mid-IR spectrometer, ATR fiber probe) Vibrational spectroscopy in the mid-IR range (4000–400 cm-1) is one of the most informative methods of chemical analysis.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "Table 1 (p.6)",
+    "check": "unverified"
+   },
+   {
+    "source": "S02",
+    "page": "7",
+    "quote": "Robust 100-300m cables made with Silica fibers of low OH-content",
+    "check": "verified"
+   },
+   {
+    "source": "S02",
+    "page": "9",
+    "quote": "both 2 m long (HWG-750-2m, PIR 600/700-2m)",
+    "check": "visual_note"
+   },
+   {
+    "source": "S02",
+    "page": "13",
+    "quote": "no process installation, fiber length or analyzer distance is shown",
+    "check": "visual_note"
    }
   ],
   "mode": "draft",
   "assumptions": [
-   "The petroleum stream is sufficiently clear for transmission NIR; water absorption bands are not masked by hydrocarbons; probe can be mounted on available ports.",
-   "NIR (transmission): Transmission probes are suitable for clear or semi‑transparent liquids and are listed as average cost, matching the need for a simple, inexpensive first test. (not supported by the cited page)",
-   "NIR (transmission): The NIR range (780–2500 nm) contains overtone bands of –OH that can be used for water detection in hydrocarbons. (not supported by the cited page)"
+   "The petroleum stream is optically clear enough for a transmission path.",
+   "Temperature and pressure are within the operating range of standard silica fibers.",
+   "Water is present as dissolved or fine dispersed phase that shows O‑H absorption in NIR/MIR."
   ],
   "pointsToConfirm": [
-   "Actual water concentration range; sample turbidity; temperature/pressure compatibility; probe mounting feasibility; acceptable response time."
+   "Exact optical clarity and scattering characteristics of the stream.",
+   "Process temperature/pressure limits for probe and fiber selection.",
+   "Required water detection limit and measurement frequency.",
+   "Physical dimensions of the available access point for probe installation."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 304.0,
+   "ms": 306.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 2790.0,
-   "detail": "4 stated (0 from answers) · 2 unknown"
+   "ms": 12433.0,
+   "detail": "4 stated (0 from answers) · 6 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 67.0,
-   "detail": "S01 p.10, S01 p.16, S01 p.18, S02 p.13, S03 p.4 · BM25 · flashrank"
+   "ms": 81.0,
+   "detail": "S01 p.1, S01 p.10, S01 p.5, S01 p.6, S01 p.9, S02 p.13, S02 p.14, S02 p.6, S02 p.7, S03 p.4 · 8 routed by the source guide · vector+BM25"
   },
   {
    "step": "Premise checks",
-   "status": "fail",
+   "status": "ok",
    "ms": 0.0,
-   "detail": "The variable to measure is named"
+   "detail": "nothing contradicted"
   },
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 24186.0,
-   "detail": "openai/gpt-oss-20b via groq"
+   "ms": 41770.0,
+   "detail": "openai/gpt-oss-120b via groq"
   },
   {
    "step": "Verify citations",
-   "status": "warn",
+   "status": "ok",
    "ms": 0.0,
-   "detail": "2 of 4 quotes found on the cited page · 2 not found"
+   "detail": "9 of 9 quotes found on the cited page"
   },
   {
    "step": "Validate numbers, claims and questions",
-   "status": "warn",
+   "status": "ok",
    "ms": 0.0,
-   "detail": "1 unsupported numbers replaced · 2 unsupported sentences and 1 uncited recommendations moved to assumptions · 5 open questions · all required sections present"
+   "detail": "all numbers traced to the customer or a cited page · every recommendation sentence cited · 5 open questions · all required sections present"
   }
  ]
 }

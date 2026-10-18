@@ -14,6 +14,7 @@ from app.services import ledger as L
 from app.services import validators as V
 from app.services.citations import page_text, verify
 from app.services.numbers import allowed_numbers, scrub
+from app.services.passages import number, resolve, strip_refs
 from app.services.premises import (Facts, access_check, apply_floor, combination_check, combined_probe_applies, cost_check,
                                    geometry_check, mir_link_check, owned_equipment_check, target_qualifier_check)
 
@@ -22,13 +23,7 @@ VALID = V.VALID
 
 
 def _excerpts(docs: list[dict]) -> str:
-    rows = []
-    for d in docs:
-        label = d.get("label") or f"p.{d['page']}"
-        kind = " (team transcription of a slide image)" if d["kind"] == "visual_note" else ""
-        app = f" · application: {', '.join(d['applications'])}" if d.get("applications") else ""
-        rows.append(f"[{d['source']} {label}{kind}{app}]\n{d['text']}")
-    return "\n\n".join(rows)
+    return number(docs)[0]
 
 
 def _page_for(c: dict) -> str:
@@ -106,6 +101,22 @@ def ensure_answer(report: Report) -> bool:
     return True
 
 
+def _strip_refs(report: Report) -> None:
+    """Passage numbers belong in citations; the model sometimes also writes them into the prose."""
+    for r in report.recommendations:
+        r.reason = strip_refs(r.reason) or ""
+    c = report.concept
+    c.summary = strip_refs(c.summary) or ""
+    report.spectralRange.summary = strip_refs(report.spectralRange.summary) or ""
+    if report.answer:
+        report.answer.text = strip_refs(report.answer.text) or ""
+        report.answer.sayInstead = strip_refs(report.answer.sayInstead)
+    for key in ("risks", "assumptions", "pointsToConfirm"):
+        setattr(report, key, [strip_refs(x) or "" for x in getattr(report, key)])
+    report.feasibility.steps = [strip_refs(x) or "" for x in report.feasibility.steps]
+    report.feasibility.decisionBasis = strip_refs(report.feasibility.decisionBasis) or ""
+
+
 def cited_page_texts(report: Report) -> list[str]:
     return [page_text(c.source, c.page) for c in report.sources if c.source != "EXT"]
 
@@ -131,14 +142,28 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
         data["answer"] = {"text": data["answer"]}
     if not isinstance(data.get("answer"), dict) or not str(data["answer"].get("text") or "").strip():
         data.pop("answer", None)
+    refs = number(documents or [])[1]
+    unknown_refs = 0
     for holder in [*(data.get("recommendations") or []), data.get("concept") or {}, data.get("spectralRange") or {}, data.get("answer") or {}]:
-        holder["citations"] = [{**c, "page": _page_for(c)} for c in holder.get("citations", []) if isinstance(c, dict) and c.get("source")]
+        cites = []
+        for c in holder.get("citations", []):
+            if isinstance(c, str):  # a bare reference: "S01.14.3"
+                c = {"ref": c}
+            if not isinstance(c, dict):
+                continue
+            r = resolve(c, refs)
+            if r is None:
+                unknown_refs += 1
+            elif r.get("source"):
+                cites.append({**r, "page": _page_for(r)})
+        holder["citations"] = cites
     for key in ("assumptions", "pointsToConfirm", "risks"):
         data[key] = [str(x) for x in (data.get(key) or []) if str(x).strip()]
     data.update(premiseChecks=[c.model_dump() for c in checks], sources=[], scenarioId=scenario_id, origin="live",
                 mode="final" if final else "draft", generatedAt=datetime.now(timezone.utc).isoformat(timespec="seconds"))
     report = Report.model_validate(data)
-    stats: dict = {"verified": 0, "visual_note": 0, "failed": 0, "unverified": 0, "numbers": 0, "questions": {}}
+    _strip_refs(report)
+    stats: dict = {"verified": 0, "visual_note": 0, "failed": 0, "unverified": 0, "numbers": 0, "questions": {}, "unknown_refs": unknown_refs}
 
     # Stated facts: the analyst's quote-verified facts with their turn, not the composer's paraphrase.
     if facts.stated:
@@ -210,7 +235,7 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
             seen.setdefault((c.source, c.page, c.quote), verify(c) if c.quote else c)
     report.sources = list(seen.values())
 
-    reply, stats["numbers"] = _validate_numbers(report, str(raw.get("reply") or ""), customer=client_text(messages),
+    reply, stats["numbers"] = _validate_numbers(report, strip_refs(str(raw.get("reply") or "")) or "", customer=client_text(messages),
                                                 cited_pages=cited_page_texts(report))
 
     # Final mode: provisional unless the checks justify otherwise. Otherwise the checks set the floor.
@@ -265,11 +290,9 @@ def responder_node(state: AgentState) -> dict:
             report, stats, reply = finalise(raw, **kw)
             problem = f"These required sections are missing or empty: {', '.join(stats['missing'])}." if stats["missing"] else None
             if problem and "recommendation with citations" in stats["missing"]:
-                bad = [c for r in raw.get("recommendations") or [] if isinstance(r, dict) for c in r.get("citations") or []
-                       if isinstance(c, dict) and c.get("source") and verify(Citation(**{**c, "page": _page_for(c), "check": "unverified"})).check not in VALID]
-                problem += (" Each recommendation needs a quote copied verbatim from EXCERPTS (or a Table 1 row), and its reason may only"
-                            " say what that passage says." + (" These quotes were not found on the cited page: "
-                            + "; ".join(f"{c['source']} {_page_for(c)}: \"{str(c.get('quote'))[:120]}\"" for c in bad[:6]) if bad else ""))
+                problem += (" Each recommendation needs at least one citation by passage number from EXCERPTS ({\"ref\": \"S01.14.3\"})"
+                            " or a Table 1 row, and its reason may only say what those passages say."
+                            + (f" {stats['unknown_refs']} cited numbers do not exist in EXCERPTS." if stats.get("unknown_refs") else ""))
         except ValidationError as e:
             report, stats, reply, problem = None, None, "", str(e)[:1500]
         if problem:  # reject and repair once; if the repair is unusable, keep the first report (when it was valid)

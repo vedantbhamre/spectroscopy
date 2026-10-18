@@ -15,7 +15,8 @@ DOMAINS: dict[str, str] = {
     "dairy and food": r"\bmilk|dairy|whey|yogh?urt|butter|cheese|\bfood|beverage|permeate",
     "bioprocess": r"ferment|bioreactor|cell culture|biomass|\byeast|cultivation|bioprocess|\bcells?\b.{0,20}(density|suspension)",
     "petroleum and chemicals": r"petroleum|crude oil|\bfuel|hydrocarbon|polymer|refiner|chemical (process|reaction)|solvent",
-    "medical and tissue": r"tissue|tumou?r|clinical|kidney|patient|in vivo|biopsy|surg",
+    "medical and tissue": r"tissue|tumou?r|clinical|kidney|patient|in vivo|biopsy|surg|cancer|malignan|benign|oncolog|carcinom"
+                          r"|histolog|patholog|intra-?operative|operating (room|theatre)|doctors?\b|physician|hospital|medical",
     "environment": r"\bsoil|waste ?water|drinking water|environmental (monitoring|sample)|groundwater",
 }
 

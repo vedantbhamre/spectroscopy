@@ -37,7 +37,7 @@ class Settings:
     PORTKEY_SLUG_2 = _env("PORTKEY_SLUG_2", "openai-fallback")  # integration holding the fallback key
 
     # Retrieved chunks sent to the responder: the main driver of input tokens per assessment.
-    RETRIEVE_TOP_N = int(_env("RETRIEVE_TOP_N", "8") or 8)  # distinct pages; 8 measured best (recall did not rise at 10)
+    RETRIEVE_TOP_N = int(_env("RETRIEVE_TOP_N", "10") or 10)  # distinct pages (~250 tokens each); see tests/test_retrieval.py
     RERANK = (_env("RERANK", "off") or "off").lower()  # "flashrank" to reorder the keyword hits (measured no gain)
 
     @property

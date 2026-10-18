@@ -1,23 +1,27 @@
 {
- "reply": "Hi, here’s a draft of the feasibility plan for in‑line monitoring of yeast fermentation. Let me know if you need any adjustments.",
+ "reply": "We can start with an in‑line NIR transmission probe to monitor overall biomass (cell density) and add a low‑cost fluorescence probe for specific metabolites; both can be calibrated against off‑line reference measurements.",
  "report": {
   "scenarioId": "D05",
-  "title": "Yeast Fermentation In‑Line Optical Monitoring",
+  "title": "In‑line optical monitoring of yeast fermentation",
   "origin": "live",
-  "generatedAt": "2026-10-17T23:19:26+00:00",
+  "generatedAt": "2026-10-18T14:21:10+00:00",
   "decisionStatus": "insufficient",
+  "answer": {
+   "text": "Not as asked. The variable to measure is named: no. The enquiry does not name the variable or substance to measure, so no method can be chosen yet.",
+   "citations": []
+  },
   "requirements": {
    "stated": [
-    "they want optical measurement during yeast fermentation to monitor growth and changes",
-    "team mentioned biomass and metabolic signals but not defined separately",
-    "broth becomes more optically dense as the run develops",
-    "they need help turning request into feasibility study with reference measurements"
+    "wants optical measurement during yeast fermentation",
+    "team mentioned biomass and metabolic signals",
+    "broth becomes more optically dense as run develops",
+    "needs help turning request into feasibility study with reference measurements"
    ],
    "unknowns": [
-    "specific biomass or metabolite targets to quantify",
-    "desired accuracy or detection limits",
-    "process conditions such as temperature, pH, and flow",
-    "available optical access points on the fermenter"
+    "exact biomass or metabolite targets (e.g., dry cell weight, glucose, ethanol, specific pigments)",
+    "required quantitative performance (accuracy, detection limit, response time)",
+    "available fiber infrastructure or ports in the fermenter",
+    "acceptable probe insertion depth or location"
    ],
    "factTurns": [
     1,
@@ -28,71 +32,109 @@
   },
   "questions": [
    {
-    "text": "What specific biomass or metabolite(s) would you like to quantify (e.g., cell density, glucose, lactate, NADH)?",
+    "text": "Which specific component(s) of the fermentation broth do you want to quantify (e.g., dry cell weight, glucose, ethanol, specific metabolites)?",
     "impact": "method",
     "id": "q1",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What accuracy or detection limits are required for each target?",
-    "impact": "method",
+    "text": "What is the typical optical density range of the broth (e.g., OD600 at start and end) and does it ever exceed the transmission limit of standard probes?",
+    "impact": "setup",
     "id": "q2",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What are the typical temperature, pH, and flow conditions in the fermenter?",
+    "text": "Do you have existing fiber‑optic ports or can a probe be inserted into the fermenter without major modifications?",
     "impact": "setup",
     "id": "q3",
     "status": "open",
     "askedTurn": 1
-   },
-   {
-    "text": "Which ports or windows are available for optical access (e.g., 1‑inch, 2‑inch, 4‑inch)?",
-    "impact": "setup",
-    "id": "q4",
-    "status": "open",
-    "askedTurn": 1
    }
   ],
-  "recommendations": [],
+  "recommendations": [
+   {
+    "method": "NIR transmission",
+    "methodIds": [
+     "NIR"
+    ],
+    "role": "primary",
+    "reason": "NIR transmission probes work with liquid and colloidal samples, have moderate cost, and can penetrate several millimetres, making them suitable for monitoring cell density in increasingly turbid broth.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "5",
+      "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "Table 1 (p.6)",
+      "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+      "check": "verified"
+     }
+    ]
+   }
+  ],
   "concept": {
-   "summary": "Place a UV‑Vis transmission probe in a 1‑mm path‑length cuvette or fiber‑optic probe at a liquid‑filled port. For higher OD, switch to a UV‑ATR probe. Optionally add a NIR transmission probe for metabolite monitoring. The analyzer will record [to be agreed with the customer] spectra (UV‑Vis) and [to be agreed with the customer] (NIR).",
+   "summary": "Install a stainless‑steel NIR transmission probe in the fermenter stream (e.g., via a sanitary port) linked by low‑OH silica fiber to an NIR analyzer; optionally add a fluorescence probe in the same port or a nearby sampling loop. Collect spectra continuously and build chemometric models calibrated against off‑line reference assays (dry weight, HPLC, etc.).",
+   "probe": "NIR transmission probe (glass‑window, 1‑10 mm path length) and optional fluorescence probe (UV‑Vis excitation)",
+   "location": "In‑line, inserted into the fermenter through an existing sanitary port or sampling loop",
+   "fiberLink": "Low‑OH silica fiber (compatible with NIR and UV‑Vis)",
+   "analyzer": "Broadband NIR spectrometer (FT‑NIR or DAD‑based) with real‑time chemometrics; separate fluorescence spectrometer if needed",
    "citations": [
     {
      "source": "S01",
-     "page": "S01 16",
-     "quote": "For highly transparent liquids with low optical density, UV‑Transmission or Transflection probes are ideal; they pass light through a defined path length (typically 1 mm to 10 mm), allowing for high sensitivity and accurate quantification of low‑concentration analytes.",
-     "check": "failed"
+     "page": "5",
+     "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "12",
+     "quote": "This method is frequently used in biology and biotechnology.",
+     "check": "verified"
     }
    ]
   },
   "spectralRange": {
-   "summary": "UV‑Vis: [to be agreed with the customer]; NIR: [to be agreed with the customer]",
+   "summary": "NIR transmission: 780–2500 nm (excitation broadband source, detector covers overtones); Fluorescence: excitation [to be agreed with the customer], emission [to be agreed with the customer] depending on target fluorophores.",
    "citations": [
     {
      "source": "S01",
-     "page": "S01 16",
-     "quote": "UV‑Vis tracks growth, Raman spectroscopy can be used in the same reactor to provide a \"molecular fingerprint\" for direct detection of specific metabolites like glucose, acetate, or lactate.",
-     "check": "failed"
+     "page": "5",
+     "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "12",
+     "quote": "This method is frequently used in biology and biotechnology.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "10",
+     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+     "check": "verified"
     }
    ]
   },
   "risks": [
-   "High optical density may saturate transmission probe; need ATR as backup",
-   "Turbulence or bubbles can scatter light and affect turbidity signal",
-   "Probe fouling from biomass deposition may require cleaning schedule"
+   "High optical density may saturate transmission; may need to switch to ATR or shorten path length if OD exceeds probe limits.",
+   "Fluorescence can suffer from inner‑filter effects in very turbid broth.",
+   "Probe fouling or biofilm buildup could degrade signal over time."
   ],
   "feasibility": {
    "steps": [
-    "1. Collect reference samples at different growth stages and OD values; measure with a benchtop UV‑Vis spectrometer to establish a calibration curve for turbidity vs. cell density.",
-    "2. Install a fiber‑optic UV‑Vis transmission probe at a liquid port; record spectra in real time and compare to reference data.",
-    "3. If saturation occurs at high OD, install a UV‑ATR probe and repeat step 2.",
-    "4. Optionally add a NIR transmission probe; collect spectra and correlate with glucose/lactate concentrations measured by a reference method (HPLC).",
-    "5. Validate the combined system on a pilot run, assessing accuracy, repeatability, and response time."
+    "Collect a set of fermentation broth samples covering the full OD range (early, mid, late) and measure them off‑line (dry weight, HPLC, etc.).",
+    "Record NIR transmission spectra in‑line with the proposed probe and build a calibration model for biomass.",
+    "If a specific metabolite is identified, record fluorescence spectra under the same conditions and develop a separate model.",
+    "Validate each model on independent fermentation runs (held‑out batches).",
+    "Assess probe cleaning strategy and long‑term stability."
    ],
-   "decisionBasis": "The UV‑Vis transmission probe is the simplest, cheapest method that directly measures biomass via turbidity and is supported by the literature for bioprocess monitoring. NIR provides a complementary metabolic signal if needed."
+   "decisionBasis": "Feasibility will be confirmed if calibration models achieve the agreed‑upon prediction error on held‑out samples and the probe remains operable throughout the run."
   },
   "premiseChecks": [
    {
@@ -118,9 +160,9 @@
    },
    {
     "id": "geometry_optics",
-    "label": "Probe geometry: the medium changes from clear to opaque",
+    "label": "Probe geometry: transmission for an opaque medium",
     "status": "flag",
-    "detail": "The medium changes from clear to opaque, so a single transmission path may saturate. Plan ATR or reflection for the opaque phase, or check the path length on samples from both phases.",
+    "detail": "The medium is described as turbid, opaque or scattering. A transmission path saturates when light cannot penetrate the sample; ATR or reflection is used at high optical density.",
     "citations": [
      {
       "source": "S01",
@@ -140,15 +182,33 @@
   "sources": [
    {
     "source": "S01",
-    "page": "S01 16",
-    "quote": "For highly transparent liquids with low optical density, UV‑Transmission or Transflection probes are ideal; they pass light through a defined path length (typically 1 mm to 10 mm), allowing for high sensitivity and accurate quantification of low‑concentration analytes.",
-    "check": "failed"
+    "page": "5",
+    "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+    "check": "verified"
    },
    {
     "source": "S01",
-    "page": "S01 16",
-    "quote": "UV‑Vis tracks growth, Raman spectroscopy can be used in the same reactor to provide a \"molecular fingerprint\" for direct detection of specific metabolites like glucose, acetate, or lactate.",
-    "check": "failed"
+    "page": "7",
+    "quote": "Thus, the combination of NIR spectroscopy with fluorescence spectroscopy demonstrated the possibility of more accurately determining the biomass content during yeast fermentation, as well as distinguishing between their intra- and extracellular metabolites.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "Table 1 (p.6)",
+    "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "12",
+    "quote": "This method is frequently used in biology and biotechnology.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "10",
+    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+    "check": "verified"
    },
    {
     "source": "S01",
@@ -171,29 +231,36 @@
   ],
   "mode": "draft",
   "assumptions": [
-   "UV‑Vis transmission probe (primary candidate, no verified page citation): UV‑Vis transmission probes are low‑cost, robust, and directly correlate turbidity with cell density, providing a biomass signal. They are suitable for liquid media and can be used in a transmission or transflection geometry. When the broth becomes highly opaque, a UV‑ATR probe can be added as an escalation option.",
-   "NIR transmission probe (comparison candidate, no verified page citation): NIR transmission can monitor major components such as glucose or glycerol in the millimolar range and can be used in the same reactor to provide a metabolic signal. It is compatible with liquid, colloidal media and is inexpensive."
+   "The broth remains a liquid/colloidal phase suitable for transmission probing.",
+   "No extreme UV‑Vis absorbing species will completely block fluorescence excitation.",
+   "Existing fermenter hardware can accommodate a standard sanitary probe.",
+   "Fluorescence: Fluorescence spectroscopy is low‑cost, sensitive to specific metabolites (e.g., NADH, flavins) and has been highlighted for online bioprocess monitoring. (not supported by the cited page)"
   ],
-  "pointsToConfirm": []
+  "pointsToConfirm": [
+   "Exact analytes (biomass metric and metabolites) to be quantified.",
+   "Maximum optical density expected and whether a transmission path length adjustment is needed.",
+   "Availability of a sanitary port or sampling loop for probe insertion.",
+   "Off‑line reference methods that will be used for calibration."
+  ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 2336.0,
+   "ms": 157.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 1054.0,
-   "detail": "4 stated (0 from answers) · 4 unknown"
+   "ms": 7555.0,
+   "detail": "4 stated (0 from answers) · 6 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 83.0,
-   "detail": "S01 p.16, S01 p.7, S04 p.1 · BM25 · flashrank"
+   "ms": 69.0,
+   "detail": "S01 p.10, S01 p.11, S01 p.12, S01 p.16, S01 p.5, S01 p.6, S01 p.7, S01 p.9, S04 p.3, S05 p.1 · 7 routed by the source guide · vector+BM25"
   },
   {
    "step": "Premise checks",
@@ -204,20 +271,20 @@
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 32871.0,
-   "detail": "openai/gpt-oss-20b via groq"
+   "ms": 48425.0,
+   "detail": "openai/gpt-oss-120b via groq"
   },
   {
    "step": "Verify citations",
-   "status": "warn",
+   "status": "ok",
    "ms": 0.0,
-   "detail": "0 of 4 quotes found on the cited page · 4 not found"
+   "detail": "12 of 12 quotes found on the cited page"
   },
   {
    "step": "Validate numbers, claims and questions",
    "status": "warn",
    "ms": 0.0,
-   "detail": "4 unsupported numbers replaced · 0 unsupported sentences and 2 uncited recommendations moved to assumptions · 4 open questions · all required sections present"
+   "detail": "2 unsupported numbers replaced · 1 unsupported sentences and 1 uncited recommendations moved to assumptions · 3 open questions · all required sections present"
   }
  ]
 }

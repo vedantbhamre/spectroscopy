@@ -1,24 +1,48 @@
 {
- "reply": "For a clear aqueous cell culture, a NIR transmission probe is the simplest, cheapest option that can monitor glucose and lactate in real time. Raman can be added later if higher specificity is needed.",
+ "reply": "Based on the aqueous, likely clear cell culture broth, a low‑cost NIR transmission probe is the simplest primary option; Raman could be added later if specificity is insufficient.",
  "report": {
   "scenarioId": "D04",
-  "title": "In‑situ NIR monitoring of glucose/lactate in cell culture",
+  "title": "In‑situ spectroscopy for glucose & lactate in cell culture broth",
   "origin": "live",
-  "generatedAt": "2026-10-17T23:17:22+00:00",
+  "generatedAt": "2026-10-18T14:20:11+00:00",
   "decisionStatus": "provisional",
+  "answer": {
+   "text": "It depends on the optical clarity of the broth – if it remains sufficiently transparent, NIR transmission spectroscopy can meet the need; otherwise a scattering‑compatible probe or Raman may be required.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "Table 1 (p.6)",
+     "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "as well as standard lamps as light sources, making it ideal for online applications, including remote measurements via fiber optic probes.",
+     "check": "verified"
+    }
+   ]
+  },
   "requirements": {
    "stated": [
     "cell culture process in aqueous medium",
-    "glucose and lactate are measured from samples",
+    "glucose and lactate measured from samples",
     "delay makes it difficult to see changes promptly",
     "exploring an in situ spectroscopy pilot",
     "pilot can be checked against existing laboratory measurements",
     "medium and cell population change during the run",
-    "probe and calibration strategy not yet selected"
+    "have not yet selected a probe or calibration strategy"
    ],
    "unknowns": [
-    "probe selection",
-    "calibration strategy"
+    "optical appearance (turbidity, scattering) of the broth during run",
+    "number and type of available access ports for probes",
+    "acceptable calibration error and response time"
    ],
    "factTurns": [
     1,
@@ -32,101 +56,142 @@
   },
   "questions": [
    {
-    "text": "Will you need to monitor other metabolites (e.g., acetate) in the same run?",
+    "text": "What is the typical turbidity or scattering level of the culture broth throughout the run?",
     "impact": "method",
     "id": "q1",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What is the typical optical density (OD) of the culture medium during the run?",
+    "text": "How many and what size ports are available for inserting a fiber‑optic probe?",
     "impact": "setup",
     "id": "q2",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What is the maximum acceptable probe insertion depth or distance from the reactor wall?",
-    "impact": "setup",
-    "id": "q3",
-    "status": "open",
-    "askedTurn": 1
-   },
-   {
-    "text": "Do you have a spare port or a dedicated sampling line that can accommodate a fiber‑optic probe?",
-    "impact": "setup",
-    "id": "q4",
-    "status": "open",
-    "askedTurn": 1
-   },
-   {
-    "text": "What is the desired sampling frequency (e.g., every [to be agreed with the customer])?",
+    "text": "What are the target accuracy and response‑time specifications for glucose and lactate measurements?",
     "impact": "acceptance",
-    "id": "q5",
+    "id": "q3",
     "status": "open",
     "askedTurn": 1
    }
   ],
   "recommendations": [
    {
-    "method": "Raman",
+    "method": "NIR (transmission)",
     "methodIds": [
-     "RAMAN"
+     "NIR"
     ],
-    "role": "comparison",
-    "reason": "Raman provides a molecular fingerprint for glucose and lactate and is well‑suited for aqueous environments, but it is higher cost and may require a more complex probe geometry.",
+    "role": "primary",
+    "reason": "NIR transmission probes work with clear liquids, use inexpensive optics, and have been highlighted as ideal for online applications with standard glass optics and fiber probes.",
     "citations": [
      {
       "source": "S01",
-      "page": "16",
-      "quote": "Raman spectroscopy can be used in the same reactor to provide a \"molecular fingerprint\" for direct detection of specific metabolites like glucose, acetate, or lactate.",
+      "page": "Table 1 (p.6)",
+      "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "5",
+      "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "5",
+      "quote": "as well as standard lamps as light sources, making it ideal for online applications, including remote measurements via fiber optic probes.",
+      "check": "verified"
+     }
+    ]
+   },
+   {
+    "method": "Raman (probe)",
+    "methodIds": [],
+    "role": "comparison",
+    "reason": "Raman provides molecular specificity for glucose and lactate and can operate in turbid media, but requires a higher‑cost probe and laser safety considerations.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "5",
+      "quote": "Measurement of the weak Raman effect requires special probes but is recorded in the visible and NIR spectral regions.",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "5",
+      "quote": "Moreover, the spectra of vibrational transitions in Raman and mid-IR spectroscopy carry complementary qualitative and quantitative information about the sample's composition.",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "Table 1 (p.6)",
+      "quote": "RAMAN: Raman probe (Raman scattering (emission)); sample: liquid, powder, solid; cost: high",
       "check": "verified"
      }
     ]
    }
   ],
   "concept": {
-   "summary": "Install a NIR transmission fiber‑optic probe in the reactor, positioned to sample the bulk medium. The probe will be connected to a NIR spectrometer covering 780–2500 nm. Calibration will be built from lab samples with known glucose and lactate concentrations, using chemometric models (e.g., PLS). The probe will provide real‑time spectra that can be processed online to give concentration estimates.",
+   "summary": "Install a transmission‑type NIR fiber probe directly in the reactor stream, connect via low‑OD silica fiber to a compact NIR spectrometer; collect spectra continuously and build a chemometric calibration for glucose and lactate against off‑line assays.",
+   "probe": "NIR transmission probe (in‑line, stainless‑steel housing)",
+   "location": "Inserted into the liquid stream via an existing sampling port",
+   "fiberLink": "Low‑OD silica fiber (core ~[to be agreed with the customer]) to the NIR analyzer",
+   "analyzer": "Compact NIR spectrometer with diode‑array detector",
    "citations": [
     {
      "source": "S01",
-     "page": "5.2",
-     "quote": "Near‑IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
-     "check": "failed"
+     "page": "Table 1 (p.6)",
+     "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "as well as standard lamps as light sources, making it ideal for online applications, including remote measurements via fiber optic probes.",
+     "check": "verified"
     }
    ]
   },
   "spectralRange": {
-   "summary": "780–2500 nm (NIR transmission).",
+   "summary": "NIR region (≈780–2500 nm) covering overtone and combination bands of O–H, C–H, N–H groups relevant to glucose and lactate.",
    "citations": [
     {
      "source": "S01",
-     "page": "5.2",
-     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups.",
-     "check": "failed"
+     "page": "10",
+     "quote": "ontain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups, such as -OH, -NH2=NH, -CH3, =CH2, ≥CH, etc., found in many organic and inorganic compounds.",
+     "check": "verified"
     },
     {
      "source": "S01",
      "page": "10",
-     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+     "quote": "Unlike mid- IR spectroscopy, measurements in the NIR region are facilitated by a number of factors: the transparency of plain and quartz glass (which allows the use of standard optics and probes), low molar absorption coefficients,",
      "check": "verified"
     }
    ]
   },
   "risks": [
-   "Probe fouling by cells or proteins may reduce signal quality; requires periodic cleaning or anti‑fouling coatings.",
-   "Spectral overlap of water absorption may limit sensitivity at low concentrations; chemometric models must account for this.",
-   "Calibration drift over time if medium composition changes; periodic re‑calibration needed."
+   "Increasing broth turbidity may attenuate the transmission signal, reducing accuracy.",
+   "Probe fouling from cells or proteins could require periodic cleaning or replacement.",
+   "Chemometric model may drift with changing media composition; regular recalibration needed."
   ],
   "feasibility": {
    "steps": [
-    "1. Obtain a NIR transmission probe and spectrometer; verify compatibility with reactor ports.",
-    "2. Run a small batch, collect spectra and reference lab measurements of glucose/lactate.",
-    "3. Build a PLS model and validate on held‑out samples.",
-    "4. Deploy probe in pilot, monitor real‑time data, compare with lab samples to confirm performance.",
-    "5. If sensitivity is insufficient, evaluate adding a Raman probe as a complementary method."
+    "Collect a set of broth samples spanning the expected range of glucose and lactate concentrations.",
+    "Measure each sample off‑line (reference assays) and in‑line with the NIR transmission probe.",
+    "Develop a multivariate calibration (e.g., PLS) using the paired data.",
+    "Validate on independent samples not used in model building.",
+    "If transmission signal degrades, repeat steps with a Raman probe for comparison.",
+    "Validate the model on samples not used to build it (held-out samples, e.g. from other patients, batches or days) before drawing any conclusion; a model built on few samples can fit them without generalising."
    ],
-   "decisionBasis": "The NIR transmission method meets the requirement for simplicity, cost, and suitability for clear aqueous media, as supported by the supplied table and literature."
+   "decisionBasis": "Validation performance (RMSEP, bias) will be compared to the agreed‑upon laboratory assay error; the simplest method that meets those criteria will be selected."
   },
   "premiseChecks": [
    {
@@ -140,60 +205,83 @@
   "sources": [
    {
     "source": "S01",
-    "page": "16",
-    "quote": "Raman spectroscopy can be used in the same reactor to provide a \"molecular fingerprint\" for direct detection of specific metabolites like glucose, acetate, or lactate.",
+    "page": "Table 1 (p.6)",
+    "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
     "check": "verified"
    },
    {
     "source": "S01",
-    "page": "5.2",
-    "quote": "Near‑IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
-    "check": "failed"
+    "page": "5",
+    "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+    "check": "verified"
    },
    {
     "source": "S01",
-    "page": "5.2",
-    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups.",
-    "check": "failed"
+    "page": "5",
+    "quote": "as well as standard lamps as light sources, making it ideal for online applications, including remote measurements via fiber optic probes.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "Measurement of the weak Raman effect requires special probes but is recorded in the visible and NIR spectral regions.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "Moreover, the spectra of vibrational transitions in Raman and mid-IR spectroscopy carry complementary qualitative and quantitative information about the sample's composition.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "Table 1 (p.6)",
+    "quote": "RAMAN: Raman probe (Raman scattering (emission)); sample: liquid, powder, solid; cost: high",
+    "check": "verified"
    },
    {
     "source": "S01",
     "page": "10",
-    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+    "quote": "ontain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups, such as -OH, -NH2=NH, -CH3, =CH2, ≥CH, etc., found in many organic and inorganic compounds.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "10",
+    "quote": "Unlike mid- IR spectroscopy, measurements in the NIR region are facilitated by a number of factors: the transparency of plain and quartz glass (which allows the use of standard optics and probes), low molar absorption coefficients,",
     "check": "verified"
    }
   ],
   "mode": "draft",
   "assumptions": [
-   "The culture medium remains optically clear (low OD) throughout the run.",
-   "The reactor has a port or access point suitable for a fiber‑optic probe insertion.",
-   "The probe can be positioned to sample the bulk medium without significant dead‑volume effects.",
-   "NIR (transmission): NIR transmission probes are suitable for clear liquids and are listed as average cost, making them the simplest, cheapest sufficient method for glucose and lactate in aqueous media. (not supported by the cited page)"
+   "The culture broth remains optically clear enough for transmission measurements.",
+   "At least one suitable port exists for probe insertion.",
+   "Reference off‑line glucose and lactate assays are accurate and can serve as calibration truth."
   ],
   "pointsToConfirm": [
-   "Exact optical density range of the medium during operation.",
-   "Availability and size of a suitable port for probe installation.",
-   "Whether the probe can be cleaned or coated to prevent fouling during the run."
+   "Actual turbidity/optical density of the broth during the process.",
+   "Physical dimensions and material compatibility of the available sampling port.",
+   "Target measurement accuracy and latency required for process control."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 1286.0,
+   "ms": 271.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 11907.0,
-   "detail": "7 stated (0 from answers) · 2 unknown"
+   "ms": 952.0,
+   "detail": "7 stated (0 from answers) · 3 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 117.0,
-   "detail": "S01 p.1, S01 p.10, S01 p.16, S04 p.1 · BM25 · flashrank"
+   "ms": 87.0,
+   "detail": "S01 p.10, S01 p.11, S01 p.12, S01 p.16, S01 p.5, S01 p.6, S01 p.9, S02 p.3, S04 p.6, S05 p.1 · 7 routed by the source guide · vector+BM25"
   },
   {
    "step": "Premise checks",
@@ -204,20 +292,20 @@
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 29673.0,
-   "detail": "openai/gpt-oss-20b via groq"
+   "ms": 43652.0,
+   "detail": "openai/gpt-oss-120b via groq"
   },
   {
    "step": "Verify citations",
-   "status": "warn",
+   "status": "ok",
    "ms": 0.0,
-   "detail": "3 of 5 quotes found on the cited page · 2 not found"
+   "detail": "14 of 14 quotes found on the cited page"
   },
   {
    "step": "Validate numbers, claims and questions",
    "status": "warn",
    "ms": 0.0,
-   "detail": "1 unsupported numbers replaced · 1 unsupported sentences and 1 uncited recommendations moved to assumptions · 5 open questions · all required sections present"
+   "detail": "1 unsupported numbers replaced · every recommendation sentence cited · 3 open questions · all required sections present"
   }
  ]
 }

@@ -1,11 +1,15 @@
 {
- "reply": "We need to know what you are measuring – the API identity or its concentration – and the melt’s optical properties. Once those are clear we can pick a probe that survives the hot, fouling environment and gives a usable signal.",
+ "reply": "The client’s request cannot be answered until the target analyte or composition variable is identified.  We need to know what component(s) in the melt you wish to monitor (e.g., API concentration, polymer‑to‑API ratio, moisture, etc.).",
  "report": {
   "scenarioId": "D07",
-  "title": "Hot Polymer Extrusion – Initial Probe Selection",
+  "title": "Hot polymer extrusion – in‑line optical monitoring",
   "origin": "live",
-  "generatedAt": "2026-10-17T23:23:02+00:00",
+  "generatedAt": "2026-10-18T14:23:50+00:00",
   "decisionStatus": "insufficient",
+  "answer": {
+   "text": "Not yet",
+   "citations": []
+  },
   "requirements": {
    "stated": [
     "developing hot polymer extrusion process with active pharmaceutical ingredient",
@@ -14,10 +18,7 @@
     "need initial comparison plan and questions required before choosing a probe"
    ],
    "unknowns": [
-    "API identity and concentration range",
-    "melt optical density and scattering",
-    "temperature and pressure at probe location",
-    "available port size and access points"
+    "Which composition variable(s) to monitor (API concentration, polymer content, moisture, etc.)"
    ],
    "factTurns": [
     1,
@@ -28,62 +29,34 @@
   },
   "questions": [
    {
-    "text": "What is the active pharmaceutical ingredient (API) and its expected concentration range in the polymer melt?",
+    "text": "What specific component or concentration change in the melt do you need to monitor in real time?",
     "impact": "method",
     "id": "q1",
-    "status": "open",
-    "askedTurn": 1
-   },
-   {
-    "text": "What is the approximate optical density (OD) or scattering level of the melt at the measurement wavelength range?",
-    "impact": "method",
-    "id": "q2",
-    "status": "open",
-    "askedTurn": 1
-   },
-   {
-    "text": "What are the temperature and pressure conditions at the intended probe location?",
-    "impact": "setup",
-    "id": "q3",
-    "status": "open",
-    "askedTurn": 1
-   },
-   {
-    "text": "What is the size and type of the available port or interface for probe installation?",
-    "impact": "setup",
-    "id": "q4",
-    "status": "open",
-    "askedTurn": 1
-   },
-   {
-    "text": "Do you have any constraints on probe material (e.g., must withstand high temperature and chemical exposure)?",
-    "impact": "setup",
-    "id": "q5",
     "status": "open",
     "askedTurn": 1
    }
   ],
   "recommendations": [],
   "concept": {
-   "summary": "None yet – requires clarification of target and melt properties",
+   "summary": "None yet – method selection depends on target analyte.",
    "citations": []
   },
   "spectralRange": {
-   "summary": "None yet – depends on API and melt optical properties",
+   "summary": "None yet – depends on chosen method and target.",
    "citations": []
   },
   "risks": [
-   "Uncertain API absorption features may overlap with polymer background",
-   "High temperature may damage probe optics",
-   "Fouling could block optical path"
+   "Choosing an inappropriate spectral technique may lead to non‑detectable signals or poor calibration."
   ],
   "feasibility": {
    "steps": [
-    "1. Obtain representative melt samples and measure their optical density and temperature.",
-    "2. Perform laboratory ATR or diffuse‑reflection spectroscopy on the melt to identify usable spectral windows.",
-    "3. Test probe durability in a mock‑up extrusion environment."
+    "Obtain a representative melt sample and offline reference assay for the target variable.",
+    "Acquire a small‑scale in‑line probe (e.g., NIR diffuse‑reflection or MIR‑ATR) and record spectra under process‑like conditions.",
+    "Develop a chemometric model linking spectra to the reference variable.",
+    "Validate the model on held‑out melt samples.",
+    "Iterate probe choice if signal‑to‑noise or sensitivity is insufficient."
    ],
-   "decisionBasis": "Awaiting answers to the above questions"
+   "decisionBasis": "Model performance will be judged against the agreed acceptance criteria (e.g., R², RMSEP) after the feasibility test."
   },
   "premiseChecks": [
    {
@@ -97,33 +70,32 @@
   "sources": [],
   "mode": "draft",
   "assumptions": [
-   "Assumes the API is detectable by IR or Raman in the melt"
+   "The melt is optically accessible to a fiber probe (not fully opaque or highly scattering).",
+   "The target variable has a measurable spectral signature in the chosen region."
   ],
   "pointsToConfirm": [
-   "API identity and concentration range",
-   "Melt optical properties",
-   "Process temperature/pressure",
-   "Port dimensions and material compatibility"
+   "Target analyte and its concentration range in the melt.",
+   "Process temperature, pressure, and flow conditions that may affect probe durability and signal stability."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 1257.0,
+   "ms": 357.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 14682.0,
+   "ms": 534.0,
    "detail": "4 stated (0 from answers) · 0 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 61.0,
-   "detail": "S01 p.16, S02 p.14, S04 p.1, S04 p.2 · BM25 · flashrank"
+   "ms": 346.0,
+   "detail": "S01 p.10, S01 p.11, S01 p.12, S01 p.14, S01 p.15, S01 p.5, S01 p.6, S01 p.9, S02 p.13, S02 p.14 · 10 routed by the source guide · vector+BM25"
   },
   {
    "step": "Premise checks",
@@ -134,7 +106,7 @@
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 38121.0,
+   "ms": 44504.0,
    "detail": "openai/gpt-oss-20b via groq"
   },
   {
@@ -147,7 +119,7 @@
    "step": "Validate numbers, claims and questions",
    "status": "ok",
    "ms": 0.0,
-   "detail": "all numbers traced to the customer or a cited page · every recommendation sentence cited · 5 open questions · all required sections present"
+   "detail": "all numbers traced to the customer or a cited page · every recommendation sentence cited · 1 open questions · all required sections present"
   }
  ]
 }

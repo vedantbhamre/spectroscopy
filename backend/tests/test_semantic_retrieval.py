@@ -28,7 +28,7 @@ UNSEEN = [
 def _unseen_recall() -> float:
     scores = []
     for q, truth in UNSEEN:
-        docs, _ = retrieve([], top_n=8, routing_text=q)
+        docs, _ = retrieve([], top_n=settings.RETRIEVE_TOP_N, routing_text=q)
         scores.append(len(truth & {(d["source"], int(d["page"])) for d in docs}) / len(truth))
     return sum(scores) / len(scores)
 
@@ -38,14 +38,15 @@ def semantic(monkeypatch):
     monkeypatch.setattr(settings, "EMBEDDINGS", "local")
 
 
-def test_unseen_wording_is_not_routed():
-    assert not any(tag(q) for q, _ in UNSEEN)
+def test_unseen_wording_is_mostly_not_routed():
+    # Written to miss the router; only the clinical one is now caught by the medical vocabulary.
+    assert sum(bool(tag(q)) for q, _ in UNSEEN) <= 1
 
 
 def test_vectors_reach_pages_keywords_miss(semantic):
     docs, info = retrieve([], top_n=8, routing_text=UNSEEN[0][0])
     assert info["vector"]
-    assert _unseen_recall() >= 0.9  # routing + BM25 alone: ~0.64
+    assert _unseen_recall() >= 0.95  # routing + BM25 alone: ~0.64
 
 
 def test_vectors_keep_development_recall(semantic):

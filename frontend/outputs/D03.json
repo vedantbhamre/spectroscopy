@@ -1,77 +1,185 @@
 {
- "reply": "For the clear‑to‑turbid whey stream, a single NIR transmission probe is the simplest, cost‑effective choice for protein tracking, with a diffuse‑reflection probe as a comparison when turbidity rises.",
+ "reply": "We can start with an in‑line NIR transmission probe for the clear whey and add a diffuse‑reflection probe to cover the turbid conditions; both use the same NIR spectrometer and can be calibrated against your lab protein assays.",
  "report": {
   "scenarioId": "D03",
-  "title": "Whey Protein Monitoring – NIR Transmission First",
+  "title": "In‑line NIR concept for whey protein monitoring across clarity changes",
   "origin": "live",
-  "generatedAt": "2026-10-17T23:16:19+00:00",
-  "decisionStatus": "insufficient",
+  "generatedAt": "2026-10-18T14:19:23+00:00",
+  "decisionStatus": "provisional",
+  "answer": {
+   "text": "It depends on the optical density range of the whey; a transmission‑based NIR probe works for clear liquid, while a diffuse‑reflection NIR probe can handle the turbid states.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "17",
+     "quote": "The use of Near-Infrared (NIR) spectroscopy for the inline monitoring of milk is a cornerstone of modern dairy \"Process Analytical Technology\" (PAT).",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "18",
+     "quote": "Conversely, reflection can work well in highly scattering environments but can be less representative for clear liquids.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "Table 1 (p.6)",
+     "quote": "| NIR spectroscopy | transmission or transflection probe | transmission | liquid, colloidal",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "Table 1 (p.6)",
+     "quote": "| NIR spectroscopy | diffuse reflection probe | diffuse reflection | scattering media, powder",
+     "check": "verified"
+    }
+   ]
+  },
   "requirements": {
    "stated": [
-    "whey stream is relatively clear before concentration",
-    "whey stream can become turbid under some operating conditions",
-    "want to investigate spectroscopy to track protein concentration"
+    "dairy process includes a relatively clear whey stream before a concentration stage",
+    "want to track protein concentration as the stream changes using spectroscopy",
+    "laboratory results will be used as reference",
+    "stream can become more turbid under some operating conditions",
+    "need a first measurement concept that handles change rather than assuming clear liquid"
    ],
-   "unknowns": [],
+   "unknowns": [
+    "expected range of turbidity (optical density or scattering coefficient)",
+    "number and size of available process ports for probes",
+    "whether a single fiber link can serve both probes"
+   ],
    "factTurns": [
+    1,
+    1,
     1,
     1,
     1
    ]
   },
-  "questions": [],
+  "questions": [
+   {
+    "text": "What is the typical turbidity (e.g., absorbance or scattering coefficient) range of the whey stream under the worst‑case operating conditions?",
+    "impact": "method",
+    "id": "q1",
+    "status": "open",
+    "askedTurn": 1
+   },
+   {
+    "text": "How many spare ports or access points are available in the line for installing probes?",
+    "impact": "setup",
+    "id": "q2",
+    "status": "open",
+    "askedTurn": 1
+   },
+   {
+    "text": "Will the same NIR spectrometer be used for both transmission and reflection measurements, or do you plan separate analyzers?",
+    "impact": "setup",
+    "id": "q3",
+    "status": "open",
+    "askedTurn": 1
+   }
+  ],
   "recommendations": [
    {
-    "method": "NIR (transmission)",
+    "method": "NIR transmission",
     "methodIds": [
      "NIR"
     ],
     "role": "primary",
-    "reason": "NIR transmission is preferred for transparent or semi‑transparent liquids such as whey, providing accurate protein signals via Beer‑Lambert law and is inexpensive compared to other methods.",
+    "reason": "Transmission NIR probes are listed for liquid and colloidal samples and are cost‑average; they work well for clear whey where light can pass through the flow.",
     "citations": [
      {
       "source": "S01",
+      "page": "Table 1 (p.6)",
+      "quote": "| NIR spectroscopy | transmission or transflection probe | transmission | liquid, colloidal",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "17",
+      "quote": "The use of Near-Infrared (NIR) spectroscopy for the inline monitoring of milk is a cornerstone of modern dairy \"Process Analytical Technology\" (PAT).",
+      "check": "verified"
+     }
+    ]
+   },
+   {
+    "method": "NIR diffuse reflection",
+    "methodIds": [
+     "NIR"
+    ],
+    "role": "comparison",
+    "reason": "Diffuse‑reflection NIR probes handle scattering or turbid media and are also cost‑average; they complement transmission when the whey becomes opaque.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "Table 1 (p.6)",
+      "quote": "| NIR spectroscopy | diffuse reflection probe | diffuse reflection | scattering media, powder",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
       "page": "18",
-      "quote": "NIR Transmission is the preferred method for transparent or semi‑transparent liquids, such as skim milk, whey, or permeate.",
+      "quote": "Conversely, reflection can work well in highly scattering environments but can be less representative for clear liquids.",
       "check": "verified"
      }
     ]
    }
   ],
   "concept": {
-   "summary": "Place a 1–10 mm pathlength transmission probe inline in the whey line before concentration. The probe is a fiber‑optic NIR probe with a fixed optical path. Light passes through the sample; the detector records transmittance, converted to absorbance for protein calibration.",
+   "summary": "Install an immersible transmission NIR probe in a straight section of the whey line for clear conditions and a second diffuse‑reflection NIR probe downstream or in a side‑stream where turbidity may increase; both connect via a single low‑loss silica fiber to one NIR spectrometer.",
+   "probe": "Transmission NIR probe (1‑10 mm path) and diffuse‑reflection NIR probe (0.5‑1 mm path)",
+   "location": "Transmission probe in a clear‑flow pipe section; reflection probe in a turbidity‑prone section or side‑stream cell",
+   "fiberLink": "Silica fiber (low OH) suitable for 780‑2500 nm",
+   "analyzer": "Broadband NIR spectrometer (780‑2500 nm) with chemometric software",
    "citations": [
     {
      "source": "S01",
-     "page": "18",
-     "quote": "The key experimental action is the precise control of the optical pathlength (usually 1 - 10 mm); if the pathlength is too wide, the signal is lost to absorption; if too narrow, the sample represents a negligible volume.",
+     "page": "5",
+     "quote": "Immersible fiber optic probes operating in various spectral regions from UV to mid-IR are increasingly being used for measuring liquid and soft or powdered solid samples.",
      "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "They can be used to obtain absorption, diffuse reflectance or transmission, Raman, and ATR spectra.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "10",
+     "quote": "Near-IR Spectrometry (includes FTIR, NIR-IR, or diffraction grating/slit spectrometer, Diffuse Reflection fiber probe, or Transmission fiber probe) Near-IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
+     "check": "verified",
+     "transfer": true,
+     "application": "medical and tissue"
     }
    ]
   },
   "spectralRange": {
-   "summary": "Use [to be agreed with the customer], the standard NIR window for protein overtone/combination bands.",
+   "summary": "NIR region 780–2500 nm (overtones of O‑H, N‑H, C‑H bonds relevant to protein)",
    "citations": [
     {
      "source": "S01",
-     "page": "18",
-     "quote": "NIR Transmission is the preferred method for transparent or semi‑transparent liquids, such as skim milk, whey, or permeate.",
+     "page": "10",
+     "quote": "Near-IR Spectrometry (includes FTIR, NIR-IR, or diffraction grating/slit spectrometer, Diffuse Reflection fiber probe, or Transmission fiber probe) Near-IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
      "check": "verified"
     }
    ]
   },
   "risks": [
-   "Turbidity may reduce transmission signal; a backup diffuse‑reflection probe mitigates this.",
-   "Probe fouling or sediment deposition could alter pathlength; periodic calibration or cleaning is required."
+   "Transmission probe may saturate or lose signal if turbidity exceeds the path length limit.",
+   "Reflection probe may be surface‑biased and less representative for homogeneous concentration if scattering changes rapidly.",
+   "Fiber fouling or coating buildup could affect both probes; regular cleaning may be required."
   ],
   "feasibility": {
    "steps": [
-    "1. Acquire a 1–10 mm NIR transmission probe and a diffuse‑reflection probe as a spare.",
-    "2. Run laboratory whey samples at known protein concentrations, both clear and artificially turbid, to build calibration models.",
-    "3. Validate the transmission model on held‑out samples; if performance drops when turbidity increases, switch to the diffuse‑reflection model.",
-    "4. Install the chosen probe inline, monitor real‑time protein concentration, and compare to laboratory reference data for acceptance criteria."
+    "Collect whey samples spanning the expected turbidity range (clear to turbid).",
+    "Measure each sample with both transmission and reflection probes in the lab using the same NIR spectrometer.",
+    "Obtain reference protein concentrations from the laboratory assay.",
+    "Develop separate chemometric calibration models (e.g., PLS) for each probe.",
+    "Validate each model on held‑out samples and compare prediction errors.",
+    "Select the probe that meets the agreed‑upon accuracy for each operating condition; implement the chosen probe(s) inline."
    ],
-   "decisionBasis": "The transmission probe meets the clear‑to‑turbid requirement with the lowest cost and simplest setup; the diffuse‑reflection probe is a low‑cost contingency."
+   "decisionBasis": "If the transmission model meets accuracy for clear samples and the reflection model meets accuracy for turbid samples, the combined concept is validated."
   },
   "premiseChecks": [
    {
@@ -80,26 +188,6 @@
     "status": "pass",
     "detail": "Target: protein concentration.",
     "citations": []
-   },
-   {
-    "id": "fluorescent_target",
-    "label": "Fluorescence has a defined fluorescent target",
-    "status": "fail",
-    "detail": "No fluorescent species, marker or reference relationship is named. Sensitivity alone does not make fluorescence a measurement of the requested variables.",
-    "citations": [
-     {
-      "source": "S01",
-      "page": "16",
-      "quote": "Fluorescence spectroscopy can be used for highsensitivity detection (down to the nM-µM range) of critical cofactors and amino acids like NADH, tryptophan, and riboflavin.",
-      "check": "verified"
-     },
-     {
-      "source": "S01",
-      "page": "5",
-      "quote": "NIR, UV, and fluorescence spectra contain broad, highly overlapping signals",
-      "check": "verified"
-     }
-    ]
    },
    {
     "id": "geometry_optics",
@@ -125,27 +213,47 @@
   "sources": [
    {
     "source": "S01",
-    "page": "18",
-    "quote": "NIR Transmission is the preferred method for transparent or semi‑transparent liquids, such as skim milk, whey, or permeate.",
+    "page": "17",
+    "quote": "The use of Near-Infrared (NIR) spectroscopy for the inline monitoring of milk is a cornerstone of modern dairy \"Process Analytical Technology\" (PAT).",
     "check": "verified"
    },
    {
     "source": "S01",
     "page": "18",
-    "quote": "The key experimental action is the precise control of the optical pathlength (usually 1 - 10 mm); if the pathlength is too wide, the signal is lost to absorption; if too narrow, the sample represents a negligible volume.",
+    "quote": "Conversely, reflection can work well in highly scattering environments but can be less representative for clear liquids.",
     "check": "verified"
    },
    {
     "source": "S01",
-    "page": "16",
-    "quote": "Fluorescence spectroscopy can be used for highsensitivity detection (down to the nM-µM range) of critical cofactors and amino acids like NADH, tryptophan, and riboflavin.",
+    "page": "Table 1 (p.6)",
+    "quote": "| NIR spectroscopy | transmission or transflection probe | transmission | liquid, colloidal",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "Table 1 (p.6)",
+    "quote": "| NIR spectroscopy | diffuse reflection probe | diffuse reflection | scattering media, powder",
     "check": "verified"
    },
    {
     "source": "S01",
     "page": "5",
-    "quote": "NIR, UV, and fluorescence spectra contain broad, highly overlapping signals",
+    "quote": "Immersible fiber optic probes operating in various spectral regions from UV to mid-IR are increasingly being used for measuring liquid and soft or powdered solid samples.",
     "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "They can be used to obtain absorption, diffuse reflectance or transmission, Raman, and ATR spectra.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "10",
+    "quote": "Near-IR Spectrometry (includes FTIR, NIR-IR, or diffraction grating/slit spectrometer, Diffuse Reflection fiber probe, or Transmission fiber probe) Near-IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
+    "check": "verified",
+    "transfer": true,
+    "application": "medical and tissue"
    },
    {
     "source": "S01",
@@ -162,56 +270,59 @@
   ],
   "mode": "draft",
   "assumptions": [
-   "The whey stream’s turbidity can be managed by switching to diffuse‑reflection when needed; the probe’s optical path can be maintained in the process line; laboratory reference data are available for calibration.",
-   "NIR (diffuse reflection): When the stream becomes turbid, diffuse‑reflection probes can still collect useful spectra from scattering media, offering a simple escalation path. (not supported by the cited page)"
+   "Protein has sufficient NIR absorbance features to be quantified with chemometrics.",
+   "The NIR spectrometer can be shared between the two probes without re‑configuration.",
+   "Cleaning procedures can keep probe surfaces free of fouling during operation.",
+   "Transfer assumption: S01 p.10 shows this for medical and tissue, not for dairy and food; it has to be tested for this application."
   ],
   "pointsToConfirm": [
-   "Confirm the maximum turbidity level the transmission probe can tolerate before signal loss.",
-   "Determine the exact optical pathlength that balances sensitivity and penetration for the specific whey composition."
+   "Exact turbidity range (absorbance or scattering) to size the transmission path.",
+   "Availability and dimensions of process ports for probe installation.",
+   "Whether a single fiber link can multiplex both probes or separate links are needed."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 503.0,
+   "ms": 297.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 1690.0,
-   "detail": "3 stated (0 from answers) · 0 unknown"
+   "ms": 16254.0,
+   "detail": "5 stated (0 from answers) · 1 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 82.0,
-   "detail": "S01 p.14, S01 p.16, S01 p.18, S02 p.20, S03 p.16 · BM25 · flashrank"
+   "ms": 73.0,
+   "detail": "S01 p.10, S01 p.12, S01 p.16, S01 p.17, S01 p.18, S01 p.5, S01 p.6, S01 p.9, S03 p.16, S04 p.3 · 7 routed by the source guide · vector+BM25"
   },
   {
    "step": "Premise checks",
-   "status": "fail",
+   "status": "ok",
    "ms": 0.0,
-   "detail": "Fluorescence has a defined fluorescent target"
+   "detail": "nothing contradicted"
   },
   {
    "step": "Compose the assessment",
-   "status": "warn",
-   "ms": 64852.0,
-   "detail": "openai/gpt-oss-20b via groq · repaired once"
+   "status": "ok",
+   "ms": 44869.0,
+   "detail": "openai/gpt-oss-120b via groq"
   },
   {
    "step": "Verify citations",
    "status": "ok",
    "ms": 0.0,
-   "detail": "4 of 4 quotes found on the cited page"
+   "detail": "12 of 12 quotes found on the cited page"
   },
   {
    "step": "Validate numbers, claims and questions",
-   "status": "warn",
+   "status": "ok",
    "ms": 0.0,
-   "detail": "1 unsupported numbers replaced · 1 unsupported sentences and 1 uncited recommendations moved to assumptions · 0 open questions · all required sections present"
+   "detail": "all numbers traced to the customer or a cited page · every recommendation sentence cited · 1 transfer assumptions labelled · 3 open questions · all required sections present"
   }
  ]
 }

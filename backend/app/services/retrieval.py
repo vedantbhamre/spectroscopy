@@ -114,13 +114,23 @@ def routed_pages(text: str) -> list[tuple[str, int]]:
     from app.knowledge.applications import tag
 
     want = list(M.CORE)
+    named = {m for m, pat in M.METHOD_PATTERNS.items() if re.search(pat, text, re.I)}
+    for pair, pages in M.PAIR_PAGES.items():  # the most specific evidence for two named methods: their combined probe
+        if pair <= named:
+            want += pages
     for domain in tag(text):
         want += M.DOMAIN_PAGES.get(domain, [])
-    methods = {m for m, pat in M.METHOD_PATTERNS.items() if re.search(pat, text, re.I)}
-    for src, pg in [w for w in want if w not in M.CORE]:
+    if M.COMBINATION_TOPIC.search(text):
+        want += M.COMBINATION_PAGES
+    # Methods the enquiry names come first, then those its application pages discuss most: the page budget is small.
+    mentions = dict.fromkeys(M.METHOD_PATTERNS, 0)
+    pair_pages = {p for pages in M.PAIR_PAGES.values() for p in pages}
+    for src, pg in [w for w in want if w not in M.CORE and w not in M.COMBINATION_PAGES and w not in pair_pages]:
         page = " ".join(c["text"] for c in chunks() if c["source"] == src and int(c["page"]) == pg)
-        methods |= {m for m, pat in M.METHOD_PATTERNS.items() if len(re.findall(pat, page, re.I)) >= M.METHOD_MENTIONS}
-    want += [M.METHOD_PAGES[m] for m in sorted(methods)]
+        for m, pat in M.METHOD_PATTERNS.items():
+            mentions[m] += len(re.findall(pat, page, re.I))
+    methods = named | {m for m, n in mentions.items() if n >= M.METHOD_MENTIONS}
+    want += [M.METHOD_PAGES[m] for m in sorted(methods, key=lambda m: (m not in named, -mentions[m], m))]
     if M.FIBRE_TOPIC.search(text):
         want += M.FIBRE_PAGES
     return list(dict.fromkeys(want))

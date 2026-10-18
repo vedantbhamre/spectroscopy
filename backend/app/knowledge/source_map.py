@@ -7,7 +7,7 @@ petroleum p.13, API in polymer extrusion p.14, combined probes p.15–16. S03 an
 Customers describe processes, not methods, so keyword search alone rarely reaches the method pages an assessment
 needs. Retrieval therefore always includes the method overview and comparison table, the application pages for the
 domain the enquiry is about, the method pages that the enquiry names or that those application pages discuss, and the
-fibre pages when fibres, cables or distance come up. Generic: keyed on application domain, method and topic only.
+fibre pages when fibres, cables or distance come up, and the combining-methods pages when methods are used together. Generic: keyed on application domain, method and topic only.
 """
 
 import re
@@ -35,6 +35,17 @@ METHOD_PATTERNS: dict[str, str] = {
 }
 
 FIBRE_PAGES: list[Page] = [("S02", 6), ("S02", 7)]
+
+# Combined probes for a pair of methods: S01 p.15 (NIR + Raman, pharmaceutical), S04 and S02 p.15 (ATR mid-IR + fluorescence,
+# tissue classification). Routed when both methods of the pair come up.
+PAIR_PAGES: dict[frozenset, list[Page]] = {
+    frozenset({"NIR", "RAMAN"}): [("S01", 15)],
+    frozenset({"MIR_ATR", "FLUO"}): [("S04", 1), ("S04", 3), ("S04", 4), ("S02", 15)],
+}
+
+# S01 §3.2 "Synergy of Combining Spectral Methods" when the enquiry is about using methods together.
+COMBINATION_PAGES: list[Page] = [("S01", 7), ("S01", 8)]
+COMBINATION_TOPIC = re.compile(r"combin|complementar|simultaneous|same (location|spot|point|position)|multi-?spectral|multi-?modal|together", re.I)
 FIBRE_TOPIC = re.compile(r"fib(er|re)|cable|distance|remote|another building|outside the process|far from|control room", re.I)
 
 # A method counts as discussed on an application page when it is mentioned at least this often there.

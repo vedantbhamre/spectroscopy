@@ -91,6 +91,9 @@ def detect(text: str, facts: Facts, enquiry: str | None = None) -> Facts:
         if re.search(pat, t):
             fibers.add(fid)
     upd: dict = {"methods_mentioned": sorted(methods), "fibers_mentioned": sorted(fibers)}
+    # A classification study names its target as the classes to separate (tissue types, grades, good/bad parts).
+    if not facts.target_variables and re.search(r"classif|discriminat|distinguish|differentiat|tell .{0,40}\b(from|apart)\b", t):
+        upd["target_variables"] = ["sample class (classification task)"]
     if re.search(r"surg|in vivo|clinical|patient|tumou?r boundar|diagnos", t):
         upd["use_context"] = "clinical"
     if re.search(r"\b(proof|prove|ready for)\b", t) and re.search(r"stud|paper|findings", t):
@@ -119,8 +122,12 @@ def detect(text: str, facts: Facts, enquiry: str | None = None) -> Facts:
         if mid and not any(o.get("method") == mid for o in owned):
             owned.append({"name": (m.group(5) + m.group(6)).strip(), "method": mid})
     upd["owned_equipment"] = owned
-    if not facts.application_domain:
-        upd["application_domain"] = next(iter(app_tags(t)), None)
+    # The customer's own words decide the domain when they point to exactly one; the extraction only fills gaps.
+    tags = app_tags(t)
+    if len(tags) == 1 and facts.application_domain != tags[0]:
+        upd["application_domain"] = tags[0]
+    elif not facts.application_domain:
+        upd["application_domain"] = next(iter(tags), None)
 
     # Analyzer location and link length, from the whole transcript.
     if re.search(r"(another|separate|different|other|next)\s+(building|room|hall|site)|control room|far (away )?from the (line|probe|process)|"

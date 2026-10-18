@@ -1,19 +1,30 @@
 {
- "reply": "Based on the opaque, concentrated milk and the need for early inline data on fat and protein, NIR diffuse‑reflection spectroscopy is the simplest, cost‑effective primary option, with a parallel transmission test on a diluted sample for comparison.",
+ "reply": "Based on the opaque, concentrated milk and the need for inline monitoring of fat and protein, a diffuse‑reflection NIR probe is the simplest, cost‑effective primary option, with a lab‑based MIR‑ATR or transmission NIR as a comparison experiment.",
  "report": {
   "scenarioId": "D02",
-  "title": "Inline spectroscopy concept for opaque milk",
+  "title": "Inline spectroscopy concept for opaque milk concentrate",
   "origin": "live",
-  "generatedAt": "2026-10-18T13:55:46+00:00",
+  "generatedAt": "2026-10-18T14:18:18+00:00",
   "decisionStatus": "provisional",
   "answer": {
-   "text": "It depends on the optical path; NIR diffuse‑reflection can monitor opaque milk, while a transmission test on a diluted stream can serve as a comparison.",
-   "sayInstead": "NIR diffuse‑reflection spectroscopy is suitable for inline monitoring of opaque, concentrated milk, and a transmission measurement on a diluted sample can be used for method comparison.",
+   "text": "It depends on the optical path that can be achieved in‑line; NIR diffuse‑reflection is likely feasible, while MIR‑ATR would require sampling.",
    "citations": [
     {
      "source": "S01",
      "page": "5",
-     "quote": "NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics, as well as standard lamps as light sources, making it ideal for online applications",
+     "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "17",
+     "quote": "NIR Reflection: Inline NIR Reflection is primarily used for opaque or highly concentrated dairy products, such as yogurt, butter, or whole milk concentrates.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "18",
+     "quote": "milk becomes too \"thick\" or fat-rich, as the light cannot penetrate the sample.",
      "check": "verified"
     },
     {
@@ -27,18 +38,16 @@
   "requirements": {
    "stated": [
     "product is opaque concentrated milk that flows through a processing line",
-    "they currently sample for fat and protein analysis",
-    "they want earlier information about composition changes",
+    "they currently sample for fat and protein analysis and want earlier composition info",
     "product temperature and texture vary during production",
     "they want an initial spectroscopy concept and a practical comparison experiment while retaining lab checks"
    ],
    "unknowns": [
-    "exact temperature range of the process line",
-    "available ports or space for a probe",
-    "acceptable response time for the control loop"
+    "available in‑line port size and material compatibility",
+    "required measurement update rate",
+    "acceptable calibration error for fat and protein"
    ],
    "factTurns": [
-    1,
     1,
     1,
     1,
@@ -47,21 +56,21 @@
   },
   "questions": [
    {
-    "text": "What is the temperature range of the milk stream where the probe will be installed?",
+    "text": "What is the desired measurement update frequency (e.g., seconds per sample)?",
     "impact": "method",
     "id": "q1",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "How many spare ports or flanges are available for installing an inline probe?",
+    "text": "What is the maximum inner diameter and material of the pipe where a probe could be installed?",
     "impact": "setup",
     "id": "q2",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What is the required update frequency (e.g., seconds, minutes) for the composition data?",
+    "text": "Do you have an existing reference laboratory method (e.g., MIR‑ATR or standard wet chemistry) for fat and protein that can provide calibration data?",
     "impact": "acceptance",
     "id": "q3",
     "status": "open",
@@ -70,17 +79,29 @@
   ],
   "recommendations": [
    {
-    "method": "NIR diffuse reflection",
+    "method": "NIR diffuse‑reflection",
     "methodIds": [
      "NIR"
     ],
     "role": "primary",
-    "reason": "Opaque, scattering milk suits diffuse‑reflection; NIR probes are low‑cost and proven for dairy PAT, offering sufficient penetration for surface‑sensitive measurement of fat and protein.",
+    "reason": "NIR diffuse‑reflection works with opaque, highly scattering dairy products and can be implemented with a fiber‑optic probe mounted flush to the pipe, providing surface‑sensitive measurements of fat and protein without needing thin samples.",
     "citations": [
      {
       "source": "S01",
       "page": "5",
-      "quote": "NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering",
+      "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "17",
+      "quote": "NIR Reflection: Inline NIR Reflection is primarily used for opaque or highly concentrated dairy products, such as yogurt, butter, or whole milk concentrates.",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "18",
+      "quote": "milk becomes too \"thick\" or fat-rich, as the light cannot penetrate the sample.",
       "check": "verified"
      },
      {
@@ -93,58 +114,71 @@
    }
   ],
   "concept": {
-   "summary": "Install a diffuse‑reflection NIR probe flush‑mounted in the main pipe to monitor the opaque milk; divert a small flow to a transmission probe for parallel reference measurements.",
-   "probe": "Diffuse‑reflection fiber‑optic probe (NIR, 780–2500 nm)",
-   "location": "Flush‑mounted in the main process line (high‑OD region)",
-   "fiberLink": "Standard silica fiber (low loss in NIR)",
-   "analyzer": "Fiber‑coupled NIR spectrometer (780–2500 nm)",
+   "summary": "Install a diffuse‑reflection NIR probe flush‑mounted in the process pipe to collect back‑scattered light from the flowing milk. Light is delivered and collected via a bifurcated fiber bundle to a standard NIR spectrometer (780–2500 nm). Parallel lab samples are taken for MIR‑ATR analysis to build and validate calibration models.",
+   "probe": "Diffuse‑reflection NIR probe (bifurcated fiber, stainless‑steel housing)",
+   "location": "Flush‑mounted in the process pipe at a representative point",
+   "fiberLink": "Silica fiber bundle (low‑OH) suitable for 780–2500 nm",
+   "analyzer": "Bench‑top NIR spectrometer with chemometric software",
    "citations": [
     {
      "source": "S01",
-     "page": "5",
-     "quote": "it ideal for online applications, including remote measurements via fiber optic probes.",
+     "page": "17",
+     "quote": "The main equipment includes a fiber optic probe where one set of fibers delivers light to the sample and the other collects the \"backscattered\" light.",
      "check": "verified"
     },
     {
      "source": "S01",
-     "page": "Table 1 (p.6)",
-     "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
+     "page": "17",
+     "quote": "Experimentally, the probe is flush-mounted into a pipe or vat to interact directly with the flowing medium.",
      "check": "verified"
-    }
-   ]
-  },
-  "spectralRange": {
-   "summary": "NIR excitation 780–2500 nm; diffuse‑reflection collection over the same range.",
-   "citations": [
-    {
-     "source": "S01",
-     "page": "5",
-     "quote": "Near-IR vibrational spectroscopy (NIR) ... spectra (780–2500 nm)",
-     "check": "failed"
     },
     {
      "source": "S01",
      "page": "10",
-     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+     "quote": "Near-IR Spectrometry (includes FTIR, NIR-IR, or diffraction grating/slit spectrometer, Diffuse Reflection fiber probe, or Transmission fiber probe) Near-IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
+     "check": "verified",
+     "transfer": true,
+     "application": "medical and tissue"
+    }
+   ]
+  },
+  "spectralRange": {
+   "summary": "NIR excitation 780–2500 nm (overtones of O‑H, C‑H, N‑H) suitable for fat and protein; MIR‑ATR 4000–400 cm⁻¹ for lab reference.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "10",
+     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups, such as -OH, -NH2=NH, -CH3, =CH2, ≥CH, etc., found in many organic and inorganic compounds.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "In contrast, strong absorption in the mid-IR region limits the corresponding spectral method to the analysis of very thin samples (usually less than 50 µm),",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "9",
+     "quote": "Vibrational spectroscopy in the mid-IR range (4000–400 cm-1) is one of the most informative methods of chemical analysis.",
      "check": "verified"
     }
    ]
   },
   "risks": [
-   "Surface‑sensitivity of reflection may be affected by foam or bubbles.",
-   "Temperature drift could shift baseline; need temperature compensation.",
+   "Surface‑only measurement may be affected by foam or bubbles.",
+   "Temperature variations can shift baseline; need temperature compensation.",
    "Probe fouling from milk residues; requires cleaning protocol."
   ],
   "feasibility": {
    "steps": [
-    "Collect representative milk samples covering the expected fat/protein range.",
-    "Measure each sample with the proposed NIR reflection probe and with a laboratory reference (e.g., standard gravimetric fat/protein assay).",
-    "Build a chemometric model (e.g., PLS) on a training set; validate on held‑out samples.",
-    "Install the probe inline, record spectra during normal operation, and compare to the side‑stream transmission data.",
-    "Assess model performance (RMSEP, bias) against the lab reference; iterate calibration if needed.",
-    "Validate the model on samples not used to build it (held-out samples, e.g. from other patients, batches or days) before drawing any conclusion; a model built on few samples can fit them without generalising."
+    "Obtain representative milk samples covering expected fat/protein range.",
+    "Record NIR diffuse‑reflection spectra inline with the proposed probe.",
+    "Simultaneously collect aliquots for MIR‑ATR lab analysis (reference).",
+    "Build chemometric calibration models (e.g., PLS) for fat and protein using the paired data.",
+    "Validate on held‑out samples and on‑line runs at different temperatures/textures."
    ],
-   "decisionBasis": "If the validation on held‑out samples meets the agreed‑upon accuracy for fat and protein, the method is deemed feasible for inline deployment."
+   "decisionBasis": "If the validation RMSEP meets the agreed laboratory tolerance, the NIR inline method is accepted; otherwise adjust probe geometry or consider adding a transmission probe for low‑fat runs."
   },
   "premiseChecks": [
    {
@@ -158,7 +192,7 @@
     "id": "geometry_optics",
     "label": "Probe geometry matches the optical density of the medium",
     "status": "pass",
-    "detail": "Medium described as opaque; the proposed transmission geometry suits it.",
+    "detail": "Medium described as opaque; the proposed ATR / reflection geometry suits it.",
     "citations": [
      {
       "source": "S01",
@@ -173,7 +207,19 @@
    {
     "source": "S01",
     "page": "5",
-    "quote": "NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics, as well as standard lamps as light sources, making it ideal for online applications",
+    "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "17",
+    "quote": "NIR Reflection: Inline NIR Reflection is primarily used for opaque or highly concentrated dairy products, such as yogurt, butter, or whole milk concentrates.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "18",
+    "quote": "milk becomes too \"thick\" or fat-rich, as the light cannot penetrate the sample.",
     "check": "verified"
    },
    {
@@ -184,26 +230,40 @@
    },
    {
     "source": "S01",
-    "page": "5",
-    "quote": "NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering",
+    "page": "17",
+    "quote": "The main equipment includes a fiber optic probe where one set of fibers delivers light to the sample and the other collects the \"backscattered\" light.",
     "check": "verified"
    },
    {
     "source": "S01",
-    "page": "5",
-    "quote": "it ideal for online applications, including remote measurements via fiber optic probes.",
+    "page": "17",
+    "quote": "Experimentally, the probe is flush-mounted into a pipe or vat to interact directly with the flowing medium.",
     "check": "verified"
-   },
-   {
-    "source": "S01",
-    "page": "5",
-    "quote": "Near-IR vibrational spectroscopy (NIR) ... spectra (780–2500 nm)",
-    "check": "failed"
    },
    {
     "source": "S01",
     "page": "10",
-    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+    "quote": "Near-IR Spectrometry (includes FTIR, NIR-IR, or diffraction grating/slit spectrometer, Diffuse Reflection fiber probe, or Transmission fiber probe) Near-IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
+    "check": "verified",
+    "transfer": true,
+    "application": "medical and tissue"
+   },
+   {
+    "source": "S01",
+    "page": "10",
+    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups, such as -OH, -NH2=NH, -CH3, =CH2, ≥CH, etc., found in many organic and inorganic compounds.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "In contrast, strong absorption in the mid-IR region limits the corresponding spectral method to the analysis of very thin samples (usually less than 50 µm),",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "9",
+    "quote": "Vibrational spectroscopy in the mid-IR range (4000–400 cm-1) is one of the most informative methods of chemical analysis.",
     "check": "verified"
    },
    {
@@ -215,35 +275,36 @@
   ],
   "mode": "draft",
   "assumptions": [
-   "The milk remains sufficiently scattering for diffuse‑reflection to capture bulk composition.",
-   "The NIR spectrometer can be integrated with existing process control software.",
-   "Laboratory reference methods for fat and protein are available for model building.",
-   "NIR transmission (diluted stream): A transmission probe on a side‑stream of diluted milk provides a benchmark for bulk composition and helps assess calibration transfer to the reflection geometry. (not supported by the cited page)"
+   "The milk remains sufficiently scattering for diffuse‑reflection to return usable signal.",
+   "A suitable pipe port exists for a flush‑mounted probe.",
+   "Laboratory MIR‑ATR or standard wet chemistry can provide reference values for calibration.",
+   "Transfer assumption: S01 p.10 shows this for medical and tissue, not for dairy and food; it has to be tested for this application.",
+   "MIR‑ATR (lab): MIR‑ATR provides high molecular specificity for fat and protein and can be used on sampled aliquots to generate reference data for calibrating the inline NIR model. (not supported by the cited page)"
   ],
   "pointsToConfirm": [
-   "Exact temperature and pressure conditions at the probe location.",
-   "Availability and size of an installation port for the probe.",
-   "Required data update rate for process control."
+   "Exact pipe dimensions and material for probe mounting.",
+   "Target update rate and data integration time.",
+   "Availability of a reference laboratory method and its measurement uncertainty."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 488.0,
+   "ms": 550.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 15263.0,
-   "detail": "5 stated (0 from answers) · 3 unknown"
+   "ms": 1140.0,
+   "detail": "4 stated (0 from answers) · 3 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 81.0,
-   "detail": "S01 p.10, S01 p.17, S01 p.18, S01 p.5, S01 p.6, S01 p.9, S03 p.16, S04 p.3 · 6 routed by the source guide · vector+BM25"
+   "ms": 329.0,
+   "detail": "S01 p.10, S01 p.12, S01 p.17, S01 p.18, S01 p.5, S01 p.6, S01 p.9, S03 p.16, S04 p.3, S04 p.5 · 7 routed by the source guide · vector+BM25"
   },
   {
    "step": "Premise checks",
@@ -254,20 +315,20 @@
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 43748.0,
+   "ms": 3695.0,
    "detail": "openai/gpt-oss-120b via groq"
   },
   {
    "step": "Verify citations",
-   "status": "warn",
+   "status": "ok",
    "ms": 0.0,
-   "detail": "8 of 9 quotes found on the cited page · 1 not found"
+   "detail": "16 of 16 quotes found on the cited page"
   },
   {
    "step": "Validate numbers, claims and questions",
    "status": "warn",
    "ms": 0.0,
-   "detail": "all numbers traced to the customer or a cited page · 1 unsupported sentences and 1 uncited recommendations moved to assumptions · 3 open questions · all required sections present"
+   "detail": "all numbers traced to the customer or a cited page · 1 unsupported sentences and 1 uncited recommendations moved to assumptions · 1 transfer assumptions labelled · 3 open questions · all required sections present"
   }
  ]
 }

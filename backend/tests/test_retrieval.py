@@ -5,6 +5,7 @@ import json
 import re
 from pathlib import Path
 
+from app.config import settings
 from app.services.retrieval import retrieve
 
 USEFUL = {
@@ -28,7 +29,7 @@ def recall() -> dict[str, float]:
     out = {}
     for sid, spec in USEFUL.items():
         truth = _pages(spec)
-        docs, _ = retrieve([], top_n=8, routing_text=SCEN[sid])
+        docs, _ = retrieve([], top_n=settings.RETRIEVE_TOP_N, routing_text=SCEN[sid])
         got = {(d["source"], int(d["page"])) for d in docs}
         out[sid] = len(truth & got) / len(truth)
     return out
@@ -37,8 +38,8 @@ def recall() -> dict[str, float]:
 def test_retrieval_reaches_the_useful_pages():
     r = recall()
     mean = sum(r.values()) / len(r)
-    assert mean >= 0.85, r  # keyword search alone: ~0.35
-    assert min(r.values()) >= 0.5, r
+    assert mean >= 0.95, r  # keyword search alone: ~0.35; routing with alphabetical method order and 8 pages: 0.90
+    assert min(r.values()) >= 0.7, r
 
 
 def test_one_chunk_per_page_and_budget():

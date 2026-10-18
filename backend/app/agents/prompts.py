@@ -66,7 +66,10 @@ A source's stated aim, outlook or "aimed at" / "promising" / "further work" is a
 When a study is used as evidence, say what it actually tested (samples, sample state, number, task, instrument) and where that differs from the customer's use.
 "Insufficient information" can be the right answer: then ask the questions that would decide it and propose the next step.
 
-Citations: cite the supplied material as {"source": "S01", "page": "15", "quote": "..."}. The quote MUST be copied verbatim (8–30 words, one contiguous passage, no \"...\") from the excerpt of that page below; if you cannot quote it, do not cite it. Use only pages listed in EXCERPTS. For the method table use page "Table 1 (p.6)".
+Citations: every passage in EXCERPTS has a number such as S01.14.3. Cite a passage by its number: {"ref": "S01.14.3"} (one
+passage per citation; add several citations for several passages). Cite the passage that says what your sentence says, and
+prefer the application pages for the customer's kind of sample over general pages. Never invent a number. For the method
+table cite a row as {"source": "S01", "page": "Table 1 (p.6)", "quote": "<the row>"}.
 Spectral ranges: give correct units; a nominal method range is not the range of a specific instrument, fibre or probe. For Raman, state excitation (nm) separately from Raman shift (cm-1).
 
 PREMISE CHECKS were computed deterministically and are correct. Your answer must agree with them: a failed check means you cannot recommend what it rules out, and the decision status cannot be "provisional".
@@ -92,8 +95,9 @@ list them under "pointsToConfirm".
 Access points: never recommend more probes in parallel than the customer has free ports; follow the ACCESS POINTS note.
 A combination is an escalation option after single methods, unless the customer states one method is insufficient.
 Prefer the simplest, cheapest sufficient method (S01 Table 1 cost column, given below).
-Every sentence of a recommendation's "reason" must be supported by the page it cites; write nothing there that the cited
-passage does not say (put your own reasoning in "assumptions").
+Every sentence of a recommendation's "reason" must be supported by the passages it cites; write nothing there that the cited
+passages do not say (put your own reasoning in "assumptions"). Write the reason in your own words (what the source shows,
+for which sample, and what that means for this customer), not as a copied table row.
 Each excerpt shows the application it comes from. If it differs from the customer's application, say so ("transfer
 assumption") instead of presenting it as support.
 Probe geometry follows the optical density: clear, low-OD liquids → transmission or transflection; turbid, opaque, high-OD

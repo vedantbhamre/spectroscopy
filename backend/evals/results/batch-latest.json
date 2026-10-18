@@ -2,154 +2,154 @@
  {
   "id": "D01",
   "status": [
-   "provisional",
    "provisional"
   ],
-  "citation_pass": "9/10 (90%)",
-  "number_hits": 2,
+  "citation_pass": "16/16 (100%)",
+  "number_hits": 1,
   "repeated_questions": 0,
   "missing_sections": 0,
   "repaired": 0,
-  "moved_sentences": 1,
+  "moved_sentences": 0,
   "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 8398,
   "expectations": 1.0,
-  "expectation_failures": [],
-  "s": 34
+  "expectation_failures": []
  },
  {
   "id": "D02",
   "status": [
-   "insufficient",
-   "insufficient"
+   "provisional"
   ],
-  "citation_pass": "0/0",
-  "number_hits": 1,
+  "citation_pass": "16/16 (100%)",
+  "number_hits": 0,
   "repeated_questions": 0,
-  "missing_sections": 1,
-  "repaired": 1,
-  "moved_sentences": 0,
-  "violations": {
-   "required sections present": [
-    "turn 1: missing assumptions"
-   ]
-  },
-  "expectations": 0.25,
-  "expectation_failures": [
-   "decision status in ['provisional'] (got insufficient)",
-   "mentions one of ['nir']",
-   "mentions one of ['reflection']"
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 2,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
   ],
-  "s": 124
+  "tokens": 9297,
+  "expectations": 1.0,
+  "expectation_failures": []
  },
  {
   "id": "D03",
   "status": [
-   "insufficient",
-   "insufficient"
-  ],
-  "citation_pass": "8/8 (100%)",
-  "number_hits": 2,
-  "repeated_questions": 0,
-  "missing_sections": 0,
-  "repaired": 2,
-  "moved_sentences": 4,
-  "violations": {},
-  "expectations": 1.0,
-  "expectation_failures": [],
-  "s": 87
- },
- {
-  "id": "D04",
-  "status": [
-   "provisional",
    "provisional"
   ],
-  "citation_pass": "4/9 (44%)",
-  "number_hits": 2,
-  "repeated_questions": 0,
-  "missing_sections": 1,
-  "repaired": 1,
-  "moved_sentences": 3,
-  "violations": {
-   "required sections present": [
-    "turn 2: missing recommendation"
-   ]
-  },
-  "expectations": 1.0,
-  "expectation_failures": [],
-  "s": 131
- },
- {
-  "id": "D05",
-  "status": [
-   "insufficient",
-   "insufficient"
-  ],
-  "citation_pass": "3/7 (43%)",
-  "number_hits": 5,
-  "repeated_questions": 0,
-  "missing_sections": 0,
-  "repaired": 0,
-  "moved_sentences": 4,
-  "violations": {},
-  "expectations": 1.0,
-  "expectation_failures": [],
-  "s": 93
- },
- {
-  "id": "D06",
-  "status": [
-   "insufficient",
-   "provisional"
-  ],
-  "citation_pass": "5/8 (62%)",
-  "number_hits": 3,
-  "repeated_questions": 0,
-  "missing_sections": 1,
-  "repaired": 1,
-  "moved_sentences": 5,
-  "violations": {
-   "required sections present": [
-    "turn 2: missing recommendation"
-   ]
-  },
-  "expectations": 1.0,
-  "expectation_failures": [],
-  "s": 105
- },
- {
-  "id": "D07",
-  "status": [
-   "insufficient",
-   "insufficient"
-  ],
-  "citation_pass": "3/3 (100%)",
-  "number_hits": 2,
+  "citation_pass": "12/12 (100%)",
+  "number_hits": 0,
   "repeated_questions": 0,
   "missing_sections": 0,
   "repaired": 0,
   "moved_sentences": 0,
   "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 9098,
   "expectations": 1.0,
-  "expectation_failures": [],
-  "s": 104
+  "expectation_failures": []
+ },
+ {
+  "id": "D04",
+  "status": [
+   "provisional"
+  ],
+  "citation_pass": "14/14 (100%)",
+  "number_hits": 1,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 0,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 8462,
+  "expectations": 1.0,
+  "expectation_failures": []
+ },
+ {
+  "id": "D05",
+  "status": [
+   "insufficient"
+  ],
+  "citation_pass": "12/12 (100%)",
+  "number_hits": 2,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 2,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 8941,
+  "expectations": 1.0,
+  "expectation_failures": []
+ },
+ {
+  "id": "D06",
+  "status": [
+   "provisional"
+  ],
+  "citation_pass": "9/9 (100%)",
+  "number_hits": 0,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 0,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 8139,
+  "expectations": 1.0,
+  "expectation_failures": []
+ },
+ {
+  "id": "D07",
+  "status": [
+   "insufficient"
+  ],
+  "citation_pass": "0/0",
+  "number_hits": 0,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 0,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-20b via groq"
+  ],
+  "tokens": 7473,
+  "expectations": 1.0,
+  "expectation_failures": []
  },
  {
   "id": "D08",
   "status": [
-   "insufficient",
-   "insufficient"
+   "provisional"
   ],
   "citation_pass": "14/14 (100%)",
-  "number_hits": 12,
+  "number_hits": 2,
   "repeated_questions": 0,
   "missing_sections": 0,
   "repaired": 0,
-  "moved_sentences": 8,
+  "moved_sentences": 2,
   "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 8770,
   "expectations": 1.0,
-  "expectation_failures": [],
-  "s": 45
+  "expectation_failures": []
  },
  {
   "id": "H01",
