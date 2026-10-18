@@ -21,14 +21,19 @@ Latest per-case check: docs/08-stress-test.md (H06: 19.5 → 25 / 30 after the d
 
 Biggest gains still available: #7 (second key + hosting decision + rehearsal), #9 (fresh full batch on the large model), #2–#3 (large model gives 90–100 % citation pass vs 40–60 % on the small fallback).
 
-## Official criteria scorecard (final, 18 Oct 20:30)
+## Official criteria scorecard (final, 18 Oct, weighted)
 
-| Criterion `[BRIEF]` | Score | Evidence (verified) | Weakest point |
-|---|---|---|---|
-| Technical quality | 4.5 | LangGraph pipeline + deterministic validators (citations, numbers, claims, facts, cost, certainty); 182 offline tests; production build | relies on one LLM provider's free tier |
-| Use of AFS knowledge | 4.5 | source-guide routing + BM25 + local BGE vectors (recall 0.97); citation by passage number (quotes exact by construction); method ranges, fibre windows and Table 1 encoded with page quotes | useful pages cited 0.72: some application pages read but not cited |
-| Feasibility | 4 | plan ordered lab → held-out validation → in-line/pilot → decision; reference method kept until validated; hardware details confirmed, not invented | plans are generic in places |
-| Uncertainty | 5 | premise checks set the status floor; certainty phrases rejected; unstated facts become assumptions; transfer labels; scope dimensions for studies | — |
-| Explainability | 4.5 | answer first; every claim has a clickable quote; premise checks with sources; Evals page drill-down vs the organisers' useful pages | Evals scores from 17 Oct |
-| Prototype | 4 | runs locally from the README in two terminals; no-key mode; H01–H06 answers in `answers/` | no hosted URL; large-model quota |
-| **Total** | **26.5 / 30** | | |
+Weights `[USER]` (team demo plan, 18 Oct). Scores are 1–5 team estimates; weighted total = Σ weight × score / 5.
+
+| Criterion | Weight | Score | Weighted | Evidence (verified) | Weakest point | Demo segment |
+|---|---|---|---|---|---|---|
+| Technical quality | 30 % | 4.5 | 27.0 | LangGraph pipeline + deterministic validators (quotes, numbers, claims, facts, cost, certainty); 182 offline tests; production build | depends on one LLM provider's free tier | 2 (live run) |
+| Use of AFS knowledge | 20 % | 4.5 | 18.0 | source-guide routing + keyword + local semantic search (recall 0.97); citation by passage number; ranges, fibre windows and Table 1 encoded with page quotes | 0.72 of the useful pages are cited (0.97 retrieved) | 3 (citation chip) |
+| Clarification & uncertainty | 15 % | 4.5 | 13.5 | question ledger (customer facts only, never repeated); premise checks set the status; certainty phrases rejected; unstated facts become assumptions | question quality varies with the model | 2 + 4 (H04) |
+| Feasibility-study plan | 15 % | 4 | 12.0 | lab → held-out validation → in-line/pilot → decision; accuracy vs alarm threshold separated; reference method kept until validated | some plans are generic | 5 |
+| Explainability | 10 % | 4.5 | 9.0 | answer first; clickable quotes marked "found on the cited page"; Evals drill-down vs the organisers' useful pages | Evals scores from 17 Oct | 3 |
+| Prototype & presentation | 10 % | 4 | 8.0 | runs locally from the README; no-key mode; H01–H06 in `answers/`; backup video | no hosted URL; quota | 6 |
+| **Total** | **100 %** | | **87.5 / 100** | | | |
+
+Biggest remaining lever: technical quality (30 %) is shown live, so the live run must use a key with large-model quota
+(a second Groq account), with the backup video ready.
