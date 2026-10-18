@@ -146,3 +146,18 @@ def test_unsupported_hardware_detail_goes_to_points_to_confirm():
 def test_path_length_outside_table1_is_flagged():
     assert RR._path_ok("NIR transmission probe with a path length of 2 mm", ["NIR"])
     assert not RR._path_ok("ATR probe with an optical path of 2 mm", ["MIR_ATR"])
+
+
+def test_decisive_unknown_not_asked_twice_when_a_method_question_is_open():
+    raw = copy.deepcopy(RESPONDER) | {"questions": [{"text": "Which property do you want to quantify?", "impact": "method"}]}
+    report, stats, _ = finalise(raw, checks=[], scenario_id=None, facts=Facts(decisive_unknowns=["specific target analytes and their ranges"]))
+    assert [q.text for q in report.questions if q.status == "open"] == ["Which property do you want to quantify?"]
+    assert stats["decisive_open"] == 1
+
+
+def test_blocked_method_explains_empty_concept_and_range():
+    from app.schemas import PremiseCheck
+    raw = copy.deepcopy(RESPONDER) | {"concept": {"summary": ""}, "spectralRange": {"summary": ""}, "recommendations": [], "decisionStatus": "insufficient"}
+    chk = PremiseCheck(id="target_defined", label="The variable to measure is named", status="fail", detail="Not named.")
+    report, stats, _ = finalise(raw, checks=[chk], scenario_id=None)
+    assert report.concept.summary and report.spectralRange.summary and "measurement concept" not in " ".join(stats["missing"])

@@ -1,25 +1,25 @@
 {
- "reply": "The concept cannot be approved as described because a visible/NIR silica fiber cannot transmit the mid‑IR wavelengths needed for MIR‑ATR water measurement in petroleum.",
+ "reply": "The concept cannot be approved as stated because a visible/NIR silica fiber cannot transmit the mid‑IR wavelengths needed for an ATR measurement of water in oil; a MIR‑transparent fiber or a much shorter link is required.",
  "report": {
   "scenarioId": "H04",
-  "title": "MIR‑ATR water measurement with existing silica fiber",
+  "title": "MIR‑ATR water measurement in petroleum line",
   "origin": "live",
-  "generatedAt": "2026-10-18T14:34:51+00:00",
+  "generatedAt": "2026-10-18T15:12:23+00:00",
   "decisionStatus": "insufficient",
   "answer": {
-   "text": "No, the existing Vis‑NIR silica fiber cannot carry the MIR‑ATR signal required for water‑content analysis in a petroleum line.",
+   "text": "No, the proposed reuse of a Vis‑NIR silica fiber for a mid‑IR ATR sensor is not feasible because silica does not transmit the required 2.5–25 µm range.",
    "citations": [
-    {
-     "source": "S02",
-     "page": "6",
-     "quote": "polycrystalline infrared fibers 3000 nm–17 µm; hollow glass waveguides 2000 nm–18 µm; indium fluoride fibers 300–5500 nm; zirconium fluoride fibers 300–4500 nm.",
-     "check": "visual_note"
-    },
     {
      "source": "S01",
      "page": "5",
      "quote": "In contrast, strong absorption in the mid-IR region limits the corresponding spectral method to the analysis of very thin samples (usually less than 50 µm),",
      "check": "verified"
+    },
+    {
+     "source": "S02",
+     "page": "6",
+     "quote": "[Team transcription of slide figure; check figure before relying on exact numbers] Fiber transmission ranges: standard and Al/Cu-coated UV-VIS silica fibers 190–1200 nm; standard and Al/Cu-coated VIS-NIR silica fibers 350–2400 nm; chalcogenide As-S IR fibers 1100–6500 nm;",
+     "check": "visual_note"
     }
    ]
   },
@@ -27,49 +27,79 @@
    "stated": [
     "investigate water content in a petroleum line using MIR ATR",
     "analyzer would be in another building",
-    "already have a silica fiber cable from a visible or NIR measurement setup and would like to reuse it"
+    "already have a silica fiber cable from a visible or NIR measurement setup and would like to reuse it",
+    "link length, routing and operating conditions have not yet been supplied"
    ],
    "unknowns": [
-    "link length",
-    "routing constraints",
-    "operating temperature and humidity",
-    "optical appearance (clarity, scattering) of the petroleum stream"
+    "optical appearance (clarity, scattering) of the oil",
+    "required link length and routing",
+    "operating temperature and pressure of the line",
+    "available ports for probe installation"
    ],
    "factTurns": [
     1,
     1,
+    1,
     1
-   ]
+   ],
+   "decisive": []
   },
   "questions": [
    {
-    "text": "What is the optical appearance of the petroleum stream at the measurement point (clear, turbid, scattering)?",
+    "text": "What is the optical appearance of the petroleum stream (clear liquid, emulsion, or containing particulates)?",
     "impact": "method",
     "id": "q1",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What is the maximum length and routing path (bends, temperature) of the fiber link between the ATR probe and the remote analyzer?",
+    "text": "What is the maximum feasible distance between the ATR probe and the spectrometer (including any required fiber length)?",
     "impact": "setup",
     "id": "q2",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "Are there any temperature or chemical exposure limits for the fiber in the process line?",
+    "text": "What temperature and pressure conditions will the probe and any fiber run be exposed to?",
     "impact": "setup",
     "id": "q3",
     "status": "open",
     "askedTurn": 1
    }
   ],
-  "recommendations": [],
+  "recommendations": [
+   {
+    "method": "MIR ATR (with dedicated MIR‑transparent fiber)",
+    "methodIds": [
+     "MIR_ATR"
+    ],
+    "role": "primary",
+    "reason": "ATR is the standard approach for water detection in oil because the O–H stretch gives a strong absorption in the 4000–2000 cm⁻¹ region; however, the fiber must transmit mid‑IR wavelengths, which silica cannot.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "5",
+      "quote": "but it opens up the possibility of using attenuated total reflectance (ATR) by connecting appropriate attachments and probes.",
+      "check": "verified"
+     },
+     {
+      "source": "S02",
+      "page": "6",
+      "quote": "[Team transcription of slide figure; check figure before relying on exact numbers] Fiber transmission ranges: standard and Al/Cu-coated UV-VIS silica fibers 190–1200 nm; standard and Al/Cu-coated VIS-NIR silica fibers 350–2400 nm; chalcogenide As-S IR fibers 1100–6500 nm;",
+      "check": "visual_note"
+     }
+    ],
+    "limitations": [
+     "Vis-NIR silica fibre carries the MIR (ATR) range: A Vis-NIR silica fibre transmits about 0.35–2.4 µm; MIR (ATR) works at 4000–400 cm⁻¹ (2.5–25 µm). The link cannot carry the signal. Fibres in the supplied material that reach this range: chalcogenide (CIR) fibre (1.1–6.5 µm), polycrystalline IR (PIR) fibre (3.0–17.0 µm), hollow glass waveguide (2.0–18.0 µm), indium fluoride fibre (0.3–5.5 µm), zirconium fluoride fibre (0.3–4.5 µm).",
+     "Mid-IR fibre link: distance not shown to be feasible: MIR (ATR) needs mid-IR fibres, and the enquiry implies an analyzer away from the line (length not given). In the supplied material, long (100–300 m) cables are shown only for silica fibres, which do not carry the mid-IR; mid-IR fibres appear only as 2 m assemblies, and the application example shows no fibre length or analyzer distance. Measure the transmission over the planned length before committing, or plan the analyzer close to the measurement point."
+    ]
+   }
+  ],
   "concept": {
-   "summary": "Place an ATR probe directly in the petroleum line (contact or clamp‑on). Use a dedicated chalcogenide fiber cable to carry the MIR signal to the remote FTIR analyzer. Keep the silica fiber for any NIR auxiliary measurements.",
-   "probe": "ATR probe with diamond or ZnSe crystal, suitable for liquids",
-   "location": "In‑line, installed at a process tap where the oil is optically clear enough for ATR contact",
-   "fiberLink": "Chalcogenide As‑S fiber (1.1–6.5 µm transmission) sized for the required link length",
+   "summary": "Run a MIR‑transparent fiber (chalcogenide, PIR, or hollow‑waveguide) from the probe to the FTIR analyzer located in the remote building. Use chemometric calibration built on laboratory samples of oil with known water levels.",
+   "probe": "ATR probe with ZnSe or diamond crystal, suitable for liquids",
+   "location": "In‑line, inserted into the process pipe via a sanitary port",
+   "fiberLink": "Chalcogenide (As‑S) or polycrystalline IR fiber, rated for the required length and temperature",
    "analyzer": "Mid‑IR FTIR spectrometer with ATR input",
    "citations": [
     {
@@ -81,13 +111,19 @@
     {
      "source": "S02",
      "page": "6",
-     "quote": "polycrystalline infrared fibers 3000 nm–17 µm; hollow glass waveguides 2000 nm–18 µm; indium fluoride fibers 300–5500 nm; zirconium fluoride fibers 300–4500 nm.",
+     "quote": "[Team transcription of slide figure; check figure before relying on exact numbers] Fiber transmission ranges: standard and Al/Cu-coated UV-VIS silica fibers 190–1200 nm; standard and Al/Cu-coated VIS-NIR silica fibers 350–2400 nm; chalcogenide As-S IR fibers 1100–6500 nm;",
+     "check": "visual_note"
+    },
+    {
+     "source": "S02",
+     "page": "13",
+     "quote": "[Team transcription of slide figure] ATR probe with PEEK shaft.",
      "check": "visual_note"
     }
    ]
   },
   "spectralRange": {
-   "summary": "Mid‑IR: 4000–400 cm⁻¹ (2.5–25 µm) for water O‑H stretch; chalcogenide fiber transmits 1.1–6.5 µm, covering the key water band around 3 µm.",
+   "summary": "Mid‑IR absorption range 4000–400 cm⁻¹ (2.5–25 µm) for the ATR probe; NIR fallback 780–2500 nm if needed.",
    "citations": [
     {
      "source": "S01",
@@ -96,10 +132,16 @@
      "check": "verified"
     },
     {
-     "source": "S02",
-     "page": "6",
-     "quote": "polycrystalline infrared fibers 3000 nm–17 µm; hollow glass waveguides 2000 nm–18 µm; indium fluoride fibers 300–5500 nm; zirconium fluoride fibers 300–4500 nm.",
-     "check": "visual_note"
+     "source": "S01",
+     "page": "5",
+     "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "10",
+     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+     "check": "verified"
     },
     {
      "source": "S01",
@@ -110,21 +152,21 @@
    ]
   },
   "risks": [
-   "Silica fiber cannot transmit MIR wavelengths – signal loss would prevent measurement.",
-   "High temperature or aggressive chemicals in the petroleum line could degrade chalcogenide fiber if not properly protected.",
-   "If the oil is highly scattering, ATR coupling may be limited; probe fouling could affect repeatability.",
+   "Silica fiber will not transmit MIR light, leading to no signal.",
+   "Long fiber runs may introduce loss; MIR fibers have higher attenuation than silica.",
+   "High temperature/pressure may exceed fiber rating.",
+   "Oil opacity or particulates could limit ATR penetration depth.",
    "The mid-IR fibre link over the required distance is not shown to be feasible in the supplied material."
   ],
   "feasibility": {
    "steps": [
-    "Measure the transmission of the chosen mid-IR fibre over the planned link length, or plan the analyzer close to the measurement point.",
-    "Obtain a short chalcogenide fiber segment and connect it to a laboratory FTIR to verify transmission of water‑containing oil samples.",
-    "Build a calibration set of petroleum samples with known water concentrations (reference gravimetric or Karl Fischer method).",
-    "Develop a chemometric model on laboratory data, validate on held‑out samples.",
-    "Install the ATR probe in a pilot line, use the chalcogenide fiber of the planned length, and compare online predictions to reference measurements.",
-    "Evaluate signal loss, temperature effects, and probe fouling over typical operating periods."
+    "Obtain a small set of oil samples with known water concentrations (lab reference).",
+    "Test a short length of MIR‑transparent fiber (e.g., 1 m chalcogenide) between the probe and a bench FTIR to verify transmission.",
+    "Measure them with a laboratory FTIR ATR bench to build a calibration model.",
+    "Install the probe in a pilot‑scale loop and run the fiber to the remote analyzer; collect spectra and validate against the reference method on held‑out samples.",
+    "Evaluate signal‑to‑noise, drift, and robustness under process temperature/pressure."
    ],
-   "decisionBasis": "If the pilot validation meets the agreed‑upon accuracy and robustness criteria, the concept can be approved for full‑scale deployment."
+   "decisionBasis": "If step 3 shows acceptable transmission and step 4 validates the calibration on independent samples, the MIR‑ATR concept is feasible; otherwise, revert to NIR transmission using existing silica fiber. Agree two things separately with the customer before the test: the model accuracy required against the reference method, and the alarm or action threshold applied to the measured value."
   },
   "premiseChecks": [
    {
@@ -188,7 +230,7 @@
     "id": "certainty",
     "label": "Certainty: the answer can only be provisional",
     "status": "flag",
-    "detail": "The customer asks for approval, proof or an exact configuration, but 4 decisive point(s) are still open or contradicted. The answer is a provisional assessment; the open points are listed as assumptions and the first experiment decides them.",
+    "detail": "The customer asks for approval, proof or an exact configuration, but 2 decisive point(s) are still open or contradicted. The answer is a provisional assessment; the open points are listed as assumptions and the first experiment decides them.",
     "citations": []
    },
    {
@@ -220,21 +262,39 @@
   ],
   "sources": [
    {
-    "source": "S02",
-    "page": "6",
-    "quote": "polycrystalline infrared fibers 3000 nm–17 µm; hollow glass waveguides 2000 nm–18 µm; indium fluoride fibers 300–5500 nm; zirconium fluoride fibers 300–4500 nm.",
-    "check": "visual_note"
-   },
-   {
     "source": "S01",
     "page": "5",
     "quote": "In contrast, strong absorption in the mid-IR region limits the corresponding spectral method to the analysis of very thin samples (usually less than 50 µm),",
     "check": "verified"
    },
    {
+    "source": "S02",
+    "page": "6",
+    "quote": "[Team transcription of slide figure; check figure before relying on exact numbers] Fiber transmission ranges: standard and Al/Cu-coated UV-VIS silica fibers 190–1200 nm; standard and Al/Cu-coated VIS-NIR silica fibers 350–2400 nm; chalcogenide As-S IR fibers 1100–6500 nm;",
+    "check": "visual_note"
+   },
+   {
     "source": "S01",
     "page": "5",
     "quote": "but it opens up the possibility of using attenuated total reflectance (ATR) by connecting appropriate attachments and probes.",
+    "check": "verified"
+   },
+   {
+    "source": "S02",
+    "page": "13",
+    "quote": "[Team transcription of slide figure] ATR probe with PEEK shaft.",
+    "check": "visual_note"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "10",
+    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
     "check": "verified"
    },
    {
@@ -300,35 +360,35 @@
   ],
   "mode": "draft",
   "assumptions": [
-   "The petroleum stream is optically clear enough for ATR contact (no heavy scattering).",
-   "A suitable chalcogenide fiber can be sourced and installed within the plant’s safety and routing constraints.",
-   "Reference water‑content measurements are available for model building.",
-   "MIR‑ATR with chalcogenide (As‑S) fiber: Chalcogenide fibers transmit the 2.5–6.5 µm range needed for MIR‑ATR, unlike silica fibers which stop at ~2.4 µm; this matches the absorption bands of water in petroleum. (not supported by the cited page)",
-   "NIR transmission probe (as fallback): If a suitable MIR fiber cannot be installed, NIR can monitor water indirectly via overtone bands, using the existing silica fiber; however, sensitivity is lower for low water levels. (not supported by the cited page)"
+   "The oil is a clear liquid (low scattering) so ATR penetration depth is sufficient.",
+   "A suitable MIR‑transparent fiber can be sourced and installed within the plant’s safety constraints.",
+   "NIR transmission (as a fallback if MIR fiber cannot be provided): NIR can be delivered over existing silica fiber and can estimate water via overtone bands, but sensitivity is lower than MIR; it may be used for a preliminary feasibility test. (not supported by the cited page)"
   ],
   "pointsToConfirm": [
-   "Maximum allowable fiber length and bend radius for the chosen chalcogenide cable.",
-   "Temperature and chemical compatibility of the chalcogenide fiber with the process environment.",
-   "Exact optical appearance (clarity, scattering) of the oil at the measurement location."
+   "Exact optical appearance (clarity, scattering) of the petroleum stream.",
+   "Maximum allowable fiber length and routing constraints.",
+   "Temperature and pressure ratings of the proposed MIR fiber.",
+   "Availability of a sanitary port for the ATR probe installation.",
+   "Confirm with the supplier or the customer: Place an MIR‑ATR probe directly in the petroleum line (e.g., a diamond or ZnSe crystal probe)."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 177.0,
+   "ms": 222.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 1454.0,
-   "detail": "3 stated (0 from answers) · 3 unknown"
+   "ms": 1700.0,
+   "detail": "4 stated (0 from answers) · 1 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 79.0,
+   "ms": 85.0,
    "detail": "S01 p.10, S01 p.5, S01 p.6, S01 p.9, S02 p.13, S02 p.14, S02 p.16, S02 p.6, S02 p.7, S04 p.2 · 8 routed by the source guide · vector+BM25"
   },
   {
@@ -340,20 +400,20 @@
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 34844.0,
+   "ms": 41634.0,
    "detail": "openai/gpt-oss-120b via groq"
   },
   {
    "step": "Verify citations",
    "status": "ok",
    "ms": 0.0,
-   "detail": "10 of 10 quotes found on the cited page"
+   "detail": "12 of 12 quotes found on the cited page"
   },
   {
    "step": "Validate numbers, claims and questions",
    "status": "warn",
    "ms": 0.0,
-   "detail": "all numbers traced to the customer or a cited page · 2 unsupported sentences and 2 uncited recommendations moved to assumptions · 3 open questions · all required sections present"
+   "detail": "all numbers traced to the customer or a cited page · 1 unsupported sentences and 1 uncited recommendations moved to assumptions · 3 open questions · all required sections present"
   }
  ]
 }

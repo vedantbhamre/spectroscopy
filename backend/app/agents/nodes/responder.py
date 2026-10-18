@@ -247,6 +247,7 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
     # Final mode: provisional unless the checks justify otherwise. Otherwise the checks set the floor.
     report.decisionStatus = apply_floor("provisional" if final else report.decisionStatus, report.premiseChecks)
     stats["answer_written"] = ensure_answer(report)
+    stats["sections_explained"] = RR.explain_blocked_sections(report)
     stats["certainty_rejected"] = RR.reject_certainty(report)
     if report.answer and not (facts.cites_study_as_proof or _CLAIM.search(client_text(messages))):
         report.answer.sayInstead = None  # only when the customer wants to quote, claim or promise something

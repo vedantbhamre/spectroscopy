@@ -96,6 +96,7 @@ def enforce_decisive(report: Report, decisive: list[str], final: bool, turn: int
         if not any(L.similar(u, x) for x in report.requirements.unknowns):
             report.requirements.unknowns.append(u)
     led = report.questions
+    method_open = any(q.status == "open" and q.impact == "method" for q in led)
     for u in report.requirements.decisive:
         asked = next((q for q in led if L.similar(u, q.text)), None)
         if final:
@@ -105,6 +106,9 @@ def enforce_decisive(report: Report, decisive: list[str], final: bool, turn: int
             if not any(L.similar(u, s) for s in report.feasibility.steps):
                 report.feasibility.steps.insert(0, f"Establish with the first laboratory samples: {u}.")
             stats["decisive_open"] += 1
+            continue
+        if asked is None and method_open:
+            stats["decisive_open"] += 1  # an open method question already asks for it (in other words)
             continue
         if asked is None:
             from app.services.ledger import _next_id
@@ -275,4 +279,23 @@ def validate_hardware(report: Report) -> int:
     for s in report.feasibility.steps:
         (steps.append(s) if ok(s) else confirm(s))
     report.feasibility.steps = steps
+    return n
+
+
+# ---------------------------------------------------------------- empty sections when a premise blocks the method
+def explain_blocked_sections(report: Report) -> int:
+    """With a failed premise check the composer may leave the concept and spectral range empty; say why instead."""
+    failed = [c for c in report.premiseChecks if c.status == "fail"]
+    if not failed or report.decisionStatus == "provisional":
+        return 0
+    why = "; ".join(f"{c.label.lower()}: not yet" for c in failed)
+    n = 0
+    if not report.concept.summary.strip():
+        report.concept.summary = (f"No measurement concept can be fixed yet ({why}). It follows once the open questions are answered; "
+                                  "the first step is to agree the measurand and its reference method with the customer.")
+        n += 1
+    if not report.spectralRange.summary.strip():
+        report.spectralRange.summary = (f"No spectral range can be selected yet ({why}). The usable range is set by the method, "
+                                        "fibre and probe chosen for the defined measurand, confirmed on sample spectra.")
+        n += 1
     return n

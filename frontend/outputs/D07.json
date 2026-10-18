@@ -1,319 +1,227 @@
 {
- "reply": "We can start by testing a single‑method in‑line probe (e.g., NIR diffuse‑reflection or MIR‑ATR) on lab‑scale melts, then compare performance; first we need to know melt opacity, temperature limits, and available ports.",
+ "reply": "We need to know which specific component or property of the melt you want to monitor (e.g., API concentration, polymer crystallinity, moisture) before we can pick the most suitable optical probe.",
  "report": {
   "scenarioId": "D07",
-  "title": "In‑line optical monitoring of hot polymer‑API melt",
+  "title": "Hot polymer extrusion optical probe selection",
   "origin": "live",
-  "generatedAt": "2026-10-18T14:30:54+00:00",
-  "decisionStatus": "provisional",
+  "generatedAt": "2026-10-18T15:17:44+00:00",
+  "decisionStatus": "insufficient",
   "answer": {
-   "text": "It depends on the melt’s optical appearance and temperature tolerance of the probe; both NIR diffuse‑reflection and MIR‑ATR are viable candidates, but the final choice requires clarification of those factors.",
+   "text": "Not yet – the target variable has not been identified, so a method cannot be selected.",
    "citations": [
     {
      "source": "S01",
      "page": "5",
-     "quote": "They can be used to obtain absorption, diffuse reflectance or transmission, Raman, and ATR spectra.",
-     "check": "verified"
-    },
-    {
-     "source": "S02",
-     "page": "14",
-     "quote": "NIR-Reflex & MIR-ATR-spectroscopy to control polymer extrusion in-line Control of APIproduction with PIR-fiber FTIRspectroscopy in Pharma Industry Spectra of API in hot polymer obtained with Diamond cone ATR probe coupled to iC10 FTIR (MTAC) www.artphotonics.com",
+     "quote": "Thus, selecting a spectral method for a specific analytical problem is a complex task requiring specialized knowledge in chemistry, physics, and mathematics.",
      "check": "verified"
     }
    ]
   },
   "requirements": {
    "stated": [
-    "developing a hot polymer extrusion process with an active pharmaceutical ingredient",
-    "want to detect composition changes optically during melt processing",
-    "have offline assays but process interface is hot and may have material build up",
+    "developing a hot polymer extrusion process that incorporates an active pharmaceutical ingredient",
+    "want to detect composition changes in the melt using optical measurement",
+    "have offline assays for the product",
+    "process interface is hot and may be exposed to material build up",
     "need an initial comparison plan and questions before choosing a probe"
    ],
    "unknowns": [
-    "optical appearance (transparent, translucent, opaque, scattering) of the melt",
-    "maximum temperature the probe material can withstand",
-    "number and location of available access ports in the extruder"
+    "optical appearance (clear, opaque, scattering) of the melt",
+    "temperature range and probe material compatibility",
+    "exact variable to be measured (API concentration, moisture, polymer crystallinity, etc.)"
    ],
    "factTurns": [
     1,
     1,
     1,
+    1,
     1
+   ],
+   "decisive": [
+    "optical appearance (clear, opaque, scattering) of the melt"
    ]
   },
   "questions": [
    {
-    "text": "Is the melt optically clear, translucent, or opaque/scattering at the measurement wavelength?",
+    "text": "What specific variable or component in the melt must be quantified or monitored (e.g., API concentration, moisture, polymer crystallinity, additive level)?",
     "impact": "method",
     "id": "q1",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What is the maximum temperature at the measurement point and are there any constraints on probe material (e.g., need for metal‑sheathed or diamond ATR probe)?",
+    "text": "Is the melt optically clear, translucent, or highly scattering/opaque during extrusion?",
     "impact": "setup",
     "id": "q2",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "How many instrument ports are available for installing a probe, and what are their sizes?",
+    "text": "What is the maximum temperature at the measurement point and are there any chemical compatibility constraints for probe materials?",
     "impact": "setup",
     "id": "q3",
     "status": "open",
     "askedTurn": 1
    }
   ],
-  "recommendations": [
-   {
-    "method": "NIR (diffuse reflection)",
-    "methodIds": [
-     "NIR"
-    ],
-    "role": "primary",
-    "reason": "NIR diffuse‑reflection probes work with scattering or opaque solids and are average‑cost, matching the melt likely being a scattering polymer melt; they have been used for pharmaceutical solids in‑line (‑).",
-    "citations": [
-     {
-      "source": "S01",
-      "page": "Table 1 (p.6)",
-      "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
-      "check": "verified"
-     },
-     {
-      "source": "S01",
-      "page": "15",
-      "quote": "and widely implemented spectral techniques are Near-Infrared (NIR) and Raman spectroscopy.",
-      "check": "verified"
-     },
-     {
-      "source": "S01",
-      "page": "15",
-      "quote": "The combination of these techniques is particularly effective because it captures complementary chemical information: NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
-      "check": "verified"
-     }
-    ]
-   },
-   {
-    "method": "MIR‑ATR",
-    "methodIds": [
-     "MIR_ATR"
-    ],
-    "role": "comparison",
-    "reason": "ATR probes can directly contact hot melts and have been demonstrated for polymer extrusion with a diamond cone ATR probe; they provide high selectivity but at higher cost.",
-    "citations": [
-     {
-      "source": "S01",
-      "page": "Table 1 (p.6)",
-      "quote": "MIR_ATR: ATR probe (absorption); sample: liquid, paste, soft; cost: high",
-      "check": "verified"
-     },
-     {
-      "source": "S02",
-      "page": "14",
-      "quote": "NIR-Reflex & MIR-ATR-spectroscopy to control polymer extrusion in-line Control of APIproduction with PIR-fiber FTIRspectroscopy in Pharma Industry Spectra of API in hot polymer obtained with Diamond cone ATR probe coupled to iC10 FTIR (MTAC) www.artphotonics.com",
-      "check": "verified"
-     },
-     {
-      "source": "S01",
-      "page": "5",
-      "quote": "They can be used to obtain absorption, diffuse reflectance or transmission, Raman, and ATR spectra.",
-      "check": "verified"
-     }
-    ]
-   }
-  ],
+  "recommendations": [],
   "concept": {
-   "summary": "Test each method on lab‑scale melt samples using a single probe inserted into a heated flow cell; collect spectra while varying API concentration; build separate chemometric models for each method and validate on held‑out batches.",
-   "probe": "NIR diffuse‑reflection probe (for primary test) and diamond‑ATR probe (for comparison)",
-   "location": "Insert probe tip into the melt flow channel just downstream of the heating zone",
-   "fiberLink": "Silica fiber for NIR; chalcogenide or sapphire fiber for MIR‑ATR as recommended by the probe manufacturer",
-   "analyzer": "Bench‑top NIR spectrometer (e.g., 780–2500 nm) and FT‑IR spectrometer with ATR module",
+   "summary": "Develop a two‑stage plan: (1) laboratory feasibility using a bench‑top spectrometer and appropriate probe (e.g., NIR transmission or Raman probe) on representative melt samples; (2) translate the best‑performing method to an in‑line probe after the target variable is defined.",
    "citations": [
     {
      "source": "S01",
      "page": "5",
-     "quote": "Immersible fiber optic probes operating in various spectral regions from UV to mid-IR are increasingly being used for measuring liquid and soft or powdered solid samples.",
+     "quote": "The use of these probes can be essential for in-situ analysis—in the field or in an ongoing process.",
      "check": "verified"
     },
     {
-     "source": "S02",
-     "page": "14",
-     "quote": "NIR-Reflex & MIR-ATR-spectroscopy to control polymer extrusion in-line Control of APIproduction with PIR-fiber FTIRspectroscopy in Pharma Industry Spectra of API in hot polymer obtained with Diamond cone ATR probe coupled to iC10 FTIR (MTAC) www.artphotonics.com",
+     "source": "S01",
+     "page": "5",
+     "quote": "Online measurements require high-speed spectral acquisition.",
      "check": "verified"
     }
    ]
   },
   "spectralRange": {
-   "summary": "NIR: 780–2500 nm (overtones of C‑H, O‑H, N‑H); MIR‑ATR: 4000–400 cm⁻¹ (fundamental vibrations).",
+   "summary": "Potential ranges: NIR absorption 780–2500 nm (transmission or diffuse reflection) or Raman excitation (e.g., [to be agreed with the customer]) with Raman shift [to be agreed with the customer]; MIR‑ATR 4000–400 cm⁻¹ if a suitable ATR probe can survive the temperature.",
    "citations": [
     {
      "source": "S01",
      "page": "10",
-     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups, such as -OH, -NH2=NH, -CH3, =CH2, ≥CH, etc., found in many organic and inorganic compounds.",
+     "quote": "Near-IR Spectrometry (includes FTIR, NIR-IR, or diffraction grating/slit spectrometer, Diffuse Reflection fiber probe, or Transmission fiber probe) Near-IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "10",
+     "quote": "ATR fiber probes (Fig.1) enable the analysis of liquids and solid elastic samples, such as biological tissue, using specialized probes utilizing high-transmission fiber optics in the Mid-IR region.",
      "check": "verified"
     },
     {
      "source": "S01",
      "page": "9",
-     "quote": "Mid-IR Spectrometry (includes FTIR Mid-IR spectrometer, ATR fiber probe) Vibrational spectroscopy in the mid-IR range (4000–400 cm-1) is one of the most informative methods of chemical analysis.",
+     "quote": "Vibrational spectroscopy in the mid-IR range (4000–400 cm-1) is one of the most informative methods of chemical analysis.",
      "check": "verified"
     }
    ]
   },
   "risks": [
-   "Probe fouling or coating buildup on the tip at high temperature",
-   "Signal loss if melt becomes too opaque for NIR transmission",
-   "Thermal degradation of fiber or probe housing if temperature exceeds material limits"
+   "Probe fouling or material buildup on the window at high temperature",
+   "Temperature‑induced drift of optical components",
+   "Incorrect method choice if melt is opaque and a transmission probe is selected"
   ],
   "feasibility": {
    "steps": [
-    "Prepare lab‑scale melt samples with known API concentrations.",
-    "Measure each sample with the NIR diffuse‑reflection probe and the MIR‑ATR probe under identical temperature conditions.",
-    "Build separate calibration models (e.g., PLS) for each method using chemometric software.",
-    "Validate models on independent melt batches not used in calibration.",
-    "Compare prediction error, robustness to fouling, and ease of integration.",
-    "Validate the model on samples not used to build it (held-out samples, e.g. from other patients, batches or days) before drawing any conclusion; a model built on few samples can fit them without generalising."
+    "Collect melt samples at relevant temperatures and prepare them in lab cuvettes or small flow cells.",
+    "Measure with candidate techniques (NIR transmission, NIR diffuse reflection, Raman) while recording a reference assay (e.g., HPLC) for the target variable.",
+    "Build chemometric models (calibration or classification) using the spectra and reference data.",
+    "Validate on held‑out melt batches to assess prediction error.",
+    "Select the method that meets the required accuracy and can be implemented with a probe compatible with the temperature and fouling conditions.",
+    "Then measure in-line or in a pilot set-up against the reference method."
    ],
-   "decisionBasis": "Select the method that meets the agreed‑upon prediction accuracy and operational robustness on the validation set; the simpler, lower‑cost NIR option will be chosen unless MIR‑ATR shows a clear advantage for the specific melt opacity."
+   "decisionBasis": "Comparison of model performance (RMSEP, bias) against acceptance criteria agreed with the customer; the simplest method that meets the criteria will be chosen. Agree two things separately with the customer before the test: the model accuracy required against the reference method, and the alarm or action threshold applied to the measured value."
   },
   "premiseChecks": [
    {
     "id": "target_defined",
     "label": "The variable to measure is named",
-    "status": "pass",
-    "detail": "Target: composition changes of the melt, likely API concentration.",
+    "status": "fail",
+    "detail": "The enquiry does not name the variable or substance to measure, so no method can be chosen yet. Ask for it first.",
     "citations": []
-   },
-   {
-    "id": "cost",
-    "label": "Simplest method first: the primary is the cheapest candidate",
-    "status": "pass",
-    "detail": "Table 1 cost of the probe options: primary NIR (average), others MIR (ATR) (high).",
-    "citations": [
-     {
-      "source": "S01",
-      "page": "Table 1 (p.6)",
-      "check": "unverified"
-     }
-    ]
    }
   ],
   "sources": [
    {
     "source": "S01",
     "page": "5",
-    "quote": "They can be used to obtain absorption, diffuse reflectance or transmission, Raman, and ATR spectra.",
-    "check": "verified"
-   },
-   {
-    "source": "S02",
-    "page": "14",
-    "quote": "NIR-Reflex & MIR-ATR-spectroscopy to control polymer extrusion in-line Control of APIproduction with PIR-fiber FTIRspectroscopy in Pharma Industry Spectra of API in hot polymer obtained with Diamond cone ATR probe coupled to iC10 FTIR (MTAC) www.artphotonics.com",
-    "check": "verified"
-   },
-   {
-    "source": "S01",
-    "page": "Table 1 (p.6)",
-    "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
-    "check": "verified"
-   },
-   {
-    "source": "S01",
-    "page": "15",
-    "quote": "and widely implemented spectral techniques are Near-Infrared (NIR) and Raman spectroscopy.",
-    "check": "verified"
-   },
-   {
-    "source": "S01",
-    "page": "15",
-    "quote": "The combination of these techniques is particularly effective because it captures complementary chemical information: NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
-    "check": "verified"
-   },
-   {
-    "source": "S01",
-    "page": "Table 1 (p.6)",
-    "quote": "MIR_ATR: ATR probe (absorption); sample: liquid, paste, soft; cost: high",
+    "quote": "Thus, selecting a spectral method for a specific analytical problem is a complex task requiring specialized knowledge in chemistry, physics, and mathematics.",
     "check": "verified"
    },
    {
     "source": "S01",
     "page": "5",
-    "quote": "Immersible fiber optic probes operating in various spectral regions from UV to mid-IR are increasingly being used for measuring liquid and soft or powdered solid samples.",
+    "quote": "The use of these probes can be essential for in-situ analysis—in the field or in an ongoing process.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "Online measurements require high-speed spectral acquisition.",
     "check": "verified"
    },
    {
     "source": "S01",
     "page": "10",
-    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups, such as -OH, -NH2=NH, -CH3, =CH2, ≥CH, etc., found in many organic and inorganic compounds.",
+    "quote": "Near-IR Spectrometry (includes FTIR, NIR-IR, or diffraction grating/slit spectrometer, Diffuse Reflection fiber probe, or Transmission fiber probe) Near-IR vibrational spectroscopy (NIR) is the most common online analysis method performed using fiber optic probes.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "10",
+    "quote": "ATR fiber probes (Fig.1) enable the analysis of liquids and solid elastic samples, such as biological tissue, using specialized probes utilizing high-transmission fiber optics in the Mid-IR region.",
     "check": "verified"
    },
    {
     "source": "S01",
     "page": "9",
-    "quote": "Mid-IR Spectrometry (includes FTIR Mid-IR spectrometer, ATR fiber probe) Vibrational spectroscopy in the mid-IR range (4000–400 cm-1) is one of the most informative methods of chemical analysis.",
+    "quote": "Vibrational spectroscopy in the mid-IR range (4000–400 cm-1) is one of the most informative methods of chemical analysis.",
     "check": "verified"
-   },
-   {
-    "source": "S01",
-    "page": "Table 1 (p.6)",
-    "check": "unverified"
    }
   ],
   "mode": "draft",
   "assumptions": [
-   "The melt behaves as a scattering solid rather than a clear liquid.",
-   "Temperature at the probe location does not exceed typical fiber‑optic probe limits (≈[to be agreed with the customer] for silica, higher for sapphire/chalcogenide).",
-   "At least one instrument port of suitable size is available for probe insertion."
+   "The melt can be sampled for laboratory tests without altering its composition.",
+   "Standard fiber‑optic probes (e.g., stainless‑steel or PEEK‑sheath) are available for the temperature range typical of polymer extrusion ([to be agreed with the customer]‑[to be agreed with the customer]).",
+   "Chemometric modeling tools are accessible to the customer."
   ],
   "pointsToConfirm": [
-   "Exact optical appearance (transparency/opacity) of the melt at the intended measurement wavelength.",
-   "Maximum allowable probe temperature and compatible probe material (e.g., metal‑sheathed, diamond‑ATR).",
-   "Number, size, and location of available access ports in the extrusion line."
+   "Exact analyte or property to monitor in the melt.",
+   "Optical clarity or scattering behavior of the melt under process conditions.",
+   "Maximum process temperature and any chemical compatibility limits for probe window materials."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 650.0,
+   "ms": 127.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 1083.0,
-   "detail": "4 stated (0 from answers) · 4 unknown"
+   "ms": 7562.0,
+   "detail": "5 stated (0 from answers) · 2 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 308.0,
+   "ms": 81.0,
    "detail": "S01 p.10, S01 p.11, S01 p.12, S01 p.14, S01 p.15, S01 p.5, S01 p.6, S01 p.9, S02 p.13, S02 p.14 · 10 routed by the source guide · vector+BM25"
   },
   {
    "step": "Premise checks",
-   "status": "ok",
+   "status": "fail",
    "ms": 0.0,
-   "detail": "nothing contradicted"
+   "detail": "The variable to measure is named"
   },
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 3893.0,
+   "ms": 41773.0,
    "detail": "openai/gpt-oss-120b via groq"
   },
   {
    "step": "Verify citations",
    "status": "ok",
    "ms": 0.0,
-   "detail": "12 of 12 quotes found on the cited page"
+   "detail": "6 of 6 quotes found on the cited page"
   },
   {
    "step": "Validate numbers, claims and questions",
    "status": "warn",
    "ms": 0.0,
-   "detail": "1 unsupported numbers replaced · every recommendation sentence cited · 3 open questions · all required sections present"
+   "detail": "4 unsupported numbers replaced · every recommendation sentence cited · 3 open questions · all required sections present"
   }
  ]
 }

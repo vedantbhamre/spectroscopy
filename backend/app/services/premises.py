@@ -199,8 +199,16 @@ def run_checks(facts: Facts, open_points: int = 0) -> list[PremiseCheck]:
                 checks.append(PremiseCheck(id=f"fiber_{fid}_{mid}", label=f"{f.label} carries the {m.label} range", status="pass",
                                            detail="The fibre window covers the nominal range.", citations=cites))
 
-    # 3. Fluorescence needs a defined fluorescent species.
-    if "FLUO" in facts.methods_mentioned and facts.fluorescent_target_named is False:
+    # 3. Fluorescence needs a defined fluorescent species, unless the task is to classify samples: then the samples' own
+    #    fluorescence differing between classes is the measurand (S01 p.7, S04 p.4).
+    classification = any("classification" in t for t in facts.target_variables)
+    if "FLUO" in facts.methods_mentioned and facts.fluorescent_target_named is False and classification:
+        checks.append(PremiseCheck(
+            id="fluorescent_target", label="Fluorescence has a defined fluorescent target", status="pass",
+            detail="Classification study: the measurand is how the samples' own fluorescence differs between classes; no single fluorescent species has to be named. Whether it separates these classes is for the first experiment to show.",
+            citations=[Citation(source="S01", page="7", quote="The combination of fluorescence and IR spectroscopy also proved necessary for classifying biological tissues.", check="verified")],
+        ))
+    elif "FLUO" in facts.methods_mentioned and facts.fluorescent_target_named is False:
         checks.append(PremiseCheck(
             id="fluorescent_target", label="Fluorescence has a defined fluorescent target", status="fail",
             detail="No fluorescent species, marker or reference relationship is named. Sensitivity alone does not make fluorescence a measurement of the requested variables.",

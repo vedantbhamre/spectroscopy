@@ -1,13 +1,13 @@
 {
- "reply": "We can start with a low‑cost NIR diffuse‑reflection probe on the feed frame and evaluate Raman as a secondary option; both have been used on pharmaceutical powders in‑line.",
+ "reply": "Based on the powder blend being opaque in the feed frame, a diffuse‑reflection NIR probe is the simplest, lowest‑cost primary candidate, with Raman as a useful comparison for complementary chemistry.",
  "report": {
   "scenarioId": "D01",
-  "title": "In‑line API concentration monitoring in tablet feed frame",
+  "title": "In‑line API monitoring in tablet press feed frame",
   "origin": "live",
-  "generatedAt": "2026-10-18T14:07:44+00:00",
+  "generatedAt": "2026-10-18T15:02:38+00:00",
   "decisionStatus": "provisional",
   "answer": {
-   "text": "Not yet – a pilot study is needed to confirm that an NIR diffuse‑reflection probe can meet the required accuracy and speed, with Raman as a possible backup.",
+   "text": "It depends on the optical appearance of the blend; for an opaque powder the most promising first candidate to test is a diffuse‑reflection NIR probe, with Raman spectroscopy as a secondary option for comparison.",
    "citations": [
     {
      "source": "S01",
@@ -18,13 +18,7 @@
     {
      "source": "S01",
      "page": "15",
-     "quote": "the probes are inserted directly into the process environment, such as the feed frame of a rotary tablet press.",
-     "check": "verified"
-    },
-    {
-     "source": "S01",
-     "page": "15",
-     "quote": "As the powder blend passes the probe tip, the system captures spectra at high speeds without interrupting the production flow.",
+     "quote": "The combination of these techniques is particularly effective because it captures complementary chemical information: NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
      "check": "verified"
     },
     {
@@ -32,59 +26,79 @@
      "page": "Table 1 (p.6)",
      "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
      "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "Table 1 (p.6)",
+     "quote": "RAMAN: Raman probe (Raman scattering (emission)); sample: liquid, powder, solid; cost: high",
+     "check": "verified"
     }
    ]
   },
   "requirements": {
    "stated": [
-    "tablet feed frame measurement of API concentration using fiber",
-    "laboratory checks are too slow for real‑time control",
-    "first pilot will compare reasonable measurement options before committing to production equipment"
+    "they manufacture tablets from a powder blend containing an API and excipients",
+    "laboratory checks tell them whether the blend is on target but results arrive after the material has moved through the press",
+    "they want to assess whether a fiber based measurement in the feed frame could follow API concentration changes",
+    "the first pilot should compare reasonable measurement options before committing to production equipment"
    ],
    "unknowns": [
-    "required measurement accuracy (e.g., % w/w)",
-    "acceptable response time / update rate",
-    "maximum allowable probe intrusion or size",
-    "environmental conditions (temperature, dust, vibration)",
-    "whether a single method will meet performance"
+    "exact optical appearance (degree of opacity, scattering) of the blend during feeding",
+    "particle size distribution and its effect on diffuse reflectance",
+    "required measurement update rate (samples per second) for real‑time control",
+    "acceptable calibration range and tolerance for API concentration",
+    "which measurement method(s) are suitable for a powder blend in a feed frame",
+    "optical appearance of the blend in the feed frame (clear, opaque, changing)"
    ],
    "factTurns": [
     1,
     1,
+    1,
     1
+   ],
+   "decisive": [
+    "which measurement method(s) are suitable for a powder blend in a feed frame",
+    "optical appearance of the blend in the feed frame (clear, opaque, changing)"
    ]
   },
   "questions": [
    {
-    "text": "What is the target accuracy (e.g., % w/w) and allowable latency for API concentration readings?",
+    "text": "What is the typical particle size range of the powder blend as it passes the feed frame?",
     "impact": "method",
     "id": "q1",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What are the temperature range and dust/vibration levels in the feed frame where the probe will be installed?",
+    "text": "What is the required temporal resolution (e.g., spectra per second) for detecting API concentration changes?",
     "impact": "setup",
     "id": "q2",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "How large a probe (diameter, length) can be accommodated without disrupting powder flow?",
-    "impact": "setup",
+    "text": "Do you have an independent reference assay (e.g., HPLC) that can provide API concentrations for calibration and validation?",
+    "impact": "acceptance",
     "id": "q3",
+    "status": "open",
+    "askedTurn": 1
+   },
+   {
+    "text": "Can you tell us the optical appearance of the blend in the feed frame (clear, opaque, changing)?",
+    "impact": "method",
+    "id": "q4",
     "status": "open",
     "askedTurn": 1
    }
   ],
   "recommendations": [
    {
-    "method": "NIR diffuse‑reflection",
+    "method": "NIR (diffuse reflection)",
     "methodIds": [
      "NIR"
     ],
     "role": "primary",
-    "reason": "NIR diffuse‑reflection probes are designed for scattering media and powders, matching the opaque tablet blend; they are average‑cost and have been used for in‑line blend potency monitoring in pharmaceutical solids.",
+    "reason": "Diffuse‑reflection NIR probes are designed for scattering media and powders, match the opaque blend, and are listed as average‑cost in the source table; they are widely used for in‑line blend potency monitoring in pharma.",
     "citations": [
      {
       "source": "S01",
@@ -101,23 +115,24 @@
      {
       "source": "S01",
       "page": "15",
-      "quote": "the probes are inserted directly into the process environment, such as the feed frame of a rotary tablet press.",
-      "check": "verified"
-     },
-     {
-      "source": "S01",
-      "page": "15",
-      "quote": "As the powder blend passes the probe tip, the system captures spectra at high speeds without interrupting the production flow.",
+      "quote": "The combination of these techniques is particularly effective because it captures complementary chemical information: NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
       "check": "verified"
      }
-    ]
+    ],
+    "limitations": []
    },
    {
     "method": "Raman spectroscopy",
     "methodIds": [],
     "role": "comparison",
-    "reason": "Raman provides complementary molecular‑backbone information and has been demonstrated for in‑line powder monitoring; it can serve as a backup if NIR lacks selectivity for the API.",
+    "reason": "Raman provides complementary information (symmetrical vibrations) and has been demonstrated for in‑line powder blend monitoring; it can help verify NIR models or resolve interferences.",
     "citations": [
+     {
+      "source": "S01",
+      "page": "Table 1 (p.6)",
+      "quote": "RAMAN: Raman probe (Raman scattering (emission)); sample: liquid, powder, solid; cost: high",
+      "check": "verified"
+     },
      {
       "source": "S01",
       "page": "15",
@@ -127,24 +142,19 @@
      {
       "source": "S01",
       "page": "15",
-      "quote": "the probes are inserted directly into the process environment, such as the feed frame of a rotary tablet press.",
-      "check": "verified"
-     },
-     {
-      "source": "S01",
-      "page": "15",
-      "quote": "As the powder blend passes the probe tip, the system captures spectra at high speeds without interrupting the production flow.",
+      "quote": "The combination of these techniques is particularly effective because it captures complementary chemical information: NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
       "check": "verified"
      }
-    ]
+    ],
+    "limitations": []
    }
   ],
   "concept": {
-   "summary": "Install a diffuse‑reflection NIR probe in contact with the powder stream in the feed frame; route the fiber to a bench‑top NIR spectrometer for rapid acquisition. Optionally add a Raman probe at the same location for side‑by‑side data collection during the pilot.",
-   "probe": "NIR diffuse‑reflection probe (contact tip) – optional Raman probe (785 nm excitation) for comparison",
-   "location": "Feed frame of the rotary tablet press, inserted into the powder flow without obstructing material movement",
-   "fiberLink": "Silica fiber (low‑OH) for NIR; separate fiber (e.g., low‑fluorescence) for Raman",
-   "analyzer": "Bench‑top NIR spectrometer (780–2500 nm) with chemometric software; Raman spectrometer with 785 nm laser for the comparison arm",
+   "summary": "Insert a diffuse‑reflection NIR probe into the feed frame, collect spectra via a short‑length silica fiber to a bench‑top NIR spectrometer; optionally add a Raman probe at the same location for parallel data collection.",
+   "probe": "Diffuse‑reflection NIR probe (contact tip) and optional Raman fiber probe (785 nm excitation)",
+   "location": "Feed frame of the rotary tablet press, mounted on an existing process port",
+   "fiberLink": "Silica fiber (low‑OH) for NIR; silica or low‑loss fiber for Raman",
+   "analyzer": "Bench‑top NIR spectrometer (780–2500 nm) and Raman spectrometer (785 nm laser)",
    "citations": [
     {
      "source": "S01",
@@ -160,14 +170,14 @@
     },
     {
      "source": "S01",
-     "page": "Table 1 (p.6)",
-     "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
+     "page": "15",
+     "quote": "This setup allows the laboratory to track dynamic changes, such as the gradual increase in coating thickness or the homogenization of a multicomponent blend, in real-time.",
      "check": "verified"
     }
    ]
   },
   "spectralRange": {
-   "summary": "NIR: 780–2500 nm (overtones of C‑H, N‑H, O‑H); Raman: [to be agreed with the customer] Raman shift with 785 nm excitation.",
+   "summary": "NIR absorption range 780–2500 nm (overtones of C‑H, N‑H, O‑H); Raman excitation 785 nm with Raman shift recorded in cm‑1.",
    "citations": [
     {
      "source": "S01",
@@ -180,24 +190,29 @@
      "page": "11",
      "quote": "The difference between the observed frequencies and the laser frequency is called the Raman shift, expressed in units of frequency–wavenumbers (cm-1).",
      "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "11",
+     "quote": "The difference between the observed frequencies and the laser frequency is called the Raman shift, expressed in units of frequency–wavenumbers (cm-1).",
+     "check": "verified"
     }
    ]
   },
   "risks": [
-   "Probe fouling or dust buildup reducing signal quality",
-   "Temperature fluctuations affecting baseline stability",
-   "Insufficient selectivity of NIR alone for API if excipients have overlapping overtone bands"
+   "High scattering may reduce signal‑to‑noise for NIR; probe fouling from dust requires cleaning strategy.",
+   "Raman signal is weak; fluorescence from excipients could mask Raman bands.",
+   "Calibration may be sensitive to particle size and bulk density variations."
   ],
   "feasibility": {
    "steps": [
-    "Collect representative powder blend samples covering the expected API range.",
-    "Acquire reference API concentrations by offline HPLC or validated lab assay.",
-    "Record NIR diffuse‑reflection spectra in‑line with the probe; build a chemometric calibration (e.g., PLS).",
-    "Validate the model on held‑out samples and assess accuracy and response time.",
-    "Repeat steps with Raman probe for side‑by‑side comparison.",
-    "Evaluate probe durability under feed‑frame temperature and dust conditions."
+    "Collect representative powder samples covering the expected API concentration range.",
+    "Build a chemometric calibration model (e.g., PLS) and validate on held‑out samples.",
+    "Repeat the same with Raman (if probe is added) to assess complementary performance.",
+    "Evaluate model robustness to particle size and flow rate variations.",
+    "Acquire NIR diffuse‑reflection spectra in‑line using the proposed probe; simultaneously record reference API values with the existing lab assay."
    ],
-   "decisionBasis": "If the NIR model meets the agreed accuracy and latency on independent samples, it will be selected as the primary method; Raman results will inform whether a combined approach is needed."
+   "decisionBasis": "If the NIR model meets the agreed‑upon prediction error on independent samples, it will be the preferred method; Raman results will inform whether a combined approach is needed. Agree two things separately with the customer before the test: the model accuracy required against the reference method, and the alarm or action threshold applied to the measured value."
   },
   "premiseChecks": [
    {
@@ -232,6 +247,24 @@
    {
     "source": "S01",
     "page": "15",
+    "quote": "The combination of these techniques is particularly effective because it captures complementary chemical information: NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "Table 1 (p.6)",
+    "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "Table 1 (p.6)",
+    "quote": "RAMAN: Raman probe (Raman scattering (emission)); sample: liquid, powder, solid; cost: high",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "15",
     "quote": "the probes are inserted directly into the process environment, such as the feed frame of a rotary tablet press.",
     "check": "verified"
    },
@@ -243,8 +276,8 @@
    },
    {
     "source": "S01",
-    "page": "Table 1 (p.6)",
-    "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
+    "page": "15",
+    "quote": "This setup allows the laboratory to track dynamic changes, such as the gradual increase in coating thickness or the homogenization of a multicomponent blend, in real-time.",
     "check": "verified"
    },
    {
@@ -268,34 +301,34 @@
   ],
   "mode": "draft",
   "assumptions": [
-   "The powder blend is optically opaque, requiring diffuse‑reflection geometry.",
-   "The feed frame provides a stable location for a contact probe without disrupting flow.",
-   "Chemometric modeling (e.g., PLS) will be used to relate spectra to API concentration."
+   "The blend appears opaque and highly scattering in the feed frame (as indicated in the facts).",
+   "A suitable process port exists for inserting a fiber probe.",
+   "Reference API concentration data can be obtained for calibration."
   ],
   "pointsToConfirm": [
-   "Exact accuracy and speed requirements for API monitoring.",
-   "Maximum allowable probe dimensions and material compatibility with the process.",
-   "Environmental limits (temperature, dust) that could affect probe performance.",
-   "Availability of a reference analytical method for calibration (e.g., HPLC)."
+   "Exact particle size distribution and bulk density of the powder during feeding.",
+   "Maximum allowable probe temperature and cleaning schedule in the dusty environment.",
+   "Availability of a reference analytical method for API concentration (e.g., HPLC).",
+   "Required update rate for real‑time control (spectra per second)."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 548.0,
+   "ms": 795.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 1044.0,
-   "detail": "3 stated (0 from answers) · 5 unknown"
+   "ms": 1282.0,
+   "detail": "4 stated (0 from answers) · 2 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 280.0,
+   "ms": 471.0,
    "detail": "S01 p.10, S01 p.11, S01 p.12, S01 p.14, S01 p.15, S01 p.5, S01 p.6, S01 p.9, S02 p.14, S02 p.6 · 10 routed by the source guide · vector+BM25"
   },
   {
@@ -307,7 +340,7 @@
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 3733.0,
+   "ms": 3774.0,
    "detail": "openai/gpt-oss-120b via groq"
   },
   {
@@ -318,9 +351,9 @@
   },
   {
    "step": "Validate numbers, claims and questions",
-   "status": "warn",
+   "status": "ok",
    "ms": 0.0,
-   "detail": "1 unsupported numbers replaced · every recommendation sentence cited · 3 open questions · all required sections present"
+   "detail": "all numbers traced to the customer or a cited page · every recommendation sentence cited · 4 open questions · all required sections present"
   }
  ]
 }

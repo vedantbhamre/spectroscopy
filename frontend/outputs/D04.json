@@ -1,13 +1,13 @@
 {
- "reply": "Based on the aqueous, likely clear cell culture broth, a low‑cost NIR transmission probe is the simplest primary option; Raman could be added later if specificity is insufficient.",
+ "reply": "Based on the aqueous, likely clear medium, NIR transmission spectroscopy is the simplest, cost‑effective first candidate; a pilot test should verify that it can quantify glucose and lactate against your lab assays.",
  "report": {
   "scenarioId": "D04",
-  "title": "In‑situ spectroscopy for glucose & lactate in cell culture broth",
+  "title": "In‑situ spectroscopy for glucose & lactate in bioprocess",
   "origin": "live",
-  "generatedAt": "2026-10-18T14:20:11+00:00",
+  "generatedAt": "2026-10-18T15:05:54+00:00",
   "decisionStatus": "provisional",
   "answer": {
-   "text": "It depends on the optical clarity of the broth – if it remains sufficiently transparent, NIR transmission spectroscopy can meet the need; otherwise a scattering‑compatible probe or Raman may be required.",
+   "text": "Not yet – NIR transmission spectroscopy is the most promising first candidate to test for in‑line glucose and lactate monitoring.",
    "citations": [
     {
      "source": "S01",
@@ -31,48 +31,61 @@
   },
   "requirements": {
    "stated": [
-    "cell culture process in aqueous medium",
-    "glucose and lactate measured from samples",
-    "delay makes it difficult to see changes promptly",
-    "exploring an in situ spectroscopy pilot",
-    "pilot can be checked against existing laboratory measurements",
-    "medium and cell population change during the run",
-    "have not yet selected a probe or calibration strategy"
+    "they run a cell culture process in an aqueous medium",
+    "glucose and lactate are measured from samples with delay",
+    "they are exploring an in situ spectroscopy pilot to compare with lab measurements",
+    "the medium and cell population change during the run and probe/calibration not selected yet"
    ],
    "unknowns": [
-    "optical appearance (turbidity, scattering) of the broth during run",
-    "number and type of available access ports for probes",
-    "acceptable calibration error and response time"
+    "optical appearance (turbidity, scattering) of the medium during the run",
+    "concentration ranges of glucose and lactate to be covered",
+    "available process ports / mechanical constraints for probe installation",
+    "required measurement response time",
+    "calibration strategy"
    ],
    "factTurns": [
     1,
     1,
     1,
-    1,
-    1,
-    1,
     1
+   ],
+   "decisive": [
+    "calibration strategy"
    ]
   },
   "questions": [
    {
-    "text": "What is the typical turbidity or scattering level of the culture broth throughout the run?",
+    "text": "What is the typical turbidity (or scattering) of the culture broth throughout the run?",
     "impact": "method",
     "id": "q1",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "How many and what size ports are available for inserting a fiber‑optic probe?",
+    "text": "What concentration ranges (min‑max) of glucose and lactate must be quantified?",
     "impact": "setup",
     "id": "q2",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What are the target accuracy and response‑time specifications for glucose and lactate measurements?",
-    "impact": "acceptance",
+    "text": "How many and what size ports are available for installing a fiber‑optic probe?",
+    "impact": "setup",
     "id": "q3",
+    "status": "open",
+    "askedTurn": 1
+   },
+   {
+    "text": "What is the acceptable latency between a process change and a reported measurement?",
+    "impact": "acceptance",
+    "id": "q4",
+    "status": "open",
+    "askedTurn": 1
+   },
+   {
+    "text": "Which reference analytical method (e.g., HPLC, enzymatic assay) will be used for calibration and validation?",
+    "impact": "acceptance",
+    "id": "q5",
     "status": "open",
     "askedTurn": 1
    }
@@ -84,7 +97,7 @@
      "NIR"
     ],
     "role": "primary",
-    "reason": "NIR transmission probes work with clear liquids, use inexpensive optics, and have been highlighted as ideal for online applications with standard glass optics and fiber probes.",
+    "reason": "NIR transmission probes work with clear liquids, use inexpensive optics, and provide millimetre penetration depth suitable for aqueous media; cost is average and it is highlighted as ideal for online applications with standard glass optics.",
     "citations": [
      {
       "source": "S01",
@@ -104,13 +117,14 @@
       "quote": "as well as standard lamps as light sources, making it ideal for online applications, including remote measurements via fiber optic probes.",
       "check": "verified"
      }
-    ]
+    ],
+    "limitations": []
    },
    {
     "method": "Raman (probe)",
     "methodIds": [],
     "role": "comparison",
-    "reason": "Raman provides molecular specificity for glucose and lactate and can operate in turbid media, but requires a higher‑cost probe and laser safety considerations.",
+    "reason": "Raman can directly detect glucose and lactate vibrational signatures and is mentioned for metabolite monitoring in bioprocesses, but probe cost is high and signal is weak, making it a secondary option for later comparison.",
     "citations": [
      {
       "source": "S01",
@@ -120,8 +134,8 @@
      },
      {
       "source": "S01",
-      "page": "5",
-      "quote": "Moreover, the spectra of vibrational transitions in Raman and mid-IR spectroscopy carry complementary qualitative and quantitative information about the sample's composition.",
+      "page": "16",
+      "quote": "While UV/Vis tracks growth, Raman spectroscopy can be used in the same reactor to provide a \"molecular fingerprint\" for direct detection of specific metabolites like glucose, acetate, or lactate.",
       "check": "verified"
      },
      {
@@ -130,15 +144,16 @@
       "quote": "RAMAN: Raman probe (Raman scattering (emission)); sample: liquid, powder, solid; cost: high",
       "check": "verified"
      }
-    ]
+    ],
+    "limitations": []
    }
   ],
   "concept": {
-   "summary": "Install a transmission‑type NIR fiber probe directly in the reactor stream, connect via low‑OD silica fiber to a compact NIR spectrometer; collect spectra continuously and build a chemometric calibration for glucose and lactate against off‑line assays.",
-   "probe": "NIR transmission probe (in‑line, stainless‑steel housing)",
-   "location": "Inserted into the liquid stream via an existing sampling port",
-   "fiberLink": "Low‑OD silica fiber (core ~[to be agreed with the customer]) to the NIR analyzer",
-   "analyzer": "Compact NIR spectrometer with diode‑array detector",
+   "summary": "Install a transmission NIR fiber‑optic probe directly in the reactor stream, connect via low‑OD silica fiber to a compact NIR spectrometer (diode‑array detector). Collect spectra continuously and build chemometric calibration models for glucose and lactate using lab reference data.",
+   "probe": "Transmission NIR probe (liquid, low‑OD)",
+   "location": "In‑line, inserted into the main flow stream",
+   "fiberLink": "Silica fiber (low OH, suitable for [to be agreed with the customer]‑2500 nm)",
+   "analyzer": "Compact NIR spectrometer with DAD detector",
    "citations": [
     {
      "source": "S01",
@@ -161,7 +176,7 @@
    ]
   },
   "spectralRange": {
-   "summary": "NIR region (≈780–2500 nm) covering overtone and combination bands of O–H, C–H, N–H groups relevant to glucose and lactate.",
+   "summary": "NIR absorption range ([to be agreed with the customer]) covering overtone bands of O‑H, C‑H, N‑H relevant to glucose and lactate.",
    "citations": [
     {
      "source": "S01",
@@ -178,20 +193,19 @@
    ]
   },
   "risks": [
-   "Increasing broth turbidity may attenuate the transmission signal, reducing accuracy.",
-   "Probe fouling from cells or proteins could require periodic cleaning or replacement.",
-   "Chemometric model may drift with changing media composition; regular recalibration needed."
+   "Increasing broth turbidity may reduce transmission path length and cause signal loss.",
+   "Temperature fluctuations can shift baseline; need temperature compensation.",
+   "Chemometric model may drift as cell density and media composition change."
   ],
   "feasibility": {
    "steps": [
-    "Collect a set of broth samples spanning the expected range of glucose and lactate concentrations.",
-    "Measure each sample off‑line (reference assays) and in‑line with the NIR transmission probe.",
-    "Develop a multivariate calibration (e.g., PLS) using the paired data.",
-    "Validate on independent samples not used in model building.",
-    "If transmission signal degrades, repeat steps with a Raman probe for comparison.",
-    "Validate the model on samples not used to build it (held-out samples, e.g. from other patients, batches or days) before drawing any conclusion; a model built on few samples can fit them without generalising."
+    "Collect representative broth samples spanning the expected turbidity and metabolite concentrations.",
+    "Measure each sample with the NIR transmission probe and with the laboratory reference assay.",
+    "Develop PLS (or similar) calibration models for glucose and lactate.",
+    "Validate models on held‑out samples and on‑line runs, monitoring prediction error.",
+    "If transmission signal degrades, evaluate Raman probe as a backup."
    ],
-   "decisionBasis": "Validation performance (RMSEP, bias) will be compared to the agreed‑upon laboratory assay error; the simplest method that meets those criteria will be selected."
+   "decisionBasis": "Success is defined by achieving prediction errors comparable to the laboratory assay on independent validation samples; the required error threshold will be agreed with the customer before testing."
   },
   "premiseChecks": [
    {
@@ -229,8 +243,8 @@
    },
    {
     "source": "S01",
-    "page": "5",
-    "quote": "Moreover, the spectra of vibrational transitions in Raman and mid-IR spectroscopy carry complementary qualitative and quantitative information about the sample's composition.",
+    "page": "16",
+    "quote": "While UV/Vis tracks growth, Raman spectroscopy can be used in the same reactor to provide a \"molecular fingerprint\" for direct detection of specific metabolites like glucose, acetate, or lactate.",
     "check": "verified"
    },
    {
@@ -254,33 +268,34 @@
   ],
   "mode": "draft",
   "assumptions": [
-   "The culture broth remains optically clear enough for transmission measurements.",
-   "At least one suitable port exists for probe insertion.",
-   "Reference off‑line glucose and lactate assays are accurate and can serve as calibration truth."
+   "The culture broth remains optically clear enough for transmission NIR throughout the run.",
+   "Standard silica fiber and probe materials are compatible with the process temperature and sterility requirements."
   ],
   "pointsToConfirm": [
-   "Actual turbidity/optical density of the broth during the process.",
-   "Physical dimensions and material compatibility of the available sampling port.",
-   "Target measurement accuracy and latency required for process control."
+   "Actual turbidity range and any need for a short path‑length or ATR configuration.",
+   "Exact concentration windows for glucose and lactate to be covered.",
+   "Mechanical interface (port size, material compatibility) for probe installation.",
+   "Required measurement latency and data integration with process control.",
+   "Reference analytical method details for calibration (precision, sampling frequency)."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 271.0,
+   "ms": 186.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 952.0,
-   "detail": "7 stated (0 from answers) · 3 unknown"
+   "ms": 10507.0,
+   "detail": "4 stated (0 from answers) · 2 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 87.0,
+   "ms": 98.0,
    "detail": "S01 p.10, S01 p.11, S01 p.12, S01 p.16, S01 p.5, S01 p.6, S01 p.9, S02 p.3, S04 p.6, S05 p.1 · 7 routed by the source guide · vector+BM25"
   },
   {
@@ -292,7 +307,7 @@
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 43652.0,
+   "ms": 46710.0,
    "detail": "openai/gpt-oss-120b via groq"
   },
   {
@@ -305,7 +320,7 @@
    "step": "Validate numbers, claims and questions",
    "status": "warn",
    "ms": 0.0,
-   "detail": "1 unsupported numbers replaced · every recommendation sentence cited · 3 open questions · all required sections present"
+   "detail": "2 unsupported numbers replaced · every recommendation sentence cited · 5 open questions · all required sections present"
   }
  ]
 }

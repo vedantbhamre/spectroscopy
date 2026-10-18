@@ -5,7 +5,7 @@
    "provisional"
   ],
   "citation_pass": "16/16 (100%)",
-  "number_hits": 1,
+  "number_hits": 0,
   "repeated_questions": 0,
   "missing_sections": 0,
   "repaired": 0,
@@ -14,16 +14,21 @@
   "models": [
    "openai/gpt-oss-120b via groq"
   ],
-  "tokens": 8398,
+  "tokens": 8758,
   "expectations": 1.0,
-  "expectation_failures": []
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 2
  },
  {
   "id": "D02",
   "status": [
    "provisional"
   ],
-  "citation_pass": "16/16 (100%)",
+  "citation_pass": "11/11 (100%)",
   "number_hits": 0,
   "repeated_questions": 0,
   "missing_sections": 0,
@@ -33,16 +38,21 @@
   "models": [
    "openai/gpt-oss-120b via groq"
   ],
-  "tokens": 9297,
+  "tokens": 9542,
   "expectations": 1.0,
-  "expectation_failures": []
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 2
  },
  {
   "id": "D03",
   "status": [
    "provisional"
   ],
-  "citation_pass": "12/12 (100%)",
+  "citation_pass": "8/8 (100%)",
   "number_hits": 0,
   "repeated_questions": 0,
   "missing_sections": 0,
@@ -52,9 +62,14 @@
   "models": [
    "openai/gpt-oss-120b via groq"
   ],
-  "tokens": 9098,
+  "tokens": 9248,
   "expectations": 1.0,
-  "expectation_failures": []
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 2
  },
  {
   "id": "D04",
@@ -62,7 +77,7 @@
    "provisional"
   ],
   "citation_pass": "14/14 (100%)",
-  "number_hits": 1,
+  "number_hits": 2,
   "repeated_questions": 0,
   "missing_sections": 0,
   "repaired": 0,
@@ -71,54 +86,45 @@
   "models": [
    "openai/gpt-oss-120b via groq"
   ],
-  "tokens": 8462,
+  "tokens": 8851,
   "expectations": 1.0,
-  "expectation_failures": []
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 1
  },
  {
   "id": "D05",
   "status": [
    "insufficient"
   ],
-  "citation_pass": "12/12 (100%)",
-  "number_hits": 2,
+  "citation_pass": "10/10 (100%)",
+  "number_hits": 3,
   "repeated_questions": 0,
   "missing_sections": 0,
-  "repaired": 0,
+  "repaired": 1,
   "moved_sentences": 2,
   "violations": {},
   "models": [
-   "openai/gpt-oss-120b via groq"
+   "openai/gpt-oss-20b via groq"
   ],
-  "tokens": 8941,
+  "tokens": 15680,
   "expectations": 1.0,
-  "expectation_failures": []
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 1
  },
  {
   "id": "D06",
   "status": [
    "provisional"
   ],
-  "citation_pass": "9/9 (100%)",
-  "number_hits": 0,
-  "repeated_questions": 0,
-  "missing_sections": 0,
-  "repaired": 0,
-  "moved_sentences": 0,
-  "violations": {},
-  "models": [
-   "openai/gpt-oss-120b via groq"
-  ],
-  "tokens": 8139,
-  "expectations": 1.0,
-  "expectation_failures": []
- },
- {
-  "id": "D07",
-  "status": [
-   "provisional"
-  ],
-  "citation_pass": "12/12 (100%)",
+  "citation_pass": "11/11 (100%)",
   "number_hits": 1,
   "repeated_questions": 0,
   "missing_sections": 0,
@@ -128,93 +134,46 @@
   "models": [
    "openai/gpt-oss-120b via groq"
   ],
-  "tokens": 8487,
+  "tokens": 8306,
   "expectations": 1.0,
-  "expectation_failures": []
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 1
+ },
+ {
+  "id": "D07",
+  "status": [
+   "insufficient"
+  ],
+  "citation_pass": "6/6 (100%)",
+  "number_hits": 4,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 0,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 8458,
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 1
  },
  {
   "id": "D08",
   "status": [
    "provisional"
   ],
-  "citation_pass": "14/14 (100%)",
-  "number_hits": 2,
-  "repeated_questions": 0,
-  "missing_sections": 0,
-  "repaired": 0,
-  "moved_sentences": 2,
-  "violations": {},
-  "models": [
-   "openai/gpt-oss-120b via groq"
-  ],
-  "tokens": 8770,
-  "expectations": 1.0,
-  "expectation_failures": []
- },
- {
-  "id": "H01",
-  "status": [
-   "provisional"
-  ],
-  "citation_pass": "15/15 (100%)",
-  "number_hits": 3,
-  "repeated_questions": 0,
-  "missing_sections": 0,
-  "repaired": 0,
-  "moved_sentences": 2,
-  "violations": {},
-  "models": [
-   "openai/gpt-oss-120b via groq"
-  ],
-  "tokens": 9073,
-  "expectations": 1.0,
-  "expectation_failures": []
- },
- {
-  "id": "H02",
-  "status": [
-   "provisional"
-  ],
-  "citation_pass": "16/16 (100%)",
-  "number_hits": 2,
-  "repeated_questions": 0,
-  "missing_sections": 0,
-  "repaired": 0,
-  "moved_sentences": 2,
-  "violations": {},
-  "models": [
-   "openai/gpt-oss-120b via groq"
-  ],
-  "tokens": 9615,
-  "expectations": 1.0,
-  "expectation_failures": []
- },
- {
-  "id": "H03",
-  "status": [
-   "insufficient"
-  ],
-  "citation_pass": "13/13 (100%)",
-  "number_hits": 6,
-  "repeated_questions": 0,
-  "missing_sections": 0,
-  "repaired": 0,
-  "moved_sentences": 2,
-  "violations": {},
-  "models": [
-   "openai/gpt-oss-120b via groq"
-  ],
-  "tokens": 9299,
-  "expectations": 1.0,
-  "expectation_failures": []
- },
- {
-  "id": "H04",
-  "status": [
-   "insufficient"
-  ],
   "citation_pass": "10/10 (100%)",
-  "number_hits": 0,
+  "number_hits": 4,
   "repeated_questions": 0,
   "missing_sections": 0,
   "repaired": 0,
@@ -223,35 +182,45 @@
   "models": [
    "openai/gpt-oss-120b via groq"
   ],
-  "tokens": 8371,
+  "tokens": 9268,
   "expectations": 1.0,
-  "expectation_failures": []
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 2
  },
  {
-  "id": "H05",
+  "id": "H01",
   "status": [
-   "insufficient"
+   "provisional"
   ],
-  "citation_pass": "6/6 (100%)",
-  "number_hits": 3,
+  "citation_pass": "12/12 (100%)",
+  "number_hits": 0,
   "repeated_questions": 0,
   "missing_sections": 0,
   "repaired": 0,
-  "moved_sentences": 0,
+  "moved_sentences": 2,
   "violations": {},
   "models": [
    "openai/gpt-oss-120b via groq"
   ],
-  "tokens": 7895,
+  "tokens": 9359,
   "expectations": 1.0,
-  "expectation_failures": []
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 1
  },
  {
-  "id": "H06",
+  "id": "H02",
   "status": [
-   "out_of_scope"
+   "provisional"
   ],
-  "citation_pass": "6/6 (100%)",
+  "citation_pass": "16/16 (100%)",
   "number_hits": 1,
   "repeated_questions": 0,
   "missing_sections": 0,
@@ -261,8 +230,109 @@
   "models": [
    "openai/gpt-oss-120b via groq"
   ],
-  "tokens": 8067,
+  "tokens": 9913,
   "expectations": 1.0,
-  "expectation_failures": []
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 0
+ },
+ {
+  "id": "H03",
+  "status": [
+   "insufficient"
+  ],
+  "citation_pass": "11/11 (100%)",
+  "number_hits": 4,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 1,
+  "moved_sentences": 2,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 17830,
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 1
+ },
+ {
+  "id": "H04",
+  "status": [
+   "insufficient"
+  ],
+  "citation_pass": "12/12 (100%)",
+  "number_hits": 0,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 2,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 8643,
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 1,
+  "decisive_open": 0
+ },
+ {
+  "id": "H05",
+  "status": [
+   "insufficient"
+  ],
+  "citation_pass": "4/4 (100%)",
+  "number_hits": 5,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 0,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 7932,
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 0,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 2
+ },
+ {
+  "id": "H06",
+  "status": [
+   "out_of_scope"
+  ],
+  "citation_pass": "11/11 (100%)",
+  "number_hits": 0,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 2,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 9440,
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "certainty_rejected": 0,
+  "method_mismatch": 1,
+  "recited": 0,
+  "hardware_moved": 0,
+  "decisive_open": 1
  }
 ]

@@ -65,3 +65,9 @@ def test_every_check_citation_is_on_its_page():
 def test_classification_study_has_a_target():
     f = detect("We want to classify tissue samples as muscle, fat or liver in a laboratory study.", Facts())
     assert f.target_variables and {c.id: c for c in run_checks(f)}["target_defined"].status == "pass"
+
+
+def test_fluorescence_for_classification_needs_no_named_species():
+    f = detect("We want to classify tissue samples with fluorescence in a laboratory study.", Facts(methods_mentioned=["FLUO"], fluorescent_target_named=False))
+    chk = {c.id: c for c in run_checks(f)}["fluorescent_target"]
+    assert chk.status == "pass" and verify(chk.citations[0]).check == "verified"

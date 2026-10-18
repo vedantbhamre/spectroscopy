@@ -1,20 +1,14 @@
 {
- "reply": "For a pilot you can start with two simple NIR concepts – transmission for the clear whey and diffuse‑reflection for the opaque milk concentrate – and run a side‑by‑side comparison against your lab protein/fat results.",
+ "reply": "For a pilot you can start with NIR transmission on the clear whey and NIR diffuse‑reflection on the opaque milk concentrate, then run a side‑by‑side comparison against your lab protein/fat results.",
  "report": {
   "scenarioId": "H02",
-  "title": "Pilot measurement concepts for whey (clear) and milk concentrate (opaque)",
+  "title": "Pilot measurement concepts for whey and milk concentrate",
   "origin": "live",
-  "generatedAt": "2026-10-18T14:33:05+00:00",
+  "generatedAt": "2026-10-18T15:19:27+00:00",
   "decisionStatus": "provisional",
   "answer": {
-   "text": "It depends on the optical appearance: NIR transmission is suited to the clear whey, while NIR diffuse‑reflection works for the opaque concentrate.",
+   "text": "It depends on the optical appearance of each stream; NIR transmission is most suitable for the clear whey, while NIR diffuse‑reflection is the most promising first candidate for the opaque milk concentrate.",
    "citations": [
-    {
-     "source": "S01",
-     "page": "17",
-     "quote": "The use of Near-Infrared (NIR) spectroscopy for the inline monitoring of milk is a cornerstone of modern dairy \"Process Analytical Technology\" (PAT).",
-     "check": "verified"
-    },
     {
      "source": "S01",
      "page": "18",
@@ -24,74 +18,71 @@
     {
      "source": "S01",
      "page": "18",
-     "quote": "The Advantage of Dual-Technique Availability: having both fiber optic techniques available in a lab rather than relying on one provides the flexibility needed to monitor the entire production chain.",
+     "quote": "The setup typically consists of a transmission / transflection probe, where light passes entirely through a defined layer of the sample to a detector on the opposite side.",
      "check": "verified"
     },
     {
      "source": "S01",
-     "page": "Table 1 (p.6)",
-     "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+     "page": "17",
+     "quote": "NIR Reflection: Inline NIR Reflection is primarily used for opaque or highly concentrated dairy products, such as yogurt, butter, or whole milk concentrates.",
      "check": "verified"
     },
     {
      "source": "S01",
-     "page": "Table 1 (p.6)",
-     "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
+     "page": "17",
+     "quote": "The use of Near-Infrared (NIR) spectroscopy for the inline monitoring of milk is a cornerstone of modern dairy \"Process Analytical Technology\" (PAT).",
      "check": "verified"
     }
    ]
   },
   "requirements": {
    "stated": [
-    "process handles clear whey and opaque milk concentrate",
-    "wants pilot for composition monitoring using lab protein and fat results",
-    "wants to compare different measurement interfaces before installation",
-    "asks for first measurement concepts and comparison experiment for the two streams"
+    "The dairy process handles a relatively clear whey stream and an opaque milk concentrate",
+    "They want a pilot for composition monitoring using laboratory protein and fat results where relevant",
+    "They want to compare different measurement interfaces before choosing the installation"
    ],
    "unknowns": [
-    "required detection limits for protein and fat",
-    "acceptable measurement speed / sampling frequency",
-    "available fiber or probe ports on the process line"
+    "acceptable optical pathlength for transmission probe in whey",
+    "available pipe diameter or mounting location for reflection probe in concentrate"
    ],
    "factTurns": [
     1,
     1,
-    1,
     1
-   ]
+   ],
+   "decisive": []
   },
   "questions": [
    {
-    "text": "What is the minimum protein and fat concentration change you need to detect (detection limit) for each stream?",
+    "text": "What is the maximum optical pathlength you can accommodate for a transmission probe in the whey line (e.g., 1–5 mm)?",
     "impact": "method",
     "id": "q1",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "How many optical ports are free on the whey and concentrate lines, and what are their sizes?",
+    "text": "What pipe or vessel geometry is available for mounting a diffuse‑reflection probe in the milk concentrate stream?",
     "impact": "setup",
     "id": "q2",
-    "status": "open",
-    "askedTurn": 1
-   },
-   {
-    "text": "What is the maximum allowable measurement latency (seconds per sample) for process control?",
-    "impact": "acceptance",
-    "id": "q3",
     "status": "open",
     "askedTurn": 1
    }
   ],
   "recommendations": [
    {
-    "method": "NIR transmission",
+    "method": "NIR (transmission)",
     "methodIds": [
      "NIR"
     ],
     "role": "primary",
-    "reason": "Transmission NIR probes work best with clear, low‑scattering liquids like whey, providing a representative bulk measurement and high accuracy for dilute components.",
+    "reason": "Transmission NIR probes work well for transparent or semi‑transparent liquids such as whey, providing representative bulk sampling when the pathlength is controlled (1–10 mm). The technique is listed as average‑cost and suitable for liquid/colloidal samples【source\":\"S01\",\"page\":\"Table 1 (p.6)\",\"quote\":\"NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average\"}.",
     "citations": [
+     {
+      "source": "S01",
+      "page": "Table 1 (p.6)",
+      "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+      "check": "verified"
+     },
      {
       "source": "S01",
       "page": "18",
@@ -100,64 +91,76 @@
      },
      {
       "source": "S01",
-      "page": "Table 1 (p.6)",
-      "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+      "page": "18",
+      "quote": "The setup typically consists of a transmission / transflection probe, where light passes entirely through a defined layer of the sample to a detector on the opposite side.",
       "check": "verified"
      }
+    ],
+    "limitations": [
+     "Probe geometry: the medium changes from clear to opaque: The medium changes from clear to opaque, so a single transmission path may saturate. Plan ATR or reflection for the opaque phase, or check the path length on samples from both phases."
     ]
    },
    {
-    "method": "NIR diffuse reflection",
+    "method": "NIR (diffuse reflection)",
     "methodIds": [
      "NIR"
     ],
     "role": "primary",
-    "reason": "Diffuse‑reflection NIR probes handle highly scattering, opaque media such as milk concentrate, measuring surface‑related fat globule signals.",
+    "reason": "Diffuse‑reflection NIR is the standard approach for opaque or highly scattering dairy products such as milk concentrates, where light penetration is limited and surface‑sensitive measurement is required. It is also average‑cost and designed for scattering media【source\":\"S01\",\"page\":\"Table 1 (p.6)\",\"quote\":\"NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average\"}.",
     "citations": [
-     {
-      "source": "S01",
-      "page": "17",
-      "quote": "NIR Reflection: Inline NIR Reflection is primarily used for opaque or highly concentrated dairy products, such as yogurt, butter, or whole milk concentrates.",
-      "check": "verified"
-     },
      {
       "source": "S01",
       "page": "Table 1 (p.6)",
       "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
       "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "17",
+      "quote": "NIR Reflection: Inline NIR Reflection is primarily used for opaque or highly concentrated dairy products, such as yogurt, butter, or whole milk concentrates.",
+      "check": "verified"
      }
+    ],
+    "limitations": [
+     "Probe geometry: the medium changes from clear to opaque: The medium changes from clear to opaque, so a single transmission path may saturate. Plan ATR or reflection for the opaque phase, or check the path length on samples from both phases."
     ]
    }
   ],
   "concept": {
-   "summary": "Install a transmission NIR probe in the whey line (optical path 1–5 mm) and a diffuse‑reflection NIR probe in the concentrate line (back‑scatter geometry). Both probes connect via low‑OD silica fiber to a high‑speed diode‑array NIR analyzer; calibration models are built from lab‑measured protein/fat data.",
+   "summary": "Install a transmission NIR probe in the whey line (pathlength 1–5 mm) and a diffuse‑reflection NIR probe in the milk concentrate line (flush‑mounted to the pipe wall). Use the same spectrometer platform (e.g., FT‑NIR or diode‑array) to acquire spectra, apply chemometric calibration (PLS) against lab protein/fat measurements, and compare model performance for each interface.",
    "probe": "Transmission probe for whey; diffuse‑reflection probe for concentrate",
-   "location": "Inline, flush‑mounted in the respective process pipes",
-   "fiberLink": "Silica fiber (low‑OD) from each probe to a shared NIR diode‑array analyzer",
-   "analyzer": "High‑speed NIR spectrometer (DAD) covering ~[to be agreed with the customer]",
+   "location": "Inline in the respective process streams (whey pipe, concentrate vat or pipe)",
+   "fiberLink": "Standard silica fiber (low‑OD) suitable for NIR transmission",
+   "analyzer": "NIR spectrometer (FT‑NIR or DAD‑based) capable of both transmission and reflectance modes",
    "citations": [
     {
      "source": "S01",
      "page": "5",
-     "quote": "The use of these probes can be essential for in-situ analysis—in the field or in an ongoing process.",
+     "quote": "Immersible fiber optic probes operating in various spectral regions from UV to mid-IR are increasingly being used for measuring liquid and soft or powdered solid samples.",
      "check": "verified"
     },
     {
      "source": "S01",
      "page": "5",
-     "quote": "Online measurements require high-speed spectral acquisition.",
+     "quote": "They can be used to obtain absorption, diffuse reflectance or transmission, Raman, and ATR spectra.",
      "check": "verified"
     },
     {
      "source": "S01",
-     "page": "10",
-     "quote": "DDA detectors are arrays of photodiodes that allow instantaneous recording of light intensity at all wavelengths simultaneously, which is critical for monitoring fast processes. 10",
+     "page": "17",
+     "quote": "NIR Reflection: Inline NIR Reflection is primarily used for opaque or highly concentrated dairy products, such as yogurt, butter, or whole milk concentrates.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "18",
+     "quote": "NIR Transmission: NIR Transmission is the preferred method for transparent or semi-transparent liquids, such as skim milk, whey, or permeate.",
      "check": "verified"
     }
    ]
   },
   "spectralRange": {
-   "summary": "NIR region, typically [to be agreed with the customer], with the transmission probe using a 1–5 mm pathlength and the reflection probe sampling the first few hundred microns of the surface.",
+   "summary": "Near‑Infrared absorption range ([to be agreed with the customer]) covering overtones of O‑H, N‑H, C‑H bonds relevant to protein and fat.",
    "citations": [
     {
      "source": "S01",
@@ -167,26 +170,27 @@
     },
     {
      "source": "S01",
-     "page": "18",
-     "quote": "The key experimental action is the precise control of the optical pathlength (usually 1 - 10 mm); if the pathlength is too wide, the signal is lost to absorption; if too narrow, the sample represents a negligible volume.",
+     "page": "10",
+     "quote": "Unlike mid- IR spectroscopy, measurements in the NIR region are facilitated by a number of factors: the transparency of plain and quartz glass (which allows the use of standard optics and probes), low molar absorption coefficients,",
      "check": "verified"
     }
    ]
   },
   "risks": [
-   "Transmission probe may saturate if concentrate is sampled; ensure pathlength control.",
-   "Reflection probe may be sensitive to surface fouling; requires regular cleaning.",
-   "Calibration models may not transfer directly from lab cuvettes to in‑line probes without validation."
+   "Insufficient transmission for whey if pathlength is too long, leading to signal loss.",
+   "Surface sensitivity of reflection may cause variability if fat globule size changes.",
+   "Potential fouling of probes in the concentrate stream; cleaning strategy needed."
   ],
   "feasibility": {
    "steps": [
-    "Collect representative whey and concentrate samples in the lab.",
-    "Measure each with the chosen NIR probes and with reference protein/fat assays.",
-    "Build separate chemometric calibration models (e.g., PLS) for protein and fat.",
-    "Validate each model on held‑out samples and assess prediction error.",
-    "Install probes in pilot‑scale loops and repeat the measurement‑comparison experiment to confirm in‑line performance."
+    "Collect representative whey and concentrate samples covering expected protein/fat ranges.",
+    "Measure each sample with the transmission probe (whey) and reflection probe (concentrate) using the same NIR spectrometer.",
+    "Obtain reference protein and fat values from the laboratory methods.",
+    "Build separate PLS calibration models for each probe, validate on held‑out samples.",
+    "Then measure in-line or in a pilot set-up against the reference method.",
+    "Compare prediction errors and robustness; decide which interface meets the pilot criteria."
    ],
-   "decisionBasis": "If the validation RMSEP meets the detection limits (once defined) and the measurement latency satisfies the process requirement, the method is deemed feasible."
+   "decisionBasis": "Model validation statistics (RMSEP, bias) agreed with the customer before testing; the simplest probe that meets the required accuracy will be selected. Agree two things separately with the customer before the test: the model accuracy required against the reference method, and the alarm or action threshold applied to the measured value."
   },
   "premiseChecks": [
    {
@@ -234,12 +238,6 @@
   "sources": [
    {
     "source": "S01",
-    "page": "17",
-    "quote": "The use of Near-Infrared (NIR) spectroscopy for the inline monitoring of milk is a cornerstone of modern dairy \"Process Analytical Technology\" (PAT).",
-    "check": "verified"
-   },
-   {
-    "source": "S01",
     "page": "18",
     "quote": "NIR Transmission: NIR Transmission is the preferred method for transparent or semi-transparent liquids, such as skim milk, whey, or permeate.",
     "check": "verified"
@@ -247,7 +245,19 @@
    {
     "source": "S01",
     "page": "18",
-    "quote": "The Advantage of Dual-Technique Availability: having both fiber optic techniques available in a lab rather than relying on one provides the flexibility needed to monitor the entire production chain.",
+    "quote": "The setup typically consists of a transmission / transflection probe, where light passes entirely through a defined layer of the sample to a detector on the opposite side.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "17",
+    "quote": "NIR Reflection: Inline NIR Reflection is primarily used for opaque or highly concentrated dairy products, such as yogurt, butter, or whole milk concentrates.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "17",
+    "quote": "The use of Near-Infrared (NIR) spectroscopy for the inline monitoring of milk is a cornerstone of modern dairy \"Process Analytical Technology\" (PAT).",
     "check": "verified"
    },
    {
@@ -264,26 +274,14 @@
    },
    {
     "source": "S01",
-    "page": "17",
-    "quote": "NIR Reflection: Inline NIR Reflection is primarily used for opaque or highly concentrated dairy products, such as yogurt, butter, or whole milk concentrates.",
+    "page": "5",
+    "quote": "Immersible fiber optic probes operating in various spectral regions from UV to mid-IR are increasingly being used for measuring liquid and soft or powdered solid samples.",
     "check": "verified"
    },
    {
     "source": "S01",
     "page": "5",
-    "quote": "The use of these probes can be essential for in-situ analysis—in the field or in an ongoing process.",
-    "check": "verified"
-   },
-   {
-    "source": "S01",
-    "page": "5",
-    "quote": "Online measurements require high-speed spectral acquisition.",
-    "check": "verified"
-   },
-   {
-    "source": "S01",
-    "page": "10",
-    "quote": "DDA detectors are arrays of photodiodes that allow instantaneous recording of light intensity at all wavelengths simultaneously, which is critical for monitoring fast processes. 10",
+    "quote": "They can be used to obtain absorption, diffuse reflectance or transmission, Raman, and ATR spectra.",
     "check": "verified"
    },
    {
@@ -294,8 +292,8 @@
    },
    {
     "source": "S01",
-    "page": "18",
-    "quote": "The key experimental action is the precise control of the optical pathlength (usually 1 - 10 mm); if the pathlength is too wide, the signal is lost to absorption; if too narrow, the sample represents a negligible volume.",
+    "page": "10",
+    "quote": "Unlike mid- IR spectroscopy, measurements in the NIR region are facilitated by a number of factors: the transparency of plain and quartz glass (which allows the use of standard optics and probes), low molar absorption coefficients,",
     "check": "verified"
    },
    {
@@ -319,34 +317,34 @@
   ],
   "mode": "draft",
   "assumptions": [
-   "The whey is sufficiently clear for NIR transmission (optical density low).",
-   "The concentrate is highly scattering/opaque, making transmission impractical.",
-   "Both streams can accommodate a flush‑mounted fiber probe without major redesign.",
-   "NIR transmission vs. reflection side‑by‑side test: Running both probe types on identical lab‑scale flow loops lets you quantify accuracy, precision, and speed against the reference protein/fat assays before committing to an in‑line install. (not supported by the cited page)"
+   "The whey stream is sufficiently clear to allow NIR transmission with a pathlength ≤5 mm.",
+   "The milk concentrate is optically scattering/opaque, making diffuse‑reflection the appropriate geometry.",
+   "The customer can provide laboratory protein/fat reference data for calibration.",
+   "NIR (both transmission and reflection) – comparison experiment: Running both transmission and reflection probes on the same whey and concentrate samples, calibrated against lab protein/fat values, will reveal which interface gives the best predictive performance and informs the final installation choice. (not supported by the cited page)"
   ],
   "pointsToConfirm": [
-   "Exact detection limits needed for protein and fat in each stream.",
-   "Maximum allowable sampling interval for real‑time control.",
-   "Number and size of available optical ports on the process equipment."
+   "Exact allowable pathlength and mounting space for the transmission probe in the whey line.",
+   "Material compatibility of probe windows with dairy streams (e.g., stainless steel housing, sapphire window).",
+   "Cleaning‑in‑place (CIP) feasibility for the reflection probe in the concentrate line."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 337.0,
+   "ms": 325.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 8451.0,
-   "detail": "4 stated (0 from answers) · 4 unknown"
+   "ms": 1642.0,
+   "detail": "3 stated (0 from answers) · 0 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 83.0,
+   "ms": 73.0,
    "detail": "S01 p.10, S01 p.12, S01 p.17, S01 p.18, S01 p.5, S01 p.6, S01 p.9, S03 p.16, S04 p.3, S04 p.5 · 7 routed by the source guide · vector+BM25"
   },
   {
@@ -358,7 +356,7 @@
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 62851.0,
+   "ms": 50980.0,
    "detail": "openai/gpt-oss-120b via groq"
   },
   {
@@ -371,7 +369,7 @@
    "step": "Validate numbers, claims and questions",
    "status": "warn",
    "ms": 0.0,
-   "detail": "2 unsupported numbers replaced · 1 unsupported sentences and 1 uncited recommendations moved to assumptions · 3 open questions · all required sections present"
+   "detail": "1 unsupported numbers replaced · 1 unsupported sentences and 1 uncited recommendations moved to assumptions · 2 open questions · all required sections present"
   }
  ]
 }
