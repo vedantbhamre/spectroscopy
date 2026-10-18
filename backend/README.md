@@ -12,7 +12,7 @@ POST /assess ─► safety gate ─► planner ─┬─► analyst ─► retri
 | --- | --- | --- |
 | planner | assessment vs conversational turn, search queries | yes (small JSON) |
 | analyst | stated facts (kept only if quoted from the client) vs unknowns, flags for the checks | yes |
-| retriever | pages routed by the organisers' source guide (domain, methods, fibre topic), then BM25 (+ Qdrant vectors when configured), one chunk per page, 8 pages; recall of the organisers' useful pages 0.90 vs 0.35 for keyword search alone (`tests/test_retrieval.py`) | no |
+| retriever | pages routed by the organisers' source guide (domain, methods, fibre topic), then BM25 fused with local BGE-base vectors, one chunk per page, 8 pages; recall of the organisers' useful pages 0.90 vs 0.35 for keyword search alone (`tests/test_retrieval.py`), 0.93 vs 0.64 without vectors on enquiries worded without routing keywords (`tests/test_semantic_retrieval.py`) | no |
 | checker | deterministic premise checks: target named, fibre window vs method range, fluorescent target, source scope, calibration transfer, combination, certainty | no |
 | responder | composes the report; then deterministic post-processing: computed checks replace the model's, decision status floored by failed checks, every quote verified on its page, unknown methods dropped | yes |
 
@@ -47,7 +47,7 @@ Acceptance properties for any conversation: `evals/acceptance.py` (tests in `tes
 ```bash
 cd backend
 uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python -r requirements.txt
-cp .env.example .env               # LLM_PROVIDER=groq|openai + its keys (GEMINI_API_KEY for vectors)
+cp .env.example .env               # LLM_PROVIDER=groq|openai + its keys (embeddings are local, no key)
 .venv/bin/uvicorn app.main:app --reload --port 8000
 ```
 
@@ -79,7 +79,7 @@ PDF text comes from poppler's `pdftotext` when installed (better spacing for quo
 | `PORTKEY_API_KEY` | direct calls to `LLM_PROVIDER` (groq: gpt-oss-120b → 20b; openai: gpt-4o → gpt-4o-mini), each model with the primary key, then the fallback key |
 | fallback key | only the primary key is used |
 | `LLM_FALLBACK_PROVIDER` | the other provider is never called (no surprise spend); set it to `openai` or `groq` to try it after every attempt fails |
-| `GEMINI_API_KEY` | BM25 only (vector step skipped) |
+| `EMBEDDINGS=local` (default) | model can't load (no fastembed / no first download): BM25 only |
 | `QDRANT_CLUSTER_ENDPOINT` | embedded Qdrant in `backend/.qdrant` |
 | `RERANK=flashrank` unset (default) | no reranking: FlashRank measured no gain and dropped correct pages |
 | LLM for the gate | rule-based gate (`engine: rules` in the trace) |

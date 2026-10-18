@@ -8,7 +8,7 @@ It was built for the AFS in-line spectroscopy challenge.
 | --- | --- |
 | **Frontend** | Next.js 15 (App Router, TypeScript, Tailwind v4), `frontend/` |
 | **Backend** | FastAPI + LangGraph assessment pipeline, `backend/` |
-| **Retrieval** | BM25 + optional Qdrant vector search, fused and reranked with FlashRank |
+| **Retrieval** | Source-guide routing + BM25 fused with local semantic search (BGE-base via fastembed, CPU, no API key) |
 | **LLM** | Groq (`gpt-oss-120b`) or OpenAI (`gpt-4o`), your choice via `.env` |
 
 ---
@@ -137,7 +137,7 @@ npm run dev
 
 Open <http://localhost:3000/assess>. Enquiries are now answered live by the pipeline (typically 5 to 30 seconds), including enquiries you write yourself.
 
-> The first live assessment may take a little longer: the FlashRank reranker downloads a small local model on first use. If it cannot (offline), retrieval falls back to the BM25 order and everything still works.
+> The first backend start downloads the BGE-base embedding model (~210 MB) and embeds the knowledge base once (~40 s, cached in `backend/.embeddings/`). If it cannot (offline), retrieval uses routing + BM25 and everything still works.
 
 For a production build instead of the dev server: `npm run build && npm start`.
 
@@ -182,7 +182,7 @@ POST /assess ─► safety gate ─► planner ─┬─► analyst ─► retri
 | safety gate | blocks off-topic, jailbreak and injection messages; flags over-confident requests | LLM classifier with a rule-based fallback |
 | planner | assessment turn vs follow-up question, search queries | yes |
 | analyst | stated facts (kept only if quoted from the customer) vs unknowns | yes |
-| retriever | BM25 + optional Qdrant vector search, fused, reranked with FlashRank | no |
+| retriever | source-guide routing, then BM25 fused with local BGE-base vectors, one chunk per page | no |
 | checker | deterministic premise checks: target named, fibre window vs method range, geometry vs optics, source scope, calibration transfer, certainty, owned equipment | no |
 | responder | composes the report, then deterministic post-processing: verifies every quote on its page, validates numbers, lowers the decision status if a check fails | yes |
 
@@ -265,7 +265,7 @@ Backend settings live in `backend/.env` (copy of `.env.example`). Restart the ba
 | `GROQ_MODEL` / `GROQ_SMALL_MODEL` | `openai/gpt-oss-120b` / `openai/gpt-oss-20b` | assessment model / fallback and gate model |
 | `OPENAI_MODEL` / `OPENAI_FALLBACK_MODEL` | `gpt-4o` / `gpt-4o-mini` | same, for OpenAI |
 | `*_FALLBACK_API_KEY` | none | optional second key used when the first hits a rate limit |
-| `GEMINI_API_KEY` | none | optional embeddings for the vector search step; leave empty to use BM25 + reranking only |
+| `EMBEDDINGS` | `local` | `local` (BGE-base, no key), `gemini` (needs `GEMINI_API_KEY` + ingested Qdrant index) or `off` |
 | `QDRANT_CLUSTER_ENDPOINT`, `QDRANT_API_KEY` | none | optional Qdrant Cloud; empty means embedded local Qdrant |
 | `GUARD_MODE` | unset | set to `rules` to run the safety gate without an LLM |
 | `FRONTEND_ORIGIN` | `http://localhost:3000` | origin allowed by CORS; change it if the frontend runs elsewhere |
@@ -284,9 +284,8 @@ Behaviour when optional pieces are missing:
 | Missing | Result |
 | --- | --- |
 | LLM key | `/assess` returns 503; the frontend serves the stored result for unedited examples, otherwise says "not connected" |
-| `GEMINI_API_KEY` | vector step skipped, BM25 only |
+| embedding model download | routing + BM25 only |
 | Qdrant endpoint | embedded local Qdrant in `backend/.qdrant` |
-| FlashRank model download | fused BM25/vector order |
 | LLM for the gate | rule-based gate (shown as `engine: rules` in the trace) |
 
 ---
@@ -313,7 +312,7 @@ Behaviour when optional pieces are missing:
 - Fibre "coverage" is computed against **nominal** method ranges only; it is not a statement about a particular instrument.
 - Citation checks verify that a quote is on the cited page. They do not prove that the claim is physically correct.
 - Quotes from slide images are checked against the team's own transcriptions (`visual_note`), so the figure itself should be checked.
-- The vector-search step needs an embedding key and a re-indexed collection (it needs the original source files, which are not in this repository). Without it, retrieval is BM25 plus reranking, which is what the committed results use.
+- Semantic search runs locally on the committed chunks (no key). The committed batch outputs were generated before it was added; re-run the batch to refresh them.
 - The walkthroughs on the *How it works* page are scripted examples, not live output.
 - Free-tier LLM quotas can slow or stop live runs. The stored examples keep working when the backend or LLM is unavailable.
 - No hosted demo is provided; the project is meant to be run locally as described above.
@@ -325,4 +324,4 @@ Behaviour when optional pieces are missing:
 - AFS (Art Fiber Systems) source material and the challenge organisers' examples.
 - Backend structure adapted from the [8hr-MARATHON](https://github.com/d-hackmt/8hr-MARATHON) template.
 - UI built with [Next.js](https://nextjs.org), [Tailwind CSS](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com) and [motion-primitives](https://motion-primitives.com) (MIT), with a Carbon-inspired design using IBM Plex type.
-- Backend built on [FastAPI](https://fastapi.tiangolo.com), [LangGraph](https://langchain-ai.github.io/langgraph/), [Qdrant](https://qdrant.tech) and [FlashRank](https://github.com/PrithivirajDamodaran/FlashRank).
+- Backend built on [FastAPI](https://fastapi.tiangolo.com), [LangGraph](https://langchain-ai.github.io/langgraph/), [Qdrant](https://qdrant.tech), [fastembed](https://github.com/qdrant/fastembed) with [BGE-base](https://huggingface.co/BAAI/bge-base-en-v1.5) (MIT).

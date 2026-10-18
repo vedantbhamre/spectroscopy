@@ -20,7 +20,10 @@ Next highest-value task: commit and push now; after 10:00 add the second-org Gro
 
 Recall of the organisers' "useful sources" (D01–D08) reaching the composer: **0.35 → 0.90**
 (keyword search + TinyBERT rerank → source-guide routing + stop-word BM25 + one chunk per page, 8 pages).
-Guarded by `backend/tests/test_retrieval.py`. FlashRank rerank is now opt-in (`RERANK=flashrank`): it measured no gain.
+Guarded by `backend/tests/test_retrieval.py`.
+Local semantic search added (BGE-base via fastembed, CPU, no key): on enquiries worded without routing keywords recall **0.64 → 0.93**,
+development set unchanged at 0.90 (`backend/tests/test_semantic_retrieval.py`). Compared BGE-small / BGE-base / mxbai-large (equal recall;
+BGE-base chosen for size/latency), arctic-m (0.43) and nomic (too heavy for CPU). Remaining miss: "malignant vs benign during an operation" does not reach S03 p.1. FlashRank rerank is now opt-in (`RERANK=flashrank`): it measured no gain.
 Answers have not been re-run with the new retrieval yet (needs tokens): see docs/11-next-run-plan.md step 2.
 
 ## Demo path — verified now

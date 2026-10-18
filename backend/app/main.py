@@ -6,6 +6,7 @@ from app.config import settings
 logfire.configure(token=settings.LOGFIRE_TOKEN, send_to_logfire="if-token-present", service_name="spectrasense-backend", console=False)
 
 import hashlib  # noqa: E402
+import threading  # noqa: E402
 import traceback  # noqa: E402
 from contextlib import asynccontextmanager  # noqa: E402
 
@@ -25,6 +26,11 @@ from app.services import retrieval  # noqa: E402
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     guardrails.initialize_rails()
+    if settings.EMBEDDINGS == "local":
+        from app.services import local_embedding
+
+        # Model load + cached chunk vectors (~15 s) off the request path; the first enquiry would otherwise wait.
+        threading.Thread(target=local_embedding.warm, args=(retrieval.chunks(),), daemon=True).start()
     yield
 
 
@@ -42,8 +48,9 @@ def health() -> dict:
         "models": [settings.PRIMARY_MODEL, settings.FALLBACK_MODEL],
         "route": [f"{label}:{model}" for _, model, label, _ in attempts()],
         "retrieve_top_n": settings.RETRIEVE_TOP_N,
-        "embeddings": bool(settings.GEMINI_API_KEY),
-        "qdrant": "cloud" if settings.QDRANT_URL else "local",
+        "embeddings": (f"local:{settings.LOCAL_EMBEDDING_MODEL}" if settings.EMBEDDINGS == "local"
+                       else "gemini" if settings.EMBEDDINGS == "gemini" and settings.GEMINI_API_KEY else None),
+        "qdrant": ("cloud" if settings.QDRANT_URL else "local") if settings.EMBEDDINGS == "gemini" else None,
         "kb_chunks": len(retrieval.chunks()),
         "guardrails": f"llm ({settings.FALLBACK_MODEL}, rules fallback)" if settings.llm_guard_available else "rules",
     }

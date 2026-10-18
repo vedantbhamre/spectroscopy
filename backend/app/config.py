@@ -48,7 +48,10 @@ class Settings:
     def FALLBACK_MODEL(self) -> str:
         return self.GROQ_SMALL_MODEL if self.LLM_PROVIDER == "groq" else self.OPENAI_SMALL_MODEL
 
-    # --- Embeddings ---
+    # --- Embeddings: "local" (BGE-base on CPU, default, measured), "gemini" (Qdrant index built by ingestion), "off" ---
+    EMBEDDINGS = (_env("EMBEDDINGS", "local") or "local").lower()
+    LOCAL_EMBEDDING_MODEL = _env("LOCAL_EMBEDDING_MODEL", "BAAI/bge-base-en-v1.5")
+    EMBEDDING_CACHE_DIR = BACKEND_DIR / ".embeddings"
     GEMINI_API_KEY = _env("GEMINI_API_KEY")
     EMBEDDING_MODEL = "models/gemini-embedding-2-preview"
     EMBEDDING_DIM = 3072

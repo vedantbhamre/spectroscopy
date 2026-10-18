@@ -5,6 +5,7 @@ __pycache__/
 .pytest_cache/
 /data/materials/
 .flashrank/
+.embeddings/
 
 # Eval runs: keep latest.json / latest.md, ignore timestamped history
 evals/results/2*.json

@@ -1,10 +1,10 @@
-"""Retrieval: pages routed by the organisers' source guide, then BM25 (+ Qdrant vector search when embeddings are
-configured) to fill the remaining slots, one chunk per page.
+"""Retrieval: pages routed by the organisers' source guide, then BM25 fused with semantic vector search (local BGE-base
+by default, see local_embedding.py) to fill the remaining slots, one chunk per page.
 
 Measured against the organisers' "useful sources" for the development enquiries (tests/test_retrieval.py), keyword
 search alone reached about a third of the useful pages: customers describe processes, not the method pages an
-assessment rests on. Routing by application domain, method and topic closes that gap. BM25 always runs, so retrieval
-works without a Gemini key, Qdrant or network. FlashRank reranking is optional (RERANK=flashrank): with the default
+assessment rests on. Routing by application domain, method and topic closes that gap; vectors catch enquiries worded
+without the routing keywords. BM25 always runs, so retrieval still works if the embedding model cannot load. FlashRank reranking is optional (RERANK=flashrank): with the default
 TinyBERT model it measured no gain and dropped correct pages, so it is off by default.
 """
 
@@ -70,13 +70,17 @@ def bm25(query: str, limit: int = 15, k1: float = 1.5, b: float = 0.75) -> list[
 
 
 def vector(query: str, limit: int = 15) -> list[dict]:
-    from app.services.embedding import embed_query, embeddings_available
-    from app.services.vectorstore import search
-
-    if not embeddings_available():
-        return []
     try:
-        return search(embed_query(query), limit)
+        if settings.EMBEDDINGS == "local":
+            from app.services import local_embedding
+
+            return local_embedding.search(query, chunks(), limit) if local_embedding.available() else []
+        if settings.EMBEDDINGS == "gemini":
+            from app.services.embedding import embed_query, embeddings_available
+            from app.services.vectorstore import search
+
+            return search(embed_query(query), limit) if embeddings_available() else []
+        return []
     except Exception as e:  # noqa: BLE001 - degrade to BM25 only
         logfire.warning("vector search unavailable: {err}", err=str(e))
         return []
@@ -148,8 +152,8 @@ def retrieve(queries: list[str], top_n: int = 8, routing_text: str = "") -> tupl
     by_id: dict[str, dict] = {}
     used_vector = False
     for q in [routing_text, *queries] if routing_text else queries:
-        lists = [bm25(q)]
-        v = vector(q)
+        lists = [bm25(q, 30)]
+        v = vector(q, 30)
         if v:
             used_vector = True
             lists.append(v)
