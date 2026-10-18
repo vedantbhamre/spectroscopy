@@ -1,7 +1,11 @@
-"""Hybrid retrieval: Qdrant vector search (if embeddings are configured) + BM25, then FlashRank reranking.
+"""Retrieval: pages routed by the organisers' source guide, then BM25 (+ Qdrant vector search when embeddings are
+configured) to fill the remaining slots, one chunk per page.
 
-BM25 always runs, so retrieval works without a Gemini key, Qdrant or network, and exact
-technical terms (cm-1, ATR, ZrO2) are not lost to embedding fuzziness.
+Measured against the organisers' "useful sources" for the development enquiries (tests/test_retrieval.py), keyword
+search alone reached about a third of the useful pages: customers describe processes, not the method pages an
+assessment rests on. Routing by application domain, method and topic closes that gap. BM25 always runs, so retrieval
+works without a Gemini key, Qdrant or network. FlashRank reranking is optional (RERANK=flashrank): with the default
+TinyBERT model it measured no gain and dropped correct pages, so it is off by default.
 """
 
 import json
@@ -15,11 +19,22 @@ import logfire
 from app.config import settings
 
 _TOKEN = re.compile(r"[a-z0-9]+(?:[-–][a-z0-9]+)?")
-STOP = set("the a an and or of to in for on with by is are be as at from that this it its can we our you your".split())
+# Function words and enquiry filler ("we want to investigate…"): they only reward generic, wordy pages.
+STOP = set("""a about above after again all also am an and any are as at be because been before being between both but by can
+could did do does doing during each few for from further had has have having he her here how i if in into is it its itself just
+me more most my no nor not now of off on once only or other our ours out over own same she should so some such than that the
+their them then there these they this those through to too under until up very was we were what when where which while who whom
+why will with would you your want wants need needs like currently able know first make made use used using based handle send""".split())
 
 
 def _tokens(text: str) -> list[str]:
-    return [t for t in _TOKEN.findall(text.lower()) if t not in STOP]
+    """Lower-case terms without function words; simple plurals folded (fibers → fiber)."""
+    out = []
+    for w in _TOKEN.findall(text.lower()):
+        if w in STOP or len(w) < 2:
+            continue
+        out.append(w[:-1] if len(w) > 4 and w.endswith("s") and not w.endswith("ss") else w)
+    return out
 
 
 @lru_cache(maxsize=1)
@@ -88,12 +103,51 @@ def rerank(query: str, candidates: list[dict], top_n: int) -> tuple[list[dict], 
         return candidates[:top_n], "fused"
 
 
-def retrieve(queries: list[str], top_n: int = 8) -> tuple[list[dict], dict]:
-    """Reciprocal-rank fusion of BM25 and vector hits over several query phrasings, then rerank."""
+def routed_pages(text: str) -> list[tuple[str, int]]:
+    """Pages the source guide points to for this enquiry: core method pages, application pages for its domain, method
+    pages it names or its application pages discuss, and fibre pages when fibres or distance come up."""
+    from app.knowledge import source_map as M
+    from app.knowledge.applications import tag
+
+    want = list(M.CORE)
+    for domain in tag(text):
+        want += M.DOMAIN_PAGES.get(domain, [])
+    methods = {m for m, pat in M.METHOD_PATTERNS.items() if re.search(pat, text, re.I)}
+    for src, pg in [w for w in want if w not in M.CORE]:
+        page = " ".join(c["text"] for c in chunks() if c["source"] == src and int(c["page"]) == pg)
+        methods |= {m for m, pat in M.METHOD_PATTERNS.items() if len(re.findall(pat, page, re.I)) >= M.METHOD_MENTIONS}
+    want += [M.METHOD_PAGES[m] for m in sorted(methods)]
+    if M.FIBRE_TOPIC.search(text):
+        want += M.FIBRE_PAGES
+    return list(dict.fromkeys(want))
+
+
+def _best_chunk(src: str, pg: int, query: str) -> dict | None:
+    """The chunk of a page that best matches the query (the page's first chunk if none does)."""
+    page = [c for c in chunks() if c["source"] == src and int(c["page"]) == pg]
+    if not page:
+        return None
+    q = set(_tokens(query))
+    return max(page, key=lambda c: (len(q & set(_tokens(c["text"]))), c["kind"] == "table"))
+
+
+def retrieve(queries: list[str], top_n: int = 8, routing_text: str = "") -> tuple[list[dict], dict]:
+    """Routed pages first, then reciprocal-rank fusion of BM25 (and vector) hits over the query phrasings, one chunk
+    per page, up to top_n pages."""
+    query = " ".join([routing_text, *queries])
+    picked: list[dict] = []
+    seen: set[tuple[str, int]] = set()
+    routed = routed_pages(routing_text or query)
+    for src, pg in routed:
+        c = _best_chunk(src, pg, query)
+        if c and len(picked) < top_n:
+            picked.append({**c, "routed": True})
+            seen.add((src, pg))
+
     fused: dict[str, float] = {}
     by_id: dict[str, dict] = {}
     used_vector = False
-    for q in queries:
+    for q in [routing_text, *queries] if routing_text else queries:
         lists = [bm25(q)]
         v = vector(q)
         if v:
@@ -104,5 +158,12 @@ def retrieve(queries: list[str], top_n: int = 8) -> tuple[list[dict], dict]:
                 by_id[h["id"]] = h
                 fused[h["id"]] = fused.get(h["id"], 0.0) + 1.0 / (60 + rank)
     candidates = [by_id[i] for i, _ in sorted(fused.items(), key=lambda x: -x[1])[:30]]
-    top, how = rerank(" ".join(queries[:1]), candidates, top_n)
-    return top, {"candidates": len(candidates), "vector": used_vector, "rerank": how}
+    how = "off"
+    if settings.RERANK == "flashrank":
+        candidates, how = rerank(query, candidates, len(candidates))
+    for c in candidates:
+        key = (c["source"], int(c["page"]))
+        if key not in seen and len(picked) < top_n:
+            picked.append(c)
+            seen.add(key)
+    return picked, {"candidates": len(candidates), "vector": used_vector, "rerank": how, "routed": len([p for p in picked if p.get("routed")])}

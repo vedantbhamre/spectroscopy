@@ -16,6 +16,13 @@ Judge score estimate:  36.5 / 45  (docs/01-judge-matrix.md)
 Next highest-value task: commit and push now; after 10:00 add the second-org Groq key and run the full batch on the large model
 ```
 
+## Retrieval fix (measured, no LLM tokens)
+
+Recall of the organisers' "useful sources" (D01–D08) reaching the composer: **0.35 → 0.90**
+(keyword search + TinyBERT rerank → source-guide routing + stop-word BM25 + one chunk per page, 8 pages).
+Guarded by `backend/tests/test_retrieval.py`. FlashRank rerank is now opt-in (`RERANK=flashrank`): it measured no gain.
+Answers have not been re-run with the new retrieval yet (needs tokens): see docs/11-next-run-plan.md step 2.
+
 ## Demo path — verified now
 
 | Step | Evidence (this session) | Status |

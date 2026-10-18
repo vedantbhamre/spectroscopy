@@ -12,7 +12,7 @@ POST /assess ─► safety gate ─► planner ─┬─► analyst ─► retri
 | --- | --- | --- |
 | planner | assessment vs conversational turn, search queries | yes (small JSON) |
 | analyst | stated facts (kept only if quoted from the client) vs unknowns, flags for the checks | yes |
-| retriever | Qdrant vector search + BM25, fused, reranked with FlashRank | no |
+| retriever | pages routed by the organisers' source guide (domain, methods, fibre topic), then BM25 (+ Qdrant vectors when configured), one chunk per page, 8 pages; recall of the organisers' useful pages 0.90 vs 0.35 for keyword search alone (`tests/test_retrieval.py`) | no |
 | checker | deterministic premise checks: target named, fibre window vs method range, fluorescent target, source scope, calibration transfer, combination, certainty | no |
 | responder | composes the report; then deterministic post-processing: computed checks replace the model's, decision status floored by failed checks, every quote verified on its page, unknown methods dropped | yes |
 
@@ -81,7 +81,7 @@ PDF text comes from poppler's `pdftotext` when installed (better spacing for quo
 | `LLM_FALLBACK_PROVIDER` | the other provider is never called (no surprise spend); set it to `openai` or `groq` to try it after every attempt fails |
 | `GEMINI_API_KEY` | BM25 only (vector step skipped) |
 | `QDRANT_CLUSTER_ENDPOINT` | embedded Qdrant in `backend/.qdrant` |
-| FlashRank model download | fused BM25/vector order |
+| `RERANK=flashrank` unset (default) | no reranking: FlashRank measured no gain and dropped correct pages |
 | LLM for the gate | rule-based gate (`engine: rules` in the trace) |
 
 ## Safety gate (app/guardrails)
