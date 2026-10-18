@@ -49,7 +49,7 @@ const sample: { c: Citation; meaning: string }[] = [
 const statuses = [
   { label: "Provisional feasibility assessment", icon: CheckCircle2, cls: "border-accent text-accent", text: "The known facts support a method worth testing. The first experiment decides." },
   { label: "Insufficient information", icon: CircleHelp, cls: "border-warn text-warn", text: "A decisive fact is missing or a premise is contradicted. The questions say what is needed." },
-  { label: "Outside the supported scope", icon: Ban, cls: "border-bad text-bad", text: "The request goes beyond what the sources support, for example a lab study used as clinical proof." },
+  { label: "Beyond what the sources support", icon: Ban, cls: "border-bad text-bad", text: "The request asks for more than the sources show, for example a lab study quoted as clinical proof. The report says so and what to do instead." },
 ];
 
 const checks = [

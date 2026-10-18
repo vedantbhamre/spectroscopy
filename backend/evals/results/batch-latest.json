@@ -206,7 +206,21 @@
  },
  {
   "id": "H06",
-  "error": "All LLM targets failed: Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01jvw984shfvvrk7rcm2nj2e9f` service tier `on_demand` on tokens p",
-  "s": 0
+  "status": [
+   "out_of_scope"
+  ],
+  "citation_pass": "6/6 (100%)",
+  "number_hits": 1,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 2,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 8067,
+  "expectations": 1.0,
+  "expectation_failures": []
  }
 ]

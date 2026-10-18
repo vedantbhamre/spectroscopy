@@ -1,19 +1,45 @@
 {
- "reply": "The client has not yet specified which composition variable(s) they wish to monitor in‑line. We need that information before selecting a suitable spectroscopy method.",
+ "reply": "Based on the opaque, concentrated milk and the need for early inline data on fat and protein, NIR diffuse‑reflection spectroscopy is the simplest, cost‑effective primary option, with a parallel transmission test on a diluted sample for comparison.",
  "report": {
   "scenarioId": "D02",
-  "title": "Opaque Milk Product – Variable Identification Needed",
+  "title": "Inline spectroscopy concept for opaque milk",
   "origin": "live",
-  "generatedAt": "2026-10-17T23:14:23+00:00",
-  "decisionStatus": "insufficient",
+  "generatedAt": "2026-10-18T13:55:46+00:00",
+  "decisionStatus": "provisional",
+  "answer": {
+   "text": "It depends on the optical path; NIR diffuse‑reflection can monitor opaque milk, while a transmission test on a diluted stream can serve as a comparison.",
+   "sayInstead": "NIR diffuse‑reflection spectroscopy is suitable for inline monitoring of opaque, concentrated milk, and a transmission measurement on a diluted sample can be used for method comparison.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics, as well as standard lamps as light sources, making it ideal for online applications",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "Table 1 (p.6)",
+     "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
+     "check": "verified"
+    }
+   ]
+  },
   "requirements": {
    "stated": [
-    "opaque concentrated milk product flows through a processing line",
+    "product is opaque concentrated milk that flows through a processing line",
+    "they currently sample for fat and protein analysis",
+    "they want earlier information about composition changes",
     "product temperature and texture vary during production",
-    "currently sample for fat and protein analysis"
+    "they want an initial spectroscopy concept and a practical comparison experiment while retaining lab checks"
    ],
-   "unknowns": [],
+   "unknowns": [
+    "exact temperature range of the process line",
+    "available ports or space for a probe",
+    "acceptable response time for the control loop"
+   ],
    "factTurns": [
+    1,
+    1,
     1,
     1,
     1
@@ -21,121 +47,227 @@
   },
   "questions": [
    {
-    "text": "Which specific composition variable(s) (e.g., fat, protein, lactose, total solids) would you like to monitor in‑line?",
+    "text": "What is the temperature range of the milk stream where the probe will be installed?",
     "impact": "method",
     "id": "q1",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What are the typical temperature and flow‑rate ranges of the product during production?",
+    "text": "How many spare ports or flanges are available for installing an inline probe?",
     "impact": "setup",
     "id": "q2",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "How many free probe ports are available on your processing line for an inline sensor?",
-    "impact": "setup",
-    "id": "q3",
-    "status": "open",
-    "askedTurn": 1
-   },
-   {
-    "text": "Do you have any constraints on probe size or mounting geometry (e.g., flush‑mounted, external)?",
-    "impact": "setup",
-    "id": "q4",
-    "status": "open",
-    "askedTurn": 1
-   },
-   {
-    "text": "What level of measurement precision or accuracy is required for the chosen variable(s)?",
+    "text": "What is the required update frequency (e.g., seconds, minutes) for the composition data?",
     "impact": "acceptance",
-    "id": "q5",
+    "id": "q3",
     "status": "open",
     "askedTurn": 1
    }
   ],
-  "recommendations": [],
+  "recommendations": [
+   {
+    "method": "NIR diffuse reflection",
+    "methodIds": [
+     "NIR"
+    ],
+    "role": "primary",
+    "reason": "Opaque, scattering milk suits diffuse‑reflection; NIR probes are low‑cost and proven for dairy PAT, offering sufficient penetration for surface‑sensitive measurement of fat and protein.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "5",
+      "quote": "NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "Table 1 (p.6)",
+      "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
+      "check": "verified"
+     }
+    ]
+   }
+  ],
   "concept": {
-   "summary": "Not applicable until target variable(s) are defined.",
-   "citations": []
+   "summary": "Install a diffuse‑reflection NIR probe flush‑mounted in the main pipe to monitor the opaque milk; divert a small flow to a transmission probe for parallel reference measurements.",
+   "probe": "Diffuse‑reflection fiber‑optic probe (NIR, 780–2500 nm)",
+   "location": "Flush‑mounted in the main process line (high‑OD region)",
+   "fiberLink": "Standard silica fiber (low loss in NIR)",
+   "analyzer": "Fiber‑coupled NIR spectrometer (780–2500 nm)",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "it ideal for online applications, including remote measurements via fiber optic probes.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "Table 1 (p.6)",
+     "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
+     "check": "verified"
+    }
+   ]
   },
   "spectralRange": {
-   "summary": "Not applicable.",
-   "citations": []
+   "summary": "NIR excitation 780–2500 nm; diffuse‑reflection collection over the same range.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "Near-IR vibrational spectroscopy (NIR) ... spectra (780–2500 nm)",
+     "check": "failed"
+    },
+    {
+     "source": "S01",
+     "page": "10",
+     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+     "check": "verified"
+    }
+   ]
   },
   "risks": [
-   "Unable to select a method without knowing the target analyte(s)."
+   "Surface‑sensitivity of reflection may be affected by foam or bubbles.",
+   "Temperature drift could shift baseline; need temperature compensation.",
+   "Probe fouling from milk residues; requires cleaning protocol."
   ],
   "feasibility": {
    "steps": [
-    "Obtain target variable(s) and process parameters from the client.",
-    "Re‑evaluate method options based on the specified analyte(s) and process constraints.",
-    "Design a pilot‑scale inline experiment using the chosen method.",
-    "Validate against laboratory reference measurements."
+    "Collect representative milk samples covering the expected fat/protein range.",
+    "Measure each sample with the proposed NIR reflection probe and with a laboratory reference (e.g., standard gravimetric fat/protein assay).",
+    "Build a chemometric model (e.g., PLS) on a training set; validate on held‑out samples.",
+    "Install the probe inline, record spectra during normal operation, and compare to the side‑stream transmission data.",
+    "Assess model performance (RMSEP, bias) against the lab reference; iterate calibration if needed.",
+    "Validate the model on samples not used to build it (held-out samples, e.g. from other patients, batches or days) before drawing any conclusion; a model built on few samples can fit them without generalising."
    ],
-   "decisionBasis": "Awaiting client response."
+   "decisionBasis": "If the validation on held‑out samples meets the agreed‑upon accuracy for fat and protein, the method is deemed feasible for inline deployment."
   },
   "premiseChecks": [
    {
     "id": "target_defined",
     "label": "The variable to measure is named",
-    "status": "fail",
-    "detail": "The enquiry does not name the variable or substance to measure, so no method can be chosen yet. Ask for it first.",
+    "status": "pass",
+    "detail": "Target: fat, protein.",
     "citations": []
+   },
+   {
+    "id": "geometry_optics",
+    "label": "Probe geometry matches the optical density of the medium",
+    "status": "pass",
+    "detail": "Medium described as opaque; the proposed transmission geometry suits it.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "16",
+      "quote": "as the media becomes more opaque, turbid, or highly concentrated, the signal in a standard transmission setup becomes saturated because the light cannot penetrate the bulk of the sample",
+      "check": "verified"
+     }
+    ]
    }
   ],
-  "sources": [],
+  "sources": [
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics, as well as standard lamps as light sources, making it ideal for online applications",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "Table 1 (p.6)",
+    "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "it ideal for online applications, including remote measurements via fiber optic probes.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "Near-IR vibrational spectroscopy (NIR) ... spectra (780–2500 nm)",
+    "check": "failed"
+   },
+   {
+    "source": "S01",
+    "page": "10",
+    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "16",
+    "quote": "as the media becomes more opaque, turbid, or highly concentrated, the signal in a standard transmission setup becomes saturated because the light cannot penetrate the bulk of the sample",
+    "check": "verified"
+   }
+  ],
   "mode": "draft",
-  "assumptions": [],
+  "assumptions": [
+   "The milk remains sufficiently scattering for diffuse‑reflection to capture bulk composition.",
+   "The NIR spectrometer can be integrated with existing process control software.",
+   "Laboratory reference methods for fat and protein are available for model building.",
+   "NIR transmission (diluted stream): A transmission probe on a side‑stream of diluted milk provides a benchmark for bulk composition and helps assess calibration transfer to the reflection geometry. (not supported by the cited page)"
+  ],
   "pointsToConfirm": [
-   "Target analyte(s) to be monitored in‑line.",
-   "Process temperature, flow, and available probe ports."
+   "Exact temperature and pressure conditions at the probe location.",
+   "Availability and size of an installation port for the probe.",
+   "Required data update rate for process control."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 3404.0,
+   "ms": 488.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 9662.0,
-   "detail": "3 stated (0 from answers) · 0 unknown"
+   "ms": 15263.0,
+   "detail": "5 stated (0 from answers) · 3 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 109.0,
-   "detail": "S01 p.17, S01 p.5, S01 p.6, S02 p.14 · BM25 · flashrank"
+   "ms": 81.0,
+   "detail": "S01 p.10, S01 p.17, S01 p.18, S01 p.5, S01 p.6, S01 p.9, S03 p.16, S04 p.3 · 6 routed by the source guide · vector+BM25"
   },
   {
    "step": "Premise checks",
-   "status": "fail",
+   "status": "ok",
    "ms": 0.0,
-   "detail": "The variable to measure is named"
+   "detail": "nothing contradicted"
   },
   {
    "step": "Compose the assessment",
-   "status": "warn",
-   "ms": 61963.0,
-   "detail": "openai/gpt-oss-20b via groq · repaired once"
+   "status": "ok",
+   "ms": 43748.0,
+   "detail": "openai/gpt-oss-120b via groq"
   },
   {
    "step": "Verify citations",
-   "status": "ok",
+   "status": "warn",
    "ms": 0.0,
-   "detail": "0 of 0 quotes found on the cited page"
+   "detail": "8 of 9 quotes found on the cited page · 1 not found"
   },
   {
    "step": "Validate numbers, claims and questions",
    "status": "warn",
    "ms": 0.0,
-   "detail": "all numbers traced to the customer or a cited page · every recommendation sentence cited · 5 open questions · missing sections: assumptions"
+   "detail": "all numbers traced to the customer or a cited page · 1 unsupported sentences and 1 uncited recommendations moved to assumptions · 3 open questions · all required sections present"
   }
  ]
 }

@@ -9,7 +9,7 @@ from app.agents.nodes.common import client_text, client_turns, step, transcript
 from app.agents.state import AgentState
 from app.gateway import chat, parse_json
 from app.knowledge import table1 as T1
-from app.schemas import Citation, PremiseCheck, Question, Report
+from app.schemas import Citation, DirectAnswer, PremiseCheck, Question, Report
 from app.services import ledger as L
 from app.services import validators as V
 from app.services.citations import page_text, verify
@@ -39,7 +39,8 @@ def _page_for(c: dict) -> str:
 def assistant_texts(report: Report, reply: str = "") -> list[str]:
     """Everything the model wrote (premise checks and verified quotes are computed, not written)."""
     c = report.concept
-    out = [reply, *(x for r in report.recommendations for x in (r.method, r.reason)), c.summary, c.probe or "", c.location or "",
+    a = report.answer
+    out = [reply, a.text if a else "", (a.sayInstead or "") if a else "", *(x for r in report.recommendations for x in (r.method, r.reason)), c.summary, c.probe or "", c.location or "",
            c.fiberLink or "", c.analyzer or "", report.spectralRange.summary, *report.risks, *report.feasibility.steps,
            report.feasibility.decisionBasis, *report.assumptions, *report.pointsToConfirm, *report.requirements.unknowns,
            *(q.text for q in report.questions if q.status == "open")]
@@ -73,7 +74,36 @@ def _validate_numbers(report: Report, reply: str, *, customer: str, cited_pages:
     for q in report.questions:
         if q.status == "open":
             q.text = fix(q.text)
+    if report.answer:
+        report.answer.text = fix(report.answer.text) or ""
+        report.answer.sayInstead = fix(report.answer.sayInstead)
     return fix(reply) or "", total
+
+
+_CLAIM = re.compile(r"\b(quote|cite|claim|proof|prove|promise|guarantee|advertis\w*|marketing|tell (our|the|their) (customers?|clients?))\b", re.I)
+_NEGATIVE = re.compile(r"\b(no|not|cannot|can't|isn't|aren't|unlikely|insufficient|only after|not yet)\b", re.I)
+
+
+def ensure_answer(report: Report) -> bool:
+    """The report opens with an answer to the customer's question. When a premise check fails, the answer must say
+    what it rules out; a missing or contradicting answer is replaced by one built from the failed checks.
+    Returns True when the answer was written here."""
+    failed = [c for c in report.premiseChecks if c.status == "fail"]
+    a = report.answer
+    if a and a.text.strip() and (not failed or _NEGATIVE.search(a.text)):
+        if failed and not a.citations:
+            a.citations = [c for chk in failed for c in chk.citations][:3]
+        return False
+    if failed:
+        text = "Not as asked. " + " ".join(f"{c.label}: no. {c.detail.split('. ')[0].rstrip('.')}." for c in failed)
+        cites = [c for chk in failed for c in chk.citations][:3]
+    else:
+        text = {"insufficient": "Not decidable yet: the open questions below decide it.",
+                "out_of_scope": "Not from the supplied sources."}.get(report.decisionStatus,
+                "Provisionally yes, as a feasibility candidate; the first experiment below decides it.")
+        cites = []
+    report.answer = DirectAnswer(text=text, sayInstead=a.sayInstead if a else None, citations=cites)
+    return True
 
 
 def cited_page_texts(report: Report) -> list[str]:
@@ -97,7 +127,11 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
     data["questions"] = []
     for section in (data.get("recommendations") or []):
         section["methodIds"] = [m for m in section.get("methodIds", []) if m in KNOWN_METHODS]
-    for holder in [*(data.get("recommendations") or []), data.get("concept") or {}, data.get("spectralRange") or {}]:
+    if isinstance(data.get("answer"), str):
+        data["answer"] = {"text": data["answer"]}
+    if not isinstance(data.get("answer"), dict) or not str(data["answer"].get("text") or "").strip():
+        data.pop("answer", None)
+    for holder in [*(data.get("recommendations") or []), data.get("concept") or {}, data.get("spectralRange") or {}, data.get("answer") or {}]:
         holder["citations"] = [{**c, "page": _page_for(c)} for c in holder.get("citations", []) if isinstance(c, dict) and c.get("source")]
     for key in ("assumptions", "pointsToConfirm", "risks"):
         data[key] = [str(x) for x in (data.get(key) or []) if str(x).strip()]
@@ -140,6 +174,8 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
         rec.citations = check_all(rec.citations)
     report.concept.citations = check_all(report.concept.citations)
     report.spectralRange.citations = check_all(report.spectralRange.citations)
+    if report.answer:
+        report.answer.citations = check_all(report.answer.citations)
 
     stats["transfers"] = V.label_transfers(report, facts.application_domain)
     stats.update(V.validate_claims(report))
@@ -164,8 +200,10 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
             report.feasibility.steps.insert(0, "Measure the transmission of the chosen mid-IR fibre over the planned link length, or plan the analyzer close to the measurement point.")
         report.risks.append("The mid-IR fibre link over the required distance is not shown to be feasible in the supplied material.")
 
+    stats["later_stage_moved"] = V.validate_feasibility(report)
+
     seen: dict[tuple, Citation] = {}
-    for c in [*(c for r in report.recommendations for c in r.citations), *report.concept.citations, *report.spectralRange.citations]:
+    for c in [*(report.answer.citations if report.answer else []), *(c for r in report.recommendations for c in r.citations), *report.concept.citations, *report.spectralRange.citations]:
         seen.setdefault((c.source, c.page, c.quote), c)
     for chk in report.premiseChecks:
         for c in chk.citations:
@@ -177,6 +215,9 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
 
     # Final mode: provisional unless the checks justify otherwise. Otherwise the checks set the floor.
     report.decisionStatus = apply_floor("provisional" if final else report.decisionStatus, report.premiseChecks)
+    stats["answer_written"] = ensure_answer(report)
+    if report.answer and not (facts.cites_study_as_proof or _CLAIM.search(client_text(messages))):
+        report.answer.sayInstead = None  # only when the customer wants to quote, claim or promise something
     stats["missing"] = V.missing_sections(report)
     return report, stats, reply
 

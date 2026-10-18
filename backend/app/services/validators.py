@@ -76,6 +76,34 @@ def validate_claims(report: Report) -> dict:
     return {"sentences_moved": moved, "recommendations_moved": removed}
 
 
+_LATER_STAGE = re.compile(r"\b(animal|human|clinical|patient|in-vivo|in vivo|first-in-human)\s+(pilot\s+)?(stud(y|ies)|trials?|tests?|testing|evaluation)\b"
+                          r"|\bclinical trial|\bpilot (in-vivo |in vivo )?(human|clinical|patient|in-vivo|in vivo)|\bregulatory (submission|approval)"
+                          r"|\b(during|in) (live |real )?(surgery|surgeries|operations)\b", re.I)
+_DASHES = str.maketrans({c: "-" for c in "\u2010\u2011\u2012\u2013\u2014"})
+_NUMBERED = re.compile(r"^\s*(?:step\s*)?\d+[.):]\s*", re.I)
+_HELD_OUT = re.compile(r"held[- ]out|unseen|not used (to build|for (building|training|calibration))|independent (test|validation) set"
+                       r"|external validation|(new|other|different) (patients|batches|lots|samples) (that|not)|not part of the (model|calibration)", re.I)
+HELD_OUT_STEP = ("Validate the model on samples not used to build it (held-out samples, e.g. from other patients, batches or "
+                 "days) before drawing any conclusion; a model built on few samples can fit them without generalising.")
+
+
+def validate_feasibility(report: Report) -> int:
+    """A feasibility study ends at a validated feasibility result: later-stage studies (animal, human, clinical trials,
+    regulatory) move to the points to confirm, and validation on held-out samples is always part of the plan."""
+    keep, moved = [], 0
+    for s in report.feasibility.steps:
+        s = _NUMBERED.sub("", s)  # the UI numbers the steps
+        if _LATER_STAGE.search(s.translate(_DASHES)):
+            report.pointsToConfirm.append(f"After a successful feasibility study, not part of it: {s}")
+            moved += 1
+        else:
+            keep.append(s)
+    if not any(_HELD_OUT.search(s.translate(_DASHES)) for s in keep):
+        keep.append(HELD_OUT_STEP)
+    report.feasibility.steps = keep
+    return moved
+
+
 def label_transfers(report: Report, domain: str | None) -> int:
     """Cited examples from another application are transfer assumptions, labelled on the citation and listed."""
     if not domain:

@@ -34,3 +34,19 @@ feasibility, uncertainty, explainability, prototype"), weights unknown → equal
    setup details later. Drop assumption lines the claim validator marked "not supported by the cited page".
 
 Needs LLM tokens to verify (one H06 run, ~10K). Re-check against the expected answer above.
+
+## After the fixes (live H06 re-run, 18 Oct ~15:50, gpt-oss-120b, 8K tokens)
+
+Implemented 1–4 and the question-order rule of 5 (unsupported sentences still move to the assumptions: that is an earlier
+acceptance property, kept). Tests: `backend/tests/test_answer.py` (7 offline tests); suite 122 passed.
+
+| Expected point | Now |
+|---|---|
+| Plain "No" | ✅ "No, the supplied LED NIR kidney study cannot be used as proof of clinical readiness because it was performed on resected tissue in vitro, not on living tissue in vivo." (Kidney study p.1, verified) |
+| Seven in vitro pairs; whole samples vs boundary; not their sensor; "aimed at in vivo" = goal | ✅ all five dimensions in the source-scope check, each with its page quote (p.1, p.2, p.3, p.14) |
+| What they can honestly say | ✅ "What you can say instead" (shown only when the customer wants to quote or claim something) |
+| Own sensor ex vivo → histology → held-out patients | ✅ steps 1–5 incl. "Validate the model on held-out samples (different patients)"; over-fitting (14 samples) named as a risk |
+| No jump to human studies | ✅ in the second run; later-stage steps are moved to points to confirm by `validate_feasibility` |
+| Decisive questions first | ⚠ model-dependent: run 1 asked the reference method (5th of 5), run 2 asked a single scattering question |
+
+Estimated after: technical quality 4, AFS knowledge 4.5, feasibility 4, uncertainty 4.5, explainability 4, prototype 4 → **25 / 30** (was 19.5).

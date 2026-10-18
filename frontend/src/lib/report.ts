@@ -61,6 +61,10 @@ export const Report = z.object({
   originNote: z.string().optional(),
   generatedAt: z.string().optional(),
   decisionStatus: DecisionStatus,
+  /** The customer's literal question answered first (yes / no / not yet / it depends). Missing in reports from before it existed. */
+  answer: z
+    .object({ text: z.string(), sayInstead: z.string().nullish(), citations: z.array(Citation).default([]) })
+    .nullish(),
   requirements: z.object({
     stated: z.array(z.string()),
     unknowns: z.array(z.string()),
@@ -134,7 +138,7 @@ export type AssessResponse = z.infer<typeof AssessResponse>;
 export const statusLabel: Record<DecisionStatus, string> = {
   provisional: "Provisional feasibility assessment",
   insufficient: "Insufficient information",
-  out_of_scope: "Outside the supported scope",
+  out_of_scope: "Beyond what the sources support",
 };
 
 // Readable citation: "Process Control slides p.13"; the full form names the document and its ID for cross-checking.

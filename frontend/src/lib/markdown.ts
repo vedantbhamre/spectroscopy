@@ -7,6 +7,10 @@ export function toMarkdown(r: Report, enquiry: string): string {
   L.push(`# ${r.title}`, "");
   if (r.originNote) L.push(`> ${r.originNote}`, "");
   L.push(`**Decision status:** ${statusLabel[r.decisionStatus]}`, "");
+  if (r.answer) {
+    L.push("## Answer", "", r.answer.text + cites(r.answer.citations), "");
+    if (r.answer.sayInstead) L.push(`**What you can say instead:** ${r.answer.sayInstead}`, "");
+  }
   L.push("## Enquiry", "", enquiry, "");
   L.push("## Requirements", "", "**Stated by the client**", ...r.requirements.stated.map((s) => `- ${s}`), "");
   L.push("**Key unknowns**", ...r.requirements.unknowns.map((s) => `- ${s}`), "");
@@ -45,6 +49,11 @@ export function toPlainText(r: Report, transcript: string): string {
   L.push(heading, "═".repeat(Math.min(heading.length, 72)), "");
   L.push(`Decision status: ${statusLabel[r.decisionStatus]}`);
   if (r.originNote) L.push(`Note: ${r.originNote}`);
+  if (r.answer) {
+    section("Answer");
+    L.push(r.answer.text + cites(r.answer.citations));
+    if (r.answer.sayInstead) L.push("", `What you can say instead: ${r.answer.sayInstead}`);
+  }
 
   if (transcript.trim()) {
     section("Customer conversation");

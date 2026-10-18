@@ -3,7 +3,7 @@
 Official AFS criteria `[BRIEF]` (judging slide, received 18 Oct): **technical quality, use of AFS knowledge, feasibility, uncertainty,
 explainability, prototype**. Weights not published → equal. Mapping of the rows below: technical quality #5 #6; AFS knowledge #3;
 feasibility #6; uncertainty #1 #4; explainability #2 #3 #10; prototype #7 #8 #9. Scores are 1–5 team estimates.
-Latest per-case check: docs/08-stress-test.md (H06: 19.5/30, gap = no direct answer).
+Latest per-case check: docs/08-stress-test.md (H06: 19.5 → 25 / 30 after the direct-answer fixes).
 
 | # | Criterion (evidence) | Measurable requirement | Evidence in product | Demo moment | Target | Current |
 |---|---|---|---|---|---|---|
@@ -16,7 +16,7 @@ Latest per-case check: docs/08-stress-test.md (H06: 19.5/30, gap = no direct ans
 | 7 | Live runs on evaluation cases and the jury's own enquiry `[BRIEF]` Q&A "The jury may ask you to run a shot on your own inquiry." | Any enquiry → report in < 60 s, reliably | Live D01 5.5 s (this session); cached outputs as fallback | Jury types its own enquiry | 5 | 3 (one provider org, daily token cap, no hosted URL) |
 | 8 | Usability for an expert `[INFERENCE]` the user is an AFS expert reviewing a draft | First-time user understands without help | Carbon design, readable sources, first-time guide, How it works with a report legend, WCAG AA contrast | Open Assess, follow the checklist | 5 | 4.5 |
 | 9 | Evidence that it works `[INFERENCE]` judges reward measured quality | Repeatable evaluation with honest numbers | Evals page (RAGAS-style + deterministic), 106 tests, acceptance properties, batch report | Evals page: scores with icons | 5 | 4 (results stale/mixed until the 10:00 re-run) |
-| 10 | Direct answer `[INFERENCE]` from "explainability" + H06 review | The customer's literal question answered in the first lines (yes / no / not yet), cited | none yet | Report opens with the answer | 5 | 2 |
-| | **Total** | | | | **50** | **38.5** |
+| 10 | Direct answer `[INFERENCE]` from "explainability" + H06 review | The customer's literal question answered in the first lines (yes / no / not yet), cited | `answer` field + `ensure_answer` (agrees with failed checks), "What you can say instead" | Report opens with the answer | 5 | 4 |
+| | **Total** | | | | **50** | **40.5** |
 
 Biggest gains still available: #7 (second key + hosting decision + rehearsal), #9 (fresh full batch on the large model), #2–#3 (large model gives 90–100 % citation pass vs 40–60 % on the small fallback).

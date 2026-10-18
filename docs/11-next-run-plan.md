@@ -8,7 +8,7 @@ Groq's free tier allows **200K tokens per day per model per account (organisatio
 
 ```bash
 cd spectroscopy && git pull                      # fast-forward, clean tree expected
-cd backend && .venv/bin/python -m pytest -q      # expect 114 passed
+cd backend && .venv/bin/python -m pytest -q      # expect 122 passed
 cd ../frontend && npx tsc --noEmit && npx next lint
 ```
 

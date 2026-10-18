@@ -78,6 +78,14 @@ class Feasibility(BaseModel):
     decisionBasis: str
 
 
+class DirectAnswer(BaseModel):
+    """The customer's literal question answered first: yes / no / not yet / it depends on X."""
+    text: str
+    # Only when the customer wants to quote, claim or promise something: wording the sources do support.
+    sayInstead: Optional[str] = None
+    citations: list[Citation] = Field(default_factory=list)
+
+
 class Report(BaseModel):
     scenarioId: Optional[str] = None
     title: str
@@ -85,6 +93,7 @@ class Report(BaseModel):
     originNote: Optional[str] = None
     generatedAt: Optional[str] = None
     decisionStatus: DecisionStatus
+    answer: Optional[DirectAnswer] = None
     requirements: Requirements
     questions: list[Question]
     recommendations: list[Recommendation]

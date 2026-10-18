@@ -13,6 +13,7 @@ from app.knowledge import table1 as T1
 from app.knowledge.applications import of_citation
 from app.knowledge.applications import tag as app_tags
 from app.knowledge.optics import FIBERS, METHODS, coverage
+from app.knowledge.source_scope import clinical_scope
 from app.schemas import Citation, DecisionStatus, PremiseCheck
 
 
@@ -204,11 +205,13 @@ def run_checks(facts: Facts, open_points: int = 0) -> list[PremiseCheck]:
     # 4. A source is used within its scope.
     if facts.use_context == "clinical" or facts.cites_study_as_proof:
         clinical = facts.use_context == "clinical"
+        dims = clinical_scope() if clinical else []
         checks.append(PremiseCheck(
             id="source_scope", label="Sources are used within their demonstrated scope", status="fail" if clinical else "flag",
-            detail=("The supplied tumour study is an in vitro laboratory study; it cannot support clinical or surgical readiness."
+            detail=("The supplied clinical study is a laboratory feasibility study; it cannot be quoted as proof of clinical or "
+                    "surgical readiness. It differs from that use in: " + "; ".join(d for d, _ in dims) + "."
                     if clinical else "A published application is a reason to test a method, not proof that it will work for this customer."),
-            citations=[Citation(source="S03", page="2", quote="seven pairs each of tumor and normal in vitro clinical samples from different patients", check="verified")] if clinical else [],
+            citations=[c.model_copy(update={"check": "verified"}) for _, c in dims],
         ))
 
     # 5. Calibration transfer to a new formulation.

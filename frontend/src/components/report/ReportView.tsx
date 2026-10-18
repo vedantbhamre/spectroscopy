@@ -90,6 +90,21 @@ export function ReportView({ report, transcript, toolbar }: { report: Report; tr
         </div>
       </header>
 
+      {report.answer && (
+        <section className="print-section border-t border-line py-7" aria-labelledby="answer-heading">
+          <h2 id="answer-heading" className="text-lg font-semibold tracking-tight">Answer</h2>
+          <p className="mt-3 border-l-4 border-l-accent pl-4 font-serif text-[18px] leading-relaxed text-ink">
+            {report.answer.text} <Citations items={report.answer.citations} />
+          </p>
+          {report.answer.sayInstead && (
+            <div className="mt-4 bg-panel-2 px-4 py-3">
+              <p className="font-sans text-xs font-semibold uppercase tracking-wide text-ink-3">What you can say instead</p>
+              <p className="mt-1 font-serif text-[15.5px] leading-relaxed text-ink">“{report.answer.sayInstead}”</p>
+            </div>
+          )}
+        </section>
+      )}
+
       {report.premiseChecks.length > 0 && (
         <Section title="Premise checks" hint="Checks on what the enquiry assumes, run before the answer is composed.">
           {flagged.length > 0 && (
