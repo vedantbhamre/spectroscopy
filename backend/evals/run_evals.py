@@ -135,26 +135,26 @@ def to_markdown(result: dict, names: list[str]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def main() -> None:
-    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    p.add_argument("ids", nargs="*", help="scenario IDs (default: all)")
-    p.add_argument("--no-judge", action="store_true", help="deterministic metrics only")
-    p.add_argument("--from-cache", action="store_true", help="score frontend/outputs/<ID>.json instead of running the graph")
-    args = p.parse_args()
+def run(ids: list[str] | None = None, *, judge_on: bool = True, from_cache: bool = False, progress=None) -> dict:
+    """One eval run; writes the result files and returns the result.
 
+    progress(done, total, scenario_id) is called before each scenario (the API's status endpoint uses it).
+    """
     judge = None
-    if not args.no_judge:
+    if judge_on:
         try:
             judge = Judge()
         except JudgeUnavailable as e:
             print(f"Judge off: {e}. Running deterministic metrics only.")
     names = DETERMINISTIC + (JUDGED if judge else [])
 
-    chosen = [s for s in SCENARIOS if not args.ids or s["id"] in args.ids]
+    chosen = [s for s in SCENARIOS if not ids or s["id"] in ids]
     rows = []
-    for s in chosen:
+    for i, s in enumerate(chosen):
+        if progress:
+            progress(i, len(chosen), s["id"])
         try:
-            report, docs, ms = load_cached(s) if args.from_cache else run_live(s)
+            report, docs, ms = load_cached(s) if from_cache else run_live(s)
             m = score(s, report, docs, judge)
             rows.append({"id": s["id"], "set": s["set"], "title": s["title"], "status": report.get("decisionStatus"),
                          "ms": ms, "pages_retrieved": len(docs), "metrics": m})
@@ -162,10 +162,12 @@ def main() -> None:
         except Exception as e:  # noqa: BLE001 - keep going, report at the end
             rows.append({"id": s["id"], "set": s["set"], "title": s["title"], "error": str(e)[:300]})
             print(f"{s['id']}  FAILED  {e}")
+    if progress:
+        progress(len(chosen), len(chosen), None)
 
     result = {
         "run_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "mode": "cached outputs" if args.from_cache else "live pipeline",
+        "mode": "cached outputs" if from_cache else "live pipeline",
         "judge": judge.route if judge else None,
         "judge_calls": judge.calls if judge else 0,
         "metrics": names,
@@ -181,6 +183,16 @@ def main() -> None:
     FRONTEND_OUT.mkdir(parents=True, exist_ok=True)
     (FRONTEND_OUT / "evals-latest.json").write_text(payload)
     print(f"\nWrote {RESULTS_DIR.relative_to(BACKEND_DIR)}/latest.md and frontend/outputs/evals-latest.json")
+    return result
+
+
+def main() -> None:
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("ids", nargs="*", help="scenario IDs (default: all)")
+    p.add_argument("--no-judge", action="store_true", help="deterministic metrics only")
+    p.add_argument("--from-cache", action="store_true", help="score frontend/outputs/<ID>.json instead of running the graph")
+    args = p.parse_args()
+    run(args.ids, judge_on=not args.no_judge, from_cache=args.from_cache)
 
 
 if __name__ == "__main__":

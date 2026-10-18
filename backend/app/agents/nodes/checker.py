@@ -7,7 +7,8 @@ def checker_node(state: AgentState) -> dict:
     """Deterministic premise checks (fibre windows, target defined, source scope, …)."""
     trace = list(state.get("trace", []))
     with step({"trace": trace}, "Premise checks") as rec:
-        checks = run_checks(Facts(**state.get("facts", {})))
+        open_points = sum(q.get("status") == "open" for q in state.get("ledger") or [])
+        checks = run_checks(Facts(**state.get("facts", {})), open_points=open_points)
         fails = [c for c in checks if c.status == "fail"]
         flags = [c for c in checks if c.status == "flag"]
         rec["status"] = "fail" if fails else "warn" if flags else "ok"

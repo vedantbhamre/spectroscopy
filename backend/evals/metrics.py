@@ -42,10 +42,15 @@ def report_text(report: dict) -> str:
     """Everything a reader sees, lower-cased, for term checks."""
     parts = [report.get("title", ""), report_claim_text(report)]
     parts += report.get("requirements", {}).get("stated", []) + report.get("requirements", {}).get("unknowns", [])
-    parts += [q.get("text", "") for q in report.get("questions", [])]
+    parts += [q.get("text", "") for q in report.get("questions", [])] + report.get("assumptions", []) + report.get("pointsToConfirm", [])
     parts += report.get("feasibility", {}).get("steps", []) + [report.get("feasibility", {}).get("decisionBasis", "")]
     parts += [f"{c.get('label', '')} {c.get('detail', '')}" for c in report.get("premiseChecks", [])]
     return "\n".join(parts).lower()
+
+
+def open_questions(report: dict) -> list[dict]:
+    """Questions still asked: the ledger's open ones (reports from before the ledger have no status)."""
+    return [q for q in report.get("questions", []) if q.get("status", "open") == "open"]
 
 
 def _citations(report: dict) -> list[dict]:
@@ -80,7 +85,7 @@ def grounding(report: dict) -> float | None:
 
 def clarification(report: dict) -> float:
     has_unknowns = bool(report.get("requirements", {}).get("unknowns"))
-    has_questions = bool(report.get("questions"))
+    has_questions = bool(open_questions(report) or report.get("pointsToConfirm"))  # final mode: points to confirm
     return (has_unknowns + has_questions) / 2
 
 
@@ -101,7 +106,7 @@ def expectations(report: dict, golden: dict) -> tuple[float | None, list[str]]:
     for group in golden.get("must_mention_any", []):
         checks.append((f"mentions one of {group}", any(term.lower() in text for term in group)))
     if golden.get("min_questions"):
-        checks.append((f"at least {golden['min_questions']} clarification questions", len(report.get("questions", [])) >= golden["min_questions"]))
+        checks.append((f"at least {golden['min_questions']} clarification questions", len(open_questions(report) if report.get("mode") != "final" else report.get("pointsToConfirm", [])) >= golden["min_questions"]))
     if not checks:
         return None, []
     return sum(ok for _, ok in checks) / len(checks), [name for name, ok in checks if not ok]
@@ -132,7 +137,7 @@ def answer_relevancy(judge: Judge, enquiry: str, report: dict) -> float | None:
         "it. Then rate, for each, how closely it matches the ORIGINAL enquiry's intent from 0 (unrelated) to 1 "
         '(same request). Return JSON: {"questions": [str, str, str], "similarity": [float, float, float]}.',
         f"ORIGINAL ENQUIRY:\n{enquiry}\n\nANSWER:\n{report.get('title', '')}\n{report_claim_text(report)}\n"
-        + "\n".join(f"Question asked: {q.get('text', '')}" for q in report.get("questions", [])),
+        + "\n".join(f"Question asked: {q.get('text', '')}" for q in open_questions(report)),
     )
     sims = [float(s) for s in out.get("similarity", []) if isinstance(s, (int, float))]
     return round(sum(sims) / len(sims), 4) if sims else None
@@ -183,7 +188,7 @@ def answer_correctness(judge: Judge, reference: list[str], report: dict) -> floa
         "also makes (same meaning, any wording); fn = reference statements the answer misses; fp = statements in the "
         'answer that contradict the reference. Return JSON: {"tp": int, "fp": int, "fn": int}.',
         f"REFERENCE:\n" + "\n".join(f"- {s}" for s in reference) + f"\n\nANSWER:\n{report_claim_text(report)}\n"
-        + "\n".join(f"- Question: {q.get('text', '')}" for q in report.get("questions", []))
+        + "\n".join(f"- Question: {q.get('text', '')}" for q in open_questions(report))
         + "\n" + "\n".join(f"- Step: {s}" for s in report.get("feasibility", {}).get("steps", [])),
     )
     tp, fp, fn = (int(out.get(k, 0) or 0) for k in ("tp", "fp", "fn"))

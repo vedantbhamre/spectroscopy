@@ -1,0 +1,212 @@
+[
+ {
+  "id": "D01",
+  "status": [
+   "provisional",
+   "provisional"
+  ],
+  "citation_pass": "9/10 (90%)",
+  "number_hits": 2,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 1,
+  "violations": {},
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "s": 34
+ },
+ {
+  "id": "D02",
+  "status": [
+   "insufficient",
+   "insufficient"
+  ],
+  "citation_pass": "0/0",
+  "number_hits": 1,
+  "repeated_questions": 0,
+  "missing_sections": 1,
+  "repaired": 1,
+  "moved_sentences": 0,
+  "violations": {
+   "required sections present": [
+    "turn 1: missing assumptions"
+   ]
+  },
+  "expectations": 0.25,
+  "expectation_failures": [
+   "decision status in ['provisional'] (got insufficient)",
+   "mentions one of ['nir']",
+   "mentions one of ['reflection']"
+  ],
+  "s": 124
+ },
+ {
+  "id": "D03",
+  "status": [
+   "insufficient",
+   "insufficient"
+  ],
+  "citation_pass": "8/8 (100%)",
+  "number_hits": 2,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 2,
+  "moved_sentences": 4,
+  "violations": {},
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "s": 87
+ },
+ {
+  "id": "D04",
+  "status": [
+   "provisional",
+   "provisional"
+  ],
+  "citation_pass": "4/9 (44%)",
+  "number_hits": 2,
+  "repeated_questions": 0,
+  "missing_sections": 1,
+  "repaired": 1,
+  "moved_sentences": 3,
+  "violations": {
+   "required sections present": [
+    "turn 2: missing recommendation"
+   ]
+  },
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "s": 131
+ },
+ {
+  "id": "D05",
+  "status": [
+   "insufficient",
+   "insufficient"
+  ],
+  "citation_pass": "3/7 (43%)",
+  "number_hits": 5,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 4,
+  "violations": {},
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "s": 93
+ },
+ {
+  "id": "D06",
+  "status": [
+   "insufficient",
+   "provisional"
+  ],
+  "citation_pass": "5/8 (62%)",
+  "number_hits": 3,
+  "repeated_questions": 0,
+  "missing_sections": 1,
+  "repaired": 1,
+  "moved_sentences": 5,
+  "violations": {
+   "required sections present": [
+    "turn 2: missing recommendation"
+   ]
+  },
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "s": 105
+ },
+ {
+  "id": "D07",
+  "status": [
+   "insufficient",
+   "insufficient"
+  ],
+  "citation_pass": "3/3 (100%)",
+  "number_hits": 2,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 0,
+  "violations": {},
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "s": 104
+ },
+ {
+  "id": "D08",
+  "status": [
+   "insufficient",
+   "insufficient"
+  ],
+  "citation_pass": "14/14 (100%)",
+  "number_hits": 12,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 8,
+  "violations": {},
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "s": 45
+ },
+ {
+  "id": "H01",
+  "status": [
+   "provisional",
+   "provisional"
+  ],
+  "citation_pass": "5/7 (71%)",
+  "number_hits": 3,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 1,
+  "moved_sentences": 3,
+  "violations": {},
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "s": 125
+ },
+ {
+  "id": "H02",
+  "status": [
+   "provisional",
+   "provisional"
+  ],
+  "citation_pass": "4/10 (40%)",
+  "number_hits": 2,
+  "repeated_questions": 0,
+  "missing_sections": 1,
+  "repaired": 1,
+  "moved_sentences": 2,
+  "violations": {
+   "required sections present": [
+    "turn 1: missing recommendation"
+   ]
+  },
+  "expectations": 1.0,
+  "expectation_failures": [],
+  "s": 117
+ },
+ {
+  "id": "H03",
+  "error": "All LLM targets failed: Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01jvw984shfvvrk7rcm2nj2e9f` service tier `on_demand` on tokens p",
+  "s": 15
+ },
+ {
+  "id": "H04",
+  "error": "All LLM targets failed: Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01jvw984shfvvrk7rcm2nj2e9f` service tier `on_demand` on tokens p",
+  "s": 12
+ },
+ {
+  "id": "H05",
+  "error": "All LLM targets failed: Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01jvw984shfvvrk7rcm2nj2e9f` service tier `on_demand` on tokens p",
+  "s": 7
+ },
+ {
+  "id": "H06",
+  "error": "All LLM targets failed: Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01jvw984shfvvrk7rcm2nj2e9f` service tier `on_demand` on tokens p",
+  "s": 0
+ }
+]

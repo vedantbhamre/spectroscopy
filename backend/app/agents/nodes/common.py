@@ -7,6 +7,11 @@ def client_text(messages: list[dict]) -> str:
     return "\n\n".join(m["content"] for m in messages if m["role"] == "user")
 
 
+def client_turns(messages: list[dict]) -> list[str]:
+    """The client's messages in order; turn 1 is the enquiry."""
+    return [m["content"] for m in messages if m["role"] == "user"]
+
+
 def transcript(messages: list[dict], limit: int = 12) -> str:
     rows = messages[-limit:]
     return "\n\n".join(f"{'Client' if m['role'] == 'user' else 'Assistant'}: {m['content']}" for m in rows)

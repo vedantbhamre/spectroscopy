@@ -16,12 +16,38 @@ POST /assess ─► safety gate ─► planner ─┬─► analyst ─► retri
 | checker | deterministic premise checks: target named, fibre window vs method range, fluorescent target, source scope, calibration transfer, combination, certainty | no |
 | responder | composes the report; then deterministic post-processing: computed checks replace the model's, decision status floored by failed checks, every quote verified on its page, unknown methods dropped | yes |
 
+## Conversation handling and validators
+
+Generic rules (no scenario IDs, no case wording): they use only extracted facts and the AFS sources. The LLM proposes; these decide.
+
+| # | Rule | Where |
+| --- | --- | --- |
+| 1 | **Question ledger**: statuses `open`, `answered`, `answered_unknown`, `declined`, `moved_to_experiment`; one UI input per question; a closed question is never asked again (reworded counts); an unknown answer becomes a feasibility step and stays a key unknown | `services/ledger.py`, `Workbench.tsx` |
+| 2 | **Facts from the whole transcript**, quote-checked against every customer turn and tagged with the turn | `nodes/analyst.py` |
+| 3 | **Final-report mode** on an explicit request or the gate's `immediate_config`: no question block; open points → points to confirm; status provisional unless a check fails | `nodes/planner.py`, `finalise()` |
+| 4 | **Customer-fact questions only**: no method / equipment choice, no purchases, no assistant decisions; ≤ 5 open, ranked method > setup > acceptance | `ledger.asks_assistant_decision`, `merge_new` |
+| 5 | **Number validator**: every number in the transcript or on a cited page (same unit); otherwise "[to be agreed with the customer]" | `services/numbers.py` |
+| 6 | **One pipeline for technical advice**; the conversational branch only explains the existing report (numbers validated) | `nodes/planner.py`, `conversational_node` |
+| 7 | **Claim validator**: each recommendation sentence must be covered by the passage of a verified citation; otherwise it moves to assumptions (a recommendation without any verified citation moves entirely) | `services/validators.py` |
+| 8 | **ACCESS_POINTS**: probes ≤ free ports, else a combined probe (only if the sources show one for the customer's application), sequential measurement or an offline rig | `premises.access_check` |
+| 9 | **Certainty / combination / cost**: provisional while anything decisive is open; combination only if one method is shown insufficient; cheapest sufficient method first (S01 Table 1 cost column) | `premises.py`, `knowledge/table1.py` |
+| 10 | **TARGET_QUALIFIER**: a qualified target (viable, free, dissolved, …) the cited passages do not distinguish → stated limitation, risk, and a reference method for the qualified quantity | `premises.target_qualifier_check` |
+| 11 | **Owned equipment** must be assessed (recommendation or feasibility plan) before purchases | `premises.owned_equipment_check` |
+| 12 | **GEOMETRY_VS_OPTICS** from the full transcript: clear → transmission / transflection; opaque, turbid, high-OD, powders → ATR / reflection; clear→opaque → a single transmission path may saturate (S01 p.16, p.18) | `premises.geometry_check` |
+| 13 | **Application tags** on retrieved passages and citations; another application → "transfer assumption" on the citation and in the assumptions | `knowledge/applications.py`, `validators.label_transfers` |
+| 14 | **Required sections**: missing ones are rejected and repaired once | `validators.missing_sections`, `responder_node` |
+| 15 | **One numbering source**: leading numbers stripped from question text | `ledger.clean`, `questionText()` |
+
+Citations: a quote is verified only if it is on the cited page; a near-verbatim quote (≥ 80 % of its words in order) is replaced by the exact page passage; an S01 Table 1 row is checked against the organisers' transcription of the table.
+
+Acceptance properties for any conversation: `evals/acceptance.py` (tests in `tests/test_conversation.py`). Live batch with a generic follow-up turn and per-case validation report: `.venv/bin/python -m scripts.run_batch` → `evals/results/batch-latest.md`. Live multi-turn retest: `.venv/bin/python -m scripts.retest_feed_frame`.
+
 ## Run
 
 ```bash
 cd backend
 uv venv --python 3.11 .venv && uv pip install --python .venv/bin/python -r requirements.txt
-cp .env.example .env               # add OPENAI_API_KEY (+ OPENAI_FALLBACK_API_KEY, GEMINI_API_KEY for vectors)
+cp .env.example .env               # LLM_PROVIDER=groq|openai + its keys (GEMINI_API_KEY for vectors)
 .venv/bin/uvicorn app.main:app --reload --port 8000
 ```
 
@@ -50,9 +76,9 @@ PDF text comes from poppler's `pdftotext` when installed (better spacing for quo
 | Missing | Behaviour |
 | --- | --- |
 | LLM key | `/assess` returns 503; the frontend shows "not connected" |
-| `PORTKEY_API_KEY` | direct OpenAI calls: each model with the primary key, then the fallback key; gpt-4o → gpt-4o-mini |
-| `OPENAI_FALLBACK_API_KEY` | only the primary key is used |
-| `GROQ_FALLBACK_API_KEY` | no last-resort provider; with it, Groq gpt-oss-120b / 20b are tried after every OpenAI attempt fails |
+| `PORTKEY_API_KEY` | direct calls to `LLM_PROVIDER` (groq: gpt-oss-120b → 20b; openai: gpt-4o → gpt-4o-mini), each model with the primary key, then the fallback key |
+| fallback key | only the primary key is used |
+| `LLM_FALLBACK_PROVIDER` | the other provider is never called (no surprise spend); set it to `openai` or `groq` to try it after every attempt fails |
 | `GEMINI_API_KEY` | BM25 only (vector step skipped) |
 | `QDRANT_CLUSTER_ENDPOINT` | embedded Qdrant in `backend/.qdrant` |
 | FlashRank model download | fused BM25/vector order |
@@ -74,7 +100,7 @@ Engine: LLM classifier on the gateway's small tier (gpt-4o-mini; the 8hr-MARATHO
 RAGAS-style metrics implemented in `evals/metrics.py` (no extra dependency), scored by a judge LLM on its own key, plus deterministic checks that cost nothing.
 
 ```bash
-.venv/bin/python -m evals.run_evals                # all scenarios: live pipeline + judge
+.venv/bin/python -m evals.run_evals                # all scenarios: live pipeline + judge (~$0.20 on OpenAI)
 .venv/bin/python -m evals.run_evals D01 H04        # selected scenarios
 .venv/bin/python -m evals.run_evals --no-judge     # deterministic metrics only
 .venv/bin/python -m evals.run_evals --from-cache   # score frontend/outputs/<ID>.json (no context metrics)
@@ -93,7 +119,9 @@ RAGAS-style metrics implemented in `evals/metrics.py` (no extra dependency), sco
 | feasibility | first experiment has steps and a decision basis | no |
 | expectations | expected status, premise checks and terms per scenario (`evals/golden.json`) | no |
 
-Judge: `JUDGE_OPENAI_API_KEY` (`JUDGE_MODEL`, default gpt-4o), else `JUDGE_GROQ` (gpt-oss-120b on Groq), so grading never rate-limits the live app; without either the judge uses the app gateway. `evals/golden.json` is read by the evals only, never by the pipeline. Results: `evals/results/latest.{json,md}` and `frontend/outputs/evals-latest.json`, shown on the frontend's **Evals** page.
+Judge on its own key, on the active provider, so grading never rate-limits the live app: `JUDGE_GROQ` (`JUDGE_GROQ_MODEL`) with Groq; `JUDGE_OPENAI_API_KEY` (`JUDGE_MODEL`, default gpt-4o-mini) with OpenAI. Without one the judge uses the app gateway.
+
+Evals never run on their own: only this command or the **Run evals** button on the frontend's Evals page (`POST /evals/run`, progress on `GET /evals/status`). The button asks for confirmation with a cost estimate; the backend allows one run at a time and one run per `EVAL_COOLDOWN_MIN` minutes (default 30, read from the last result on disk). Tests never start a run. `evals/golden.json` is read by the evals only, never by the pipeline. Results: `evals/results/latest.{json,md}` and `frontend/outputs/evals-latest.json`, shown on the frontend's **Evals** page.
 
 ## Tests
 

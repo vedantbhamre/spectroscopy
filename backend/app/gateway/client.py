@@ -1,10 +1,10 @@
-"""LLM gateway: OpenAI, primary model (gpt-4o) with fallback model (gpt-4o-mini) and a fallback API key;
-Groq (gpt-oss) as the last-resort provider when GROQ_FALLBACK_API_KEY is set.
+"""LLM gateway: the active provider (LLM_PROVIDER = groq | openai), each with a large and a small
+model and a primary and a fallback API key.
 
-With PORTKEY_API_KEY, requests go through Portkey (retry, cache, fallback) using the same
-gateway config shape as the 8hr-MARATHON template; the two Portkey integrations hold the
-primary and the fallback OpenAI key. Without Portkey, the client calls OpenAI directly and
-tries each model with the primary key, then the fallback key.
+Direct mode tries each model with the primary key, then the fallback key; then, only if
+LLM_FALLBACK_PROVIDER is set, the same on the other provider. With PORTKEY_API_KEY, requests go
+through Portkey (retry, cache, fallback) using the 8hr-MARATHON template's gateway config shape;
+the two Portkey integrations hold the primary and the fallback key.
 """
 
 import json
@@ -39,13 +39,53 @@ class LLMUnavailable(RuntimeError):
 class LLMResult:
     text: str
     model: str
-    via: str  # "portkey" | "openai" | "openai-fallback-key"
+    via: str  # "portkey" | "openai" | "openai-fallback-key" | "groq" | "groq-fallback-key"
     ms: float
     cache: str = "MISS"
+    tokens: int = 0
+
+
+# Tokens used by this process, per model (the batch runner reports them per case).
+USAGE: dict[str, int] = {}
+
+
+def _count(resp, model: str) -> int:
+    n = int(getattr(getattr(resp, "usage", None), "total_tokens", 0) or 0)
+    USAGE[model] = USAGE.get(model, 0) + n
+    return n
+
+
+@dataclass(frozen=True)
+class Provider:
+    name: str
+    base_url: str
+    keys: tuple[tuple[str, str], ...]  # (api_key, label)
+    large: str
+    small: str
+
+
+def provider(name: str) -> Provider | None:
+    if name == "openai":
+        keys = ((settings.OPENAI_API_KEY, "openai"), (settings.OPENAI_FALLBACK_API_KEY, "openai-fallback-key"))
+        return Provider("openai", settings.OPENAI_BASE_URL, tuple((k, lb) for k, lb in keys if k),
+                        settings.OPENAI_MODEL, settings.OPENAI_SMALL_MODEL)
+    if name == "groq":
+        keys = ((settings.GROQ_API_KEY, "groq"), (settings.GROQ_FALLBACK_API_KEY, "groq-fallback-key"))
+        return Provider("groq", settings.GROQ_BASE_URL, tuple((k, lb) for k, lb in keys if k),
+                        settings.GROQ_MODEL, settings.GROQ_SMALL_MODEL)
+    return None
+
+
+def providers() -> list[Provider]:
+    """Active provider first; the fallback provider only when LLM_FALLBACK_PROVIDER names a different one."""
+    names = [settings.LLM_PROVIDER]
+    if settings.LLM_FALLBACK_PROVIDER and settings.LLM_FALLBACK_PROVIDER != settings.LLM_PROVIDER:
+        names.append(settings.LLM_FALLBACK_PROVIDER)
+    return [p for p in map(provider, names) if p and p.keys]
 
 
 _portkey: dict[str, object] = {}
-_openai: dict[str, object] = {}
+_openai: dict[tuple[str, str], object] = {}
 
 
 def _portkey_client(tier: str = "default"):
@@ -56,26 +96,39 @@ def _portkey_client(tier: str = "default"):
     return _portkey[tier]
 
 
-def _openai_client(key: str, base_url: str | None = None):
-    if key not in _openai:
+def _openai_client(key: str, base_url: str):
+    if (key, base_url) not in _openai:
         from openai import OpenAI
 
-        _openai[key] = OpenAI(api_key=key, base_url=base_url or settings.OPENAI_BASE_URL, max_retries=2, timeout=90)
-    return _openai[key]
+        # Groq's free tier rate-limits per minute; the SDK honours retry-after, so allow more retries there.
+        retries = 4 if "groq.com" in base_url else 2
+        _openai[(key, base_url)] = OpenAI(api_key=key, base_url=base_url, max_retries=retries, timeout=90)
+    return _openai[(key, base_url)]
 
 
-def attempts(tier: str = "default") -> list[tuple[str, str, str]]:
-    """(api_key, model, label) in the order they are tried: OpenAI models × keys, then Groq."""
-    keys = [(k, label) for k, label in ((settings.OPENAI_API_KEY, "openai"), (settings.OPENAI_FALLBACK_API_KEY, "openai-fallback-key")) if k]
-    models = [settings.PRIMARY_MODEL, settings.FALLBACK_MODEL]
-    groq = [settings.GROQ_MODEL, settings.GROQ_SMALL_MODEL]
-    if tier == "small":
-        models.reverse()
-        groq.reverse()
-    out = [(k, m, label) for m in dict.fromkeys(models) for k, label in keys]
-    if settings.GROQ_FALLBACK_API_KEY:
-        out += [(settings.GROQ_FALLBACK_API_KEY, m, "groq") for m in dict.fromkeys(groq)]
+def attempts(tier: str = "default") -> list[tuple[str, str, str, str]]:
+    """(api_key, model, label, base_url) in the order they are tried: per provider, models × keys."""
+    out = []
+    for p in providers():
+        models = [p.small, p.large] if tier == "small" else [p.large, p.small]
+        out += [(k, m, label, p.base_url) for m in dict.fromkeys(models) for k, label in p.keys]
     return out
+
+
+def _extra(model: str) -> dict:
+    # Reasoning models on Groq (gpt-oss, qwen3) think before answering; keep it short so max tokens go to the answer.
+    return {"reasoning_effort": "low"} if any(s in model for s in ("gpt-oss", "qwen3")) else {}
+
+
+def _rate_limited(e: Exception | None) -> bool:
+    return e is not None and bool(re.search(r"\b429\b|rate limit", str(e), re.I))
+
+
+def _retry_after(e: Exception | None, cap: float = 30.0) -> float:
+    """Seconds the provider asks to wait ("Please try again in 12.5s" / "in 1m3s"), capped."""
+    m = re.search(r"try again in (?:(\d+)m)?([\d.]+)s", str(e or ""))
+    secs = (int(m.group(1) or 0) * 60 + float(m.group(2))) if m else 10.0
+    return min(max(secs, 1.0), cap)
 
 
 def _cache_status(resp) -> str:
@@ -90,9 +143,9 @@ def _cache_status(resp) -> str:
 
 def chat(messages: list[dict], *, json_mode: bool = False, temperature: float = 0.1, feature: str = "assess",
          max_tokens: int = 4096, tier: str = "default") -> LLMResult:
-    """tier="small": the fallback (small) model first, for fast classification."""
+    """tier="small": the small model first, for fast classification."""
     if not settings.llm_configured:
-        raise LLMUnavailable("No LLM configured: set OPENAI_API_KEY (and optionally OPENAI_FALLBACK_API_KEY) in backend/.env")
+        raise LLMUnavailable("No LLM configured: set GROQ_API_KEY or OPENAI_API_KEY (see LLM_PROVIDER) in backend/.env")
     kwargs: dict = {"messages": messages, "temperature": temperature, "max_completion_tokens": max_tokens}
     if json_mode:
         kwargs["response_format"] = {"type": "json_object"}
@@ -105,16 +158,29 @@ def chat(messages: list[dict], *, json_mode: bool = False, temperature: float = 
                              (time.perf_counter() - start) * 1000, _cache_status(resp))
 
         last: Exception | None = None
-        for key, model, label in attempts(tier):
-            try:
-                if label == "groq":  # gpt-oss reasons before answering; keep it short so max tokens go to the answer
-                    resp = _openai_client(key, settings.GROQ_BASE_URL).chat.completions.create(model=model, reasoning_effort="low", **kwargs)
-                else:
-                    resp = _openai_client(key).chat.completions.create(model=model, **kwargs)
-                return LLMResult(resp.choices[0].message.content or "", model, label, (time.perf_counter() - start) * 1000)
-            except Exception as e:  # noqa: BLE001 - try the next key / model
-                logfire.warning("{label} {model} failed: {err}", label=label, model=model, err=str(e))
-                last = e
+        for _round in range(2):  # a second round only after every target was rate-limited
+            if _round and not _rate_limited(last):
+                break
+            if _round:
+                wait = _retry_after(last)
+                logfire.warning("all LLM targets rate-limited; waiting {s} s", s=wait)
+                time.sleep(wait)
+            for key, model, label, base_url in attempts(tier):
+                try:
+                    try:
+                        resp = _openai_client(key, base_url).chat.completions.create(model=model, **kwargs, **_extra(model))
+                    except Exception as e:  # noqa: BLE001
+                        # Groq rejects JSON-mode output it cannot validate ("Failed to generate JSON"); the prompts
+                        # already ask for JSON and parse_json tolerates stray text, so retry once without JSON mode.
+                        if not (json_mode and re.search(r"failed to generate json|json_validate_failed", str(e), re.I)):
+                            raise
+                        plain = {k: v for k, v in kwargs.items() if k != "response_format"}
+                        resp = _openai_client(key, base_url).chat.completions.create(model=model, **plain, **_extra(model))
+                    return LLMResult(resp.choices[0].message.content or "", model, label, (time.perf_counter() - start) * 1000,
+                                     tokens=_count(resp, model))
+                except Exception as e:  # noqa: BLE001 - try the next key / model
+                    logfire.warning("{label} {model} failed: {err}", label=label, model=model, err=str(e))
+                    last = e
         raise LLMUnavailable(f"All LLM targets failed: {last}")
 
 

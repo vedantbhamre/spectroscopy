@@ -65,8 +65,19 @@ def test_ellipsis_and_quote_style():
     assert ok.check == "verified"
     gap = verify(Citation(source="S01", page="17", quote="The use of Near-Infrared (NIR) spectroscopy ... modern dairy 'Process Analytical Technology'"))
     assert gap.check == "verified"
-    wrong_order = verify(Citation(source="S01", page="17", quote="modern dairy ... The use of Near-Infrared (NIR) spectroscopy"))
-    assert wrong_order.check == "failed"
+    wrong = Citation(source="S01", page="17", quote="modern dairy ... The use of Near-Infrared (NIR) spectroscopy")
+    assert verify(wrong, allow_snap=False).check == "failed"
+    snapped = verify(wrong)  # near-verbatim: replaced by the exact page passage it reproduces
+    assert snapped.check == "verified" and snapped.quote != wrong.quote
+
+
+def test_invented_quote_is_not_snapped():
+    from app.schemas import Citation
+    from app.services.citations import verify
+
+    assert verify(Citation(source="S02", page="13", quote="Silica fibres transmit the full mid-IR range without loss")).check == "failed"
+    near = verify(Citation(source="S01", page="10", quote="NIR spectra (780–2500 nm) contain predominantly overtones and combination bands"))
+    assert near.check == "verified" and near.quote.startswith("NIR spectra")
 
 
 def test_trailing_full_stop_where_the_sentence_continues():

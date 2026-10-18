@@ -13,21 +13,39 @@ def _env(name: str, default: str | None = None) -> str | None:
 
 
 class Settings:
-    # --- LLM: OpenAI (optionally via Portkey) ---
+    # --- LLM provider: "groq" | "openai". Each has a primary and a fallback key, a large and a small model. ---
+    LLM_PROVIDER = (_env("LLM_PROVIDER", "openai") or "openai").lower()
+    # Other provider tried after every attempt on the active one fails. Empty = none, so testing on
+    # one provider never spends credits on the other.
+    LLM_FALLBACK_PROVIDER = (_env("LLM_FALLBACK_PROVIDER", "") or "").lower()
+
     OPENAI_API_KEY = _env("OPENAI_API_KEY")
     OPENAI_FALLBACK_API_KEY = _env("OPENAI_FALLBACK_API_KEY")  # used when the primary key fails (quota, rate limit)
     # Always explicit: an empty OPENAI_BASE_URL= line in .env would otherwise reach the SDK as base URL ""
     OPENAI_BASE_URL = _env("OPENAI_BASE_URL", "https://api.openai.com/v1")
-    PRIMARY_MODEL = _env("OPENAI_MODEL", "gpt-4o")
-    FALLBACK_MODEL = _env("OPENAI_FALLBACK_MODEL", "gpt-4o-mini")
-    PORTKEY_API_KEY = _env("PORTKEY_API_KEY")
-    PORTKEY_SLUG = _env("PORTKEY_SLUG", "openai")  # Portkey integration holding the primary OpenAI key
-    PORTKEY_SLUG_2 = _env("PORTKEY_SLUG_2", "openai-fallback")  # integration holding the fallback key
-    # Last-resort provider when every OpenAI attempt fails (outage, quota): Groq's OpenAI-compatible API
-    GROQ_FALLBACK_API_KEY = _env("GROQ_FALLBACK_API_KEY", _env("GROQ_API_KEY"))
+    OPENAI_MODEL = _env("OPENAI_MODEL", "gpt-4o")
+    OPENAI_SMALL_MODEL = _env("OPENAI_FALLBACK_MODEL", "gpt-4o-mini")
+
+    GROQ_API_KEY = _env("GROQ_API_KEY")
+    GROQ_FALLBACK_API_KEY = _env("GROQ_FALLBACK_API_KEY")
     GROQ_BASE_URL = "https://api.groq.com/openai/v1"
     GROQ_MODEL = _env("GROQ_MODEL", "openai/gpt-oss-120b")
     GROQ_SMALL_MODEL = _env("GROQ_SMALL_MODEL", "openai/gpt-oss-20b")
+
+    PORTKEY_API_KEY = _env("PORTKEY_API_KEY")
+    PORTKEY_SLUG = _env("PORTKEY_SLUG", "openai")  # Portkey integration holding the primary key
+    PORTKEY_SLUG_2 = _env("PORTKEY_SLUG_2", "openai-fallback")  # integration holding the fallback key
+
+    # Retrieved chunks sent to the responder: the main driver of input tokens per assessment.
+    RETRIEVE_TOP_N = int(_env("RETRIEVE_TOP_N", "5") or 5)
+
+    @property
+    def PRIMARY_MODEL(self) -> str:
+        return self.GROQ_MODEL if self.LLM_PROVIDER == "groq" else self.OPENAI_MODEL
+
+    @property
+    def FALLBACK_MODEL(self) -> str:
+        return self.GROQ_SMALL_MODEL if self.LLM_PROVIDER == "groq" else self.OPENAI_SMALL_MODEL
 
     # --- Embeddings ---
     GEMINI_API_KEY = _env("GEMINI_API_KEY")
@@ -58,14 +76,18 @@ class Settings:
     # --- Safety gate: "llm" (small-model classifier, rules as fallback) | "rules" | unset = llm when an LLM is configured ---
     GUARD_MODE = _env("GUARD_MODE")
 
-    # --- Evals: separate key for the judge LLM (OpenAI preferred, Groq accepted; else the app gateway) ---
+    # --- Evals: separate key for the judge LLM, on the active provider; else the app gateway ---
     JUDGE_OPENAI_API_KEY = _env("JUDGE_OPENAI_API_KEY")
-    JUDGE_MODEL = _env("JUDGE_MODEL", "gpt-4o")
+    JUDGE_MODEL = _env("JUDGE_MODEL", "gpt-4o-mini")  # mini: ~16x cheaper than gpt-4o, fine for 0/1 grading
     JUDGE_GROQ = _env("JUDGE_GROQ")
+    JUDGE_GROQ_MODEL = _env("JUDGE_GROQ_MODEL", "openai/gpt-oss-120b")
+    # The Evals page's "Run evals" button: minimum minutes between runs (latest run time is on disk).
+    EVAL_COOLDOWN_MIN = float(_env("EVAL_COOLDOWN_MIN", "30") or 30)
 
     @property
     def llm_configured(self) -> bool:
-        return bool(self.PORTKEY_API_KEY or self.OPENAI_API_KEY or self.OPENAI_FALLBACK_API_KEY or self.GROQ_FALLBACK_API_KEY)
+        return bool(self.PORTKEY_API_KEY or self.OPENAI_API_KEY or self.OPENAI_FALLBACK_API_KEY
+                    or self.GROQ_API_KEY or self.GROQ_FALLBACK_API_KEY)
 
     @property
     def llm_guard_available(self) -> bool:

@@ -9,6 +9,9 @@ import re
 
 from pydantic import BaseModel, Field
 
+from app.knowledge import table1 as T1
+from app.knowledge.applications import of_citation
+from app.knowledge.applications import tag as app_tags
 from app.knowledge.optics import FIBERS, METHODS, coverage
 from app.schemas import Citation, DecisionStatus, PremiseCheck
 
@@ -26,6 +29,7 @@ class Facts(BaseModel):
     """What the client stated. Unknown stays unknown."""
 
     stated: list[str] = Field(default_factory=list)
+    stated_turns: list[int] = Field(default_factory=list)  # client turn each stated fact was quoted from
     unknowns: list[str] = Field(default_factory=list)
     target_variables: list[str] = Field(default_factory=list)
     methods_mentioned: list[str] = Field(default_factory=list)  # MethodId values
@@ -37,28 +41,47 @@ class Facts(BaseModel):
     new_formulation_or_matrix: bool = False
     asks_for_certainty: bool = False
     combination_requested: bool = False
+    access_points: int | None = None  # free process ports / access points the customer stated
+    single_method_insufficient: bool = False  # the customer showed or stated one method is not enough
+    owned_equipment: list[dict] = Field(default_factory=list)  # [{"name": str, "method": MethodId | None}]
+    optical_appearance: str = "unknown"  # clear | opaque | changing | unknown (opaque includes turbid, high OD, powders)
+    application_domain: str | None = None  # one of applications.DOMAINS
+    qualified_targets: list[dict] = Field(default_factory=list)  # [{"qualifier": "viable", "target": "viable biomass"}]
 
+
+# Qualifiers that a bulk optical signal usually does not distinguish (the total is measured).
+# Fixed terms where the word is part of a name, not a qualifier of the quantity ("active ingredient").
+_NOT_QUALIFIER = r"(?!\s+(pharmaceutical\s+)?(ingredient|substance|agent|principle|compound|component|carbon|site)s?\b)"
+QUALIFIERS = ["viable", "live", "living", "dead", "free", "bound", "active", "inactive", "dissolved", "suspended", "available",
+              "residual", "unreacted", "crystalline", "amorphous", "ionised", "ionized", "soluble", "insoluble", "intracellular", "extracellular"]
 
 _KW = {
     "MIR_ATR": r"\b(mir|mid[- ]?ir|mid[- ]infrared|atr|ftir)\b",
     "NIR": r"\bnir\b|near[- ]infrared",
     "RAMAN": r"\braman\b",
-    "FLUO": r"fluoresc",
+    # Proposed as a measurement, not mentioned as an interference ("fluorescence unknown", "is the API fluorescent?").
+    "FLUO": r"fluorescence (spectrometer|spectroscopy|measurement|probe|sensor|information|detection)|fluorimetr|(use|compare|with) .{0,30}fluorescence",
     "UVVIS": r"\buv[- ]?vis\b|\buv\b",
 }
 
 
-def detect(text: str, facts: Facts) -> Facts:
-    """Fill gaps in the extracted facts from the client's own words."""
+def detect(text: str, facts: Facts, enquiry: str | None = None) -> Facts:
+    """Fill gaps in the extracted facts from the client's own words.
+
+    enquiry: the opening message; the method keyword fallback reads only that, so a method named in an
+    answer to a question ("fluorescence unknown") is not taken as a method the client proposes.
+    """
     t = text.lower()
     # Keywords only fill in when extraction found no requested method: "a silica cable from a
     # visible or NIR setup" names NIR without asking for it.
     methods = set(facts.methods_mentioned)
     if not methods:
         for mid, pat in _KW.items():
-            if re.search(pat, t):
+            if re.search(pat, (enquiry or text).lower()):
                 methods.add(mid)
-    fibers = set(facts.fibers_mentioned)
+    # Fibres only when the client talks about a fibre they have or propose; the extraction alone may guess one.
+    fibers = set(facts.fibers_mentioned) if re.search(r"silica|quartz|glass fib|chalcogenide|fluoride|polycrystalline|hollow|"
+                                                      r"(existing|already have|our|current)\b.{0,40}\bfib(er|re)", t) else set()
     if re.search(r"silica", t):
         fibers.add("silica_uvvis" if re.search(r"\buv\b", t) and not re.search(r"nir|visible", t) else "silica_visnir")
     for fid, pat in {"chalcogenide": r"chalcogenide", "pir": r"polycrystalline|\bpir\b", "hwg": r"hollow (glass )?waveguide", "zrf": r"zirconium fluoride", "inf": r"indium fluoride"}.items():
@@ -77,12 +100,46 @@ def detect(text: str, facts: Facts) -> Facts:
         upd["asks_for_certainty"] = True
     if re.search(r"(adding|add|combin\w*)\s+(raman|nir|mir|fluorescence)|both .* and ", t):
         upd["combination_requested"] = True
+    # Optical appearance of the medium, from the whole transcript (clear → transmission; opaque → ATR / reflection).
+    clear = re.search(r"\b(clear|transparent|translucent|low (optical density|od)|dilute|permeate)\b", t)
+    opaque = re.search(r"\b(turbid\w*|cloudy|opaque|milky|high (optical density|od)|black|highly scattering|suspension|slurry|paste|"
+                       r"powders?|solids?|granul\w*|thick)\b", t)
+    change = re.search(r"\b(becomes?|turns?|gets?|getting|grows?)\s+(more\s+|very\s+)?(turbid|cloudy|opaque|thick|dense)|from clear to", t)
+    appearance = "changing" if change or (clear and opaque) else "opaque" if opaque else "clear" if clear else facts.optical_appearance
+    upd["optical_appearance"] = appearance if facts.optical_appearance in ("unknown", "", None) or change else facts.optical_appearance
+
+    # Instruments the client already owns (the method they measure with, when named).
+    owned = list(facts.owned_equipment)
+    for m in re.finditer(r"\b(we|i)\s+(already\s+)?(have|own|use|operate|run)\s+(an?\s+|our\s+|one\s+|two\s+)?([\w\- ]{0,40}?)(spectrometer|analy[sz]er|probe|instrument|photometer|sensor)\b", t):
+        phrase = m.group(0)
+        mid = next((k for k, pat in _KW.items() if re.search(pat, phrase)), None)
+        if mid and not any(o.get("method") == mid for o in owned):
+            owned.append({"name": (m.group(5) + m.group(6)).strip(), "method": mid})
+    upd["owned_equipment"] = owned
+    if not facts.application_domain:
+        upd["application_domain"] = next(iter(app_tags(t)), None)
+
+    # Qualified targets ("viable biomass", "free fatty acids", "dissolved oxygen").
+    qualified = []
+    for target in facts.target_variables:
+        tl = target.lower()
+        q = next((w for w in QUALIFIERS if re.search(rf"\b{w}\b{_NOT_QUALIFIER}", tl)), None)
+        if not q:
+            head = (re.findall(r"[a-z]{4,}", tl) or [""])[-1]
+            m = head and re.search(rf"\b({'|'.join(QUALIFIERS)})\b{_NOT_QUALIFIER}\s+(\w+\s+)?{re.escape(head)}", t)
+            q = m.group(1) if m else None
+            target = f"{q} {target}" if q else target
+        if q:
+            qualified.append({"qualifier": q, "target": target})
+    upd["qualified_targets"] = qualified
+
     if "FLUO" in methods and re.search(r"(not|no)( yet)? (identified|named|defined)? ?(a )?fluorescent (target|marker)|have not identified a fluorescent", t):
         upd["fluorescent_target_named"] = False
     return facts.model_copy(update=upd)
 
 
-def run_checks(facts: Facts) -> list[PremiseCheck]:
+def run_checks(facts: Facts, open_points: int = 0) -> list[PremiseCheck]:
+    """open_points: ledger questions still open (they count as decisive unknowns for the certainty check)."""
     checks: list[PremiseCheck] = []
 
     # 1. Variable to measure is defined.
@@ -151,21 +208,173 @@ def run_checks(facts: Facts) -> list[PremiseCheck]:
             detail="The calibration was built for a different formulation. Whether it transfers has to be tested on the new blend with independent references; adding a method does not by itself keep it valid.",
         ))
 
-    # 6. A combination is a hypothesis.
+    # 6. A combination is an escalation, justified only when one method is shown to be insufficient.
     if facts.combination_requested:
-        checks.append(PremiseCheck(
-            id="combination", label="A method combination is justified", status="flag",
-            detail="Assess each method on its own first; a gain from combining them is a hypothesis to test for this material.",
-            citations=[Citation(source="S01", page="15", quote="By combining Raman and NIR, these models can predict API potency or coating thickness with higher accuracy and robustness than single-method models.", check="verified")],
-        ))
+        checks.append(combination_check(facts))
 
     # 7. Certainty requested beyond what the facts allow.
     if facts.asks_for_certainty:
-        checks.append(PremiseCheck(
-            id="certainty", label="The request can be answered with certainty", status="flag",
-            detail="The client asks for approval, proof or an exact configuration. The answer can only be a provisional assessment with the questions and experiment that would decide it.",
-        ))
+        failed = sum(c.status == "fail" for c in checks)
+        decisive = len(facts.unknowns) + open_points + failed
+        if decisive:
+            checks.append(PremiseCheck(
+                id="certainty", label="Certainty: the answer can only be provisional", status="flag",
+                detail=f"The customer asks for approval, proof or an exact configuration, but {decisive} decisive point(s) are still open or contradicted. "
+                       "The answer is a provisional assessment; the open points are listed as assumptions and the first experiment decides them.",
+            ))
+        else:
+            checks.append(PremiseCheck(id="certainty", label="Certainty: nothing decisive is unknown", status="pass",
+                                       detail="All points that could change the method or setup have been answered."))
 
+    return checks
+
+
+COMBINED_PROBE = Citation(source="S01", page="15", check="verified", quote=(
+    "A multispectral NIRaman fiber probe has industrial grade design that combines NIR reflection and Raman optical "
+    "techniques in a compact shaft that fits in a tablet press feed frame."))
+
+
+def combination_check(facts: Facts) -> PremiseCheck:
+    cite = [Citation(source="S01", page="15", quote="By combining Raman and NIR, these models can predict API potency or coating thickness with higher accuracy and robustness than single-method models.", check="verified")]
+    if facts.single_method_insufficient:
+        return PremiseCheck(id="combination", label="Method combination: justified, one method is stated to be insufficient", status="pass",
+                            detail="The customer states that a single method does not meet the need, so a combination is a reasonable next step; its gain is still tested.",
+                            citations=cite)
+    return PremiseCheck(
+        id="combination", label="Method combination: an escalation option, not justified up front", status="flag",
+        detail="Start with the simplest method that could meet the need and assess each method on its own; combine only if one is shown to be insufficient. A gain from combining is a hypothesis to test for this material.",
+        citations=cite,
+    )
+
+
+_HANDLED = {
+    "a combined probe": r"combin\w* (nir.?raman|probe)|multispectral|niraman|one (compact )?shaft|single (combined )?probe",
+    "sequential measurement": r"one after the other|sequential|in turn|alternat|consecutive|first .* then .* (same|port)",
+    "an offline rig": r"off-?line (rig|set-?up|test)|laboratory rig|lab rig|bench",
+}
+
+
+def access_check(facts: Facts, report: dict) -> PremiseCheck | None:
+    """More probe methods recommended in parallel than the customer has free access points (after compose)."""
+    if facts.access_points is None:
+        return None
+    recs = [r for r in report.get("recommendations", []) if r.get("role") in ("primary", "comparison", "combination")]
+    methods = {m for r in recs for m in r.get("methodIds", [])}
+    if len(methods) <= facts.access_points:
+        return PremiseCheck(id="access_points", label="Access points: the probes fit the free ports", status="pass",
+                            detail=f"{len(methods)} probe method(s) for {facts.access_points} free access point(s).")
+    # Judged on the measurement concept (where the setup is described), not on a later escalation step.
+    concept = report.get("concept", {})
+    text = " ".join([concept.get("summary", ""), concept.get("probe") or "", concept.get("location") or ""]).lower()
+    how = [name for name, pat in _HANDLED.items() if re.search(pat, text)]
+    combined_ok = combined_probe_applies(facts)
+    if "a combined probe" in how and not combined_ok:
+        how.remove("a combined probe")  # the sources show the combined probe for another application only
+    parallel = re.search(r"parallel|simultaneous|both probes|two probes|second probe", text) and "a combined probe" not in how
+    if how and not parallel:
+        return PremiseCheck(id="access_points", label="Access points: more methods than free ports, handled", status="pass",
+                            detail=f"{len(methods)} methods for {facts.access_points} free access point(s), handled by {' or '.join(how)}.",
+                            citations=[COMBINED_PROBE] if "a combined probe" in how else [])
+    options = (["a combined NIR–Raman probe in one shaft (shown in the sources for this kind of application)"] if combined_ok else []) + [
+        "measuring the methods one after the other on the same samples", "an offline rig"]
+    return PremiseCheck(
+        id="access_points", label="Access points: more probes than free ports", status="flag",
+        detail=f"{len(methods)} probe methods are recommended for {facts.access_points} free access point(s). Use " + ", ".join(options[:-1]) + f" or {options[-1]}.",
+        citations=[COMBINED_PROBE] if combined_ok else [],
+    )
+
+
+def combined_probe_applies(facts: Facts) -> bool:
+    """The sources show the combined NIR–Raman probe for one application; elsewhere it is a transfer assumption."""
+    return bool(facts.application_domain) and facts.application_domain in of_citation(COMBINED_PROBE.source, COMBINED_PROBE.page, COMBINED_PROBE.quote)
+
+
+def _recommended(report: dict) -> list[dict]:
+    return [r for r in report.get("recommendations", []) if r.get("role") in ("primary", "comparison", "combination")]
+
+
+def target_qualifier_check(facts: Facts, report: dict, support: dict[str, str]) -> PremiseCheck | None:
+    """A qualified target (viable, free, dissolved, …) that the proposed method's sources do not distinguish.
+
+    support: method id → text of the verified passages cited for it."""
+    recs = _recommended(report)
+    if not facts.qualified_targets or not recs:
+        return None
+    limits = []
+    for qt in facts.qualified_targets:
+        blind = sorted({m for r in recs for m in r.get("methodIds", []) if not re.search(rf"\b{qt['qualifier']}\b", support.get(m, ""))})
+        if blind:
+            limits.append((qt, blind))
+    if not limits:
+        return PremiseCheck(id="target_qualifier", label="Target qualifier: the cited sources address it", status="pass",
+                            detail="The cited passages discuss the qualified quantity for the proposed method(s).")
+    detail = " ".join(
+        f"The target is '{qt['target']}', but the sources cited for {', '.join(METHODS[m].label if m in METHODS else m for m in blind)} do not show that the "
+        f"signal distinguishes '{qt['qualifier']}' from the total; the method may follow a related quantity instead. A reference method that measures "
+        f"'{qt['target']}' itself is required to test whether the signal follows it." for qt, blind in limits)
+    return PremiseCheck(id="target_qualifier", label="Target qualifier: the method may not distinguish it", status="flag", detail=detail)
+
+
+def owned_equipment_check(facts: Facts, report: dict) -> PremiseCheck | None:
+    owned = [o for o in facts.owned_equipment if o.get("method") in METHODS or o.get("method") in ("RAMAN", "FLUO", "UVVIS")]
+    if not owned:
+        return None
+    mentioned = {m for r in report.get("recommendations", []) for m in r.get("methodIds", [])}
+    plan = " ".join(report.get("feasibility", {}).get("steps", [])).lower()
+    missing = [o for o in owned if o["method"] not in mentioned and not re.search(_KW.get(o["method"], "$^"), plan)]
+    names = ", ".join(o.get("name") or o["method"] for o in owned)
+    if missing:
+        return PremiseCheck(id="owned_equipment", label="Owned equipment: not assessed", status="flag",
+                            detail=f"The customer already has {', '.join(o.get('name') or o['method'] for o in missing)}. State what the sources say it can and "
+                                   "cannot measure here and use it in the feasibility plan where supported, before proposing new equipment.")
+    return PremiseCheck(id="owned_equipment", label="Owned equipment: assessed", status="pass",
+                        detail=f"The customer's existing equipment ({names}) is assessed in the recommendation or the feasibility plan.")
+
+
+def geometry_check(facts: Facts, report: dict) -> PremiseCheck | None:
+    """Probe geometry vs the optical appearance of the medium (S01 p.16, p.18; Table 1)."""
+    c = report.get("concept", {})
+    text = " ".join([c.get("summary", ""), c.get("probe") or "", c.get("location") or ""]).lower()
+    trans = bool(re.search(r"transmission|transflect", text))
+    refl = bool(re.search(r"reflect|\batr\b|attenuated total", text))
+    a = facts.optical_appearance
+    if a == "unknown" or not (trans or refl):
+        return None
+    label = "Probe geometry matches the optical density of the medium"
+    if a == "clear" and refl and not trans:
+        return PremiseCheck(id="geometry_optics", label="Probe geometry: reflection for a clear medium", status="flag",
+                            detail="The medium is described as clear. Transmission or transflection suits transparent, low optical density liquids; reflection can be less representative for clear liquids.",
+                            citations=[T1.CLEAR_TRANSMISSION, T1.REFLECTION_SCATTERING])
+    if a == "opaque" and trans and not refl:
+        return PremiseCheck(id="geometry_optics", label="Probe geometry: transmission for an opaque medium", status="flag",
+                            detail="The medium is described as turbid, opaque or scattering. A transmission path saturates when light cannot penetrate the sample; ATR or reflection is used at high optical density.",
+                            citations=[T1.OPAQUE_SATURATES, T1.HIGH_OD_ATR])
+    if a == "changing" and trans:
+        return PremiseCheck(id="geometry_optics", label="Probe geometry: the medium changes from clear to opaque", status="flag",
+                            detail="The medium changes from clear to opaque, so a single transmission path may saturate. Plan ATR or reflection for the opaque phase, or check the path length on samples from both phases.",
+                            citations=[T1.OPAQUE_SATURATES, T1.HIGH_OD_ATR])
+    return PremiseCheck(id="geometry_optics", label=label, status="pass",
+                        detail=f"Medium described as {a}; the proposed {'transmission' if trans else 'ATR / reflection'} geometry suits it.",
+                        citations=[T1.CLEAR_TRANSMISSION] if a == "clear" else [T1.OPAQUE_SATURATES])
+
+
+def cost_check(report: dict) -> PremiseCheck | None:
+    """Simplest, cheapest sufficient method first (S01 Table 1 cost column, probe options)."""
+    recs = _recommended(report)
+    primary = [m for r in recs if r["role"] == "primary" for m in r.get("methodIds", [])]
+    others = [m for r in recs if r["role"] != "primary" for m in r.get("methodIds", []) if m not in primary]
+    costs = {m: T1.probe_cost(m) for m in primary + others if T1.probe_cost(m)}
+    if not primary or not others or not all(m in costs for m in primary):
+        return None
+    p_cost = max(T1.RANK[costs[m]] for m in primary)
+    cheaper = [m for m in others if m in costs and T1.RANK[costs[m]] < p_cost]
+    fmt = lambda ms: ", ".join(f"{METHODS[m].label if m in METHODS else m} ({costs[m]})" for m in ms)  # noqa: E731
+    if cheaper:
+        return PremiseCheck(id="cost", label="Simplest method first: a cheaper candidate is ranked lower", status="flag",
+                            detail=f"Table 1 rates the primary candidate {fmt(primary)} above {fmt(cheaper)} in cost. State why the cheaper method is not sufficient, or test it first.",
+                            citations=[T1.TABLE1])
+    return PremiseCheck(id="cost", label="Simplest method first: the primary is the cheapest candidate", status="pass",
+                        detail=f"Table 1 cost of the probe options: primary {fmt(primary)}, others {fmt(others)}.", citations=[T1.TABLE1])
     return checks
 
 

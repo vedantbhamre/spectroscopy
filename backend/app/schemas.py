@@ -16,6 +16,9 @@ class Citation(BaseModel):
     quote: Optional[str] = None
     url: Optional[str] = None
     check: CheckStatus = "unverified"
+    # The cited passage shows this for another application than the customer's ("transfer assumption").
+    transfer: Optional[bool] = None
+    application: Optional[str] = None
 
 
 class Recommendation(BaseModel):
@@ -37,11 +40,23 @@ class PremiseCheck(BaseModel):
 class Requirements(BaseModel):
     stated: list[str]
     unknowns: list[str]
+    factTurns: list[int] = Field(default_factory=list)  # client turn (1 = enquiry) each stated fact was quoted from
+
+
+# Question ledger: every question asked in the conversation keeps its status, so it is never re-asked.
+# answered = the customer gave the fact; answered_unknown = the customer does not know it; declined = the
+# customer will not answer; moved_to_experiment = an unknown answer turned into a feasibility step.
+QuestionStatus = Literal["open", "answered", "answered_unknown", "declined", "moved_to_experiment"]
 
 
 class Question(BaseModel):
     text: str
     impact: Optional[Literal["method", "setup", "acceptance"]] = None
+    id: Optional[str] = None
+    status: QuestionStatus = "open"
+    answer: Optional[str] = None
+    askedTurn: Optional[int] = None
+    answeredTurn: Optional[int] = None
 
 
 class Concept(BaseModel):
@@ -79,6 +94,11 @@ class Report(BaseModel):
     feasibility: Feasibility
     premiseChecks: list[PremiseCheck] = Field(default_factory=list)
     sources: list[Citation]
+    # "final": the customer asked for an answer without further questions; open points become
+    # assumptions and points to confirm instead of a question block.
+    mode: Literal["draft", "final"] = "draft"
+    assumptions: list[str] = Field(default_factory=list)
+    pointsToConfirm: list[str] = Field(default_factory=list)
 
 
 class ChatMessage(BaseModel):
@@ -93,9 +113,20 @@ class TraceStep(BaseModel):
     detail: Optional[str] = None
 
 
+class Answer(BaseModel):
+    """An answer bound to one ledger question (the UI's per-question input)."""
+
+    id: Optional[str] = None
+    question: str = Field(min_length=1, max_length=1000)
+    status: Literal["answered", "answered_unknown", "declined"]
+    answer: Optional[str] = Field(default=None, max_length=2000)
+
+
 class AssessRequest(BaseModel):
     messages: list[ChatMessage] = Field(min_length=1, max_length=40)
     scenarioId: Optional[str] = None
+    answers: list[Answer] = Field(default_factory=list, max_length=20)
+    final: bool = False  # the customer asked for the final answer, no more questions
 
 
 class AssessResponse(BaseModel):

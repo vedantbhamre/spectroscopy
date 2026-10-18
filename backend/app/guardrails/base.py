@@ -6,7 +6,7 @@ The categories split into two groups:
     OFF_TOPIC, JAILBREAK, INJECTION
 
   Premise flags (non-blocking) — the enquiry is on-topic, but it rests on a premise the
-  assistant must push back on. They do NOT stop the request: H04 / H05 / H06 are scored
+  assistant must push back on. They do NOT stop the request: such enquiries are scored
   evaluation cases that need a full assessment (questions, first experiment). The flags
   are passed to the pipeline, where the deterministic premise checks act on them:
     APPROVAL_DEMAND     — "approve this concept now" without the needed information

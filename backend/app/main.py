@@ -6,6 +6,7 @@ from app.config import settings
 logfire.configure(token=settings.LOGFIRE_TOKEN, send_to_logfire="if-token-present", service_name="spectrasense-backend", console=False)
 
 import hashlib  # noqa: E402
+import traceback  # noqa: E402
 from contextlib import asynccontextmanager  # noqa: E402
 
 from fastapi import FastAPI  # noqa: E402
@@ -15,7 +16,9 @@ from fastapi.responses import JSONResponse  # noqa: E402
 from app import guardrails  # noqa: E402
 from app.agents.graph import agent  # noqa: E402
 from app.gateway import LLMUnavailable  # noqa: E402
+from app.gateway.client import attempts  # noqa: E402
 from app.schemas import AssessRequest, AssessResponse, QueryRequest, Report, TraceStep  # noqa: E402
+from app.evals_api import router as evals_router  # noqa: E402
 from app.services import retrieval  # noqa: E402
 
 
@@ -28,16 +31,17 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(title="SpectraSense assessment API", version="0.1.0", lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=[settings.FRONTEND_ORIGIN], allow_methods=["*"], allow_headers=["*"])
 logfire.instrument_fastapi(app)
+app.include_router(evals_router)
 
 @app.get("/")
 @app.get("/health")
 def health() -> dict:
     return {
         "service": "spectrasense-backend",
-        "llm": ("portkey → openai" if settings.PORTKEY_API_KEY else "openai" if settings.llm_configured else None),
+        "llm": (f"portkey → {settings.LLM_PROVIDER}" if settings.PORTKEY_API_KEY else settings.LLM_PROVIDER if settings.llm_configured else None),
         "models": [settings.PRIMARY_MODEL, settings.FALLBACK_MODEL],
-        "fallback_key": bool(settings.OPENAI_FALLBACK_API_KEY),
-        "groq_fallback": settings.GROQ_MODEL if settings.GROQ_FALLBACK_API_KEY else None,
+        "route": [f"{label}:{model}" for _, model, label, _ in attempts()],
+        "retrieve_top_n": settings.RETRIEVE_TOP_N,
         "embeddings": bool(settings.GEMINI_API_KEY),
         "qdrant": "cloud" if settings.QDRANT_URL else "local",
         "kb_chunks": len(retrieval.chunks()),
@@ -100,11 +104,13 @@ def assess(req: AssessRequest):
                               report=_blocked_report(req.scenarioId), trace=[gate])
     config = {"configurable": {"thread_id": _thread(messages, req.scenarioId)}}
     try:
-        out = agent.invoke({"messages": messages, "scenario_id": req.scenarioId, "gate_flags": flags, "trace": []}, config=config)
+        out = agent.invoke({"messages": messages, "scenario_id": req.scenarioId, "gate_flags": flags, "trace": [],
+                            "answers": [a.model_dump() for a in req.answers], "final_mode": req.final}, config=config)
     except LLMUnavailable as e:
         return _unavailable(e)
     except Exception as e:  # noqa: BLE001
         logfire.exception("assessment failed")
+        traceback.print_exc()  # also in the server log, for local debugging
         return JSONResponse(status_code=500, content={"error": "assessment_failed", "message": f"The assessment failed: {e}"[:300]})
     return AssessResponse(reply=out.get("reply", ""), report=Report(**out["report"]), trace=[gate, *[TraceStep(**t) for t in out.get("trace", [])]])
 
@@ -120,7 +126,7 @@ def query(req: QueryRequest):
                 "status": "Blocked by guardrails.", "sources": []}
     messages = [*prior, {"role": "user", "content": req.q}]
     try:
-        out = agent.invoke({"messages": messages, "gate_flags": flags, "trace": []}, config=config)
+        out = agent.invoke({"messages": messages, "gate_flags": flags, "trace": [], "answers": [], "final_mode": False}, config=config)
     except LLMUnavailable as e:
         return _unavailable(e)
     agent.update_state(config, {"messages": [*messages, {"role": "assistant", "content": out.get("reply", "")}]})

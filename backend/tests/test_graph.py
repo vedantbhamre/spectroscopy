@@ -98,4 +98,4 @@ def test_followup_question_uses_memory(client, monkeypatch):
     body = r.json()
     assert body["reply"].startswith("It is the link")
     assert body["report"]["title"] == "Silica link for MIR ATR"  # previous report from MemorySaver
-    assert [t["step"] for t in body["trace"]][-1] == "Answer from the previous report"
+    assert [t["step"] for t in body["trace"]][-1] == "Explain the previous report"
