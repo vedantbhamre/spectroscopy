@@ -115,5 +115,14 @@ def scrub(text: str, allowed: Allowed) -> tuple[str, int]:
         return PLACEHOLDER
 
     out = TOKEN.sub(repl, text)
-    out = re.sub(rf"(\s*{re.escape(PLACEHOLDER)})(\s*(?:–|-|to)\s*{re.escape(PLACEHOLDER)})+", r"\1", out)
+    P = re.escape(PLACEHOLDER)
+    # The whole numeric phrase goes: its qualifier ("±", "about", "up to", "less than") and a second placeholder
+    # ("between P and P", "P–P", "P or P"); the placeholder appears once per phrase.
+    out = re.sub(rf"{P}\s*(?:%\s*)?(?:w/w|v/v|wt\s*%)", PLACEHOLDER, out, flags=re.I)  # a unit left behind
+    out = re.sub(rf"(?:[±~≈<>≤≥]\s*|\b(?:approximately|approx\.|about|around|roughly|up to|at least|at most|less than|more than)\s+)+({P})",
+                 r"\1", out, flags=re.I)
+    # half of a range: "between 3 and P", "3–P", "P–7" → the whole range is unsupported
+    out = re.sub(rf"\bbetween\s+(?:{_NUM})\s*(?:{_UNIT})?\s+and\s+{P}|\bbetween\s+{P}\s+and\s+(?:{_NUM})\s*(?:{_UNIT})?", PLACEHOLDER, out, flags=re.I)
+    out = re.sub(rf"(?<![\w.])(?:{_NUM})\s*(?:–|-|to)\s*{P}|{P}\s*(?:–|-|to)\s*(?:{_NUM})(?:\s?(?:{_UNIT}))?(?![\w])", PLACEHOLDER, out, flags=re.I)
+    out = re.sub(rf"{P}(\s*(?:–|-|to|and|or|/|,)\s*{P})+", PLACEHOLDER, out)
     return out, count

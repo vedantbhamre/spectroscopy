@@ -12,7 +12,7 @@ There is a previous report: {has_report}."""
 ANALYST = """Extract what the client stated. Never fill in missing facts. Return JSON with exactly these keys:
 {
  "stated": [{"fact": "short paraphrase", "quote": "exact words copied from the client"}],
- "unknowns": ["facts needed for a method choice that the client did not give"],
+ "unknowns": [{"text": "a fact the client did not give", "impact": "method | setup | acceptance"}],
  "target_variables": ["variables or substances to measure; [] if not named"],
  "methods_requested": ["methods the client proposes to MEASURE with: NIR | MIR_ATR | RAMAN | FLUO | UVVIS"],
  "fibers_mentioned": ["silica_uvvis | silica_visnir | chalcogenide | pir | hwg | zrf | inf"],
@@ -32,7 +32,10 @@ ANALYST = """Extract what the client stated. Never fill in missing facts. Return
  "analyzer_remote": true | false,
  "link_length_m": number | null
 }
-Rules: a method mentioned only as the origin of existing equipment is not requested. A silica cable from a visible or NIR setup is "silica_visnir".
+Rules: "unknowns" impact "method" = the answer could change which method is suitable (sample matrix or identity, target and
+its range, optical appearance, interferences); "setup" = it changes the installation; "acceptance" = criteria.
+Only the client's own words are facts: lines starting "Q:" repeat the assistant's question and are never client facts.
+A method mentioned only as the origin of existing equipment is not requested. A silica cable from a visible or NIR setup is "silica_visnir".
 "asks_for_certainty" = the client wants approval, proof, a guarantee or an exact configuration now.
 "access_points" = number of free process ports / access points / probe positions the client stated (null if not stated).
 "single_method_insufficient" = the client states or shows that one method alone is not enough.
@@ -71,6 +74,12 @@ passage per citation; add several citations for several passages). Cite the pass
 prefer the application pages for the customer's kind of sample over general pages. Never invent a number. For the method
 table cite a row as {"source": "S01", "page": "Table 1 (p.6)", "quote": "<the row>"}.
 Spectral ranges: give correct units; a nominal method range is not the range of a specific instrument, fibre or probe. For Raman, state excitation (nm) separately from Raman shift (cm-1).
+Say "absorption range" for NIR, MIR and UV-Vis; "excitation" only for Raman and fluorescence.
+Certainty: nothing has been measured for this customer, so never write that a method "can meet", "will achieve", "guarantees"
+or is "approved". Say it is "the most promising first candidate to test" and what the first experiment must show.
+Hardware details (window material, seals, pressure rating, path length) only when a cited passage states them; path lengths
+follow S01 Table 1 for the probe type; otherwise list them under "pointsToConfirm".
+Cite each claim with a passage about the same method: a page about one method is no evidence for another.
 
 PREMISE CHECKS were computed deterministically and are correct. Your answer must agree with them: a failed check means you cannot recommend what it rules out, and the decision status cannot be "provisional".
 

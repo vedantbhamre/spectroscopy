@@ -23,7 +23,7 @@ const originLabel = {
   demo: { text: "Demo placeholder", cls: "text-warn border-warn/50" },
 };
 
-const roleLabel = { primary: "Primary candidate", comparison: "Comparison candidate", combination: "Combination, test after single methods", not_recommended: "Not recommended" };
+const roleLabel = { primary: "Primary candidate", comparison: "Comparison candidate", combination: "Escalation: combination after single methods", not_recommended: "Not recommended" };
 const roleStyle = { primary: "border-l-accent", comparison: "border-l-line-strong", combination: "border-l-violet", not_recommended: "border-l-bad" };
 const impactLabel = { method: "could change the method", setup: "could change the setup", acceptance: "sets acceptance" };
 
@@ -194,6 +194,11 @@ export function ReportView({ report, transcript, toolbar }: { report: Report; tr
                 <div className="font-sans text-xs font-medium text-ink-3">{roleLabel[r.role]}</div>
                 <div className="font-sans text-lg font-semibold">{r.method}</div>
                 <p className="mt-1 text-ink-2">{r.reason} <Citations items={r.citations} /></p>
+                {r.limitations && r.limitations.length > 0 && (
+                  <ul className="mt-2 space-y-1 font-sans text-sm text-warn">
+                    {r.limitations.map((l) => <li key={l} className="flex gap-1.5"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden /> {l}</li>)}
+                  </ul>
+                )}
               </div>
             ))}
           </div>

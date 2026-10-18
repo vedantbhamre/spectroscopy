@@ -2,7 +2,7 @@ import json
 import re
 
 from app.agents import prompts
-from app.agents.nodes.common import client_turns, step, transcript
+from app.agents.nodes.common import client_turns, customer_words, step, transcript
 from app.agents.state import AgentState
 from app.knowledge.applications import DOMAINS
 from app.gateway import chat, parse_json
@@ -38,9 +38,9 @@ def analyst_node(state: AgentState) -> dict:
     (enquiry and every answer); each fact is tagged with the turn it came from.
     """
     trace = list(state.get("trace", []))
-    turns = client_turns(state["messages"])
+    turns = [customer_words(t) for t in client_turns(state["messages"])]
     turn = len(turns)
-    turns_n = [normalise(t) for t in turns]
+    turns_n = [normalise(t) for t in turns]  # quotes must be the customer's words, never the echoed question text
 
     with step({"trace": trace}, "Separate facts and unknowns") as rec:
         # 1. Answers the UI bound to questions (one input per question) are authoritative.
@@ -76,17 +76,46 @@ def analyst_node(state: AgentState) -> dict:
                 stated_turns.append(t)
             else:
                 dropped += 1
-        # Every answered ledger question is a stated fact, even if the model did not list it.
+        # Every answered question is a fact in the customer's own answer words (never the question's wording).
         for q in ledger:
-            if q.status == "answered" and q.answer and not L.covered(q.answer, stated):
-                stated.append(f"{q.text.rstrip('?')}: {q.answer}")
+            if q.status == "answered" and q.answer and not L.covered(q.answer, stated) and len(L._words(q.answer)) >= 2:
+                stated.append(q.answer)
                 stated_turns.append(q.answeredTurn or turn)
+        # One row per fact (normalised); raw question-answer pairs stay in the ledger, not in the requirements.
+        seen: set[str] = set()
+        uniq = [(f, t) for f, t in zip(stated, stated_turns) if not (normalise(f) in seen or seen.add(normalise(f)))]
+        def same(a: str, b: str) -> bool:  # symmetric: a short fact is not a duplicate of a longer one that contains it
+            wa, wb = L._words(a), L._words(b)
+            return bool(wa and wb) and len(wa & wb) / len(wa | wb) >= 0.8
 
-        settled = [q for q in ledger if q.status in ("answered", "declined")]  # an "unknown" answer is still a key unknown
+        uniq = [(f, t) for i, (f, t) in enumerate(uniq) if not any(same(f, g) for g, _ in uniq[:i])]
+        stated, stated_turns = [f for f, _ in uniq], [t for _, t in uniq]
+
+        # Unknowns persist from the previous report until a customer answer or a new fact resolves them.
+        prev = (state.get("report") or {}).get("requirements") or {}
+        latest = [f for f, t in zip(stated, stated_turns) if t == turn and turn > 1]
+        settled_q = [q for q in ledger if q.status in ("answered", "declined")]
+
+        def resolved(u: str) -> bool:
+            return any(L.similar(u, q.text) for q in settled_q) or (bool(latest) and L.covered(u, latest, 0.7))
+
+        raw_unknowns = [u if isinstance(u, dict) else {"text": u} for u in data.get("unknowns", []) if isinstance(u, (str, dict))]
+        unknowns = [str(u.get("text") or "").strip() for u in raw_unknowns]
+        decisive = [str(u.get("text") or "").strip() for u in raw_unknowns if u.get("impact") == "method"]
+        for u in prev.get("unknowns") or []:
+            if u and not u.startswith("Not known yet") and not any(L.similar(u, x) for x in unknowns):
+                unknowns.append(u)
+        for u in prev.get("decisive") or []:
+            if not any(L.similar(u, x) for x in decisive):
+                decisive.append(u)
+        unknowns = [u for u in unknowns if u and not resolved(u)]
+        decisive = [u for u in decisive if u and not resolved(u)]
+
         facts = Facts(
             stated=stated,
             stated_turns=stated_turns,
-            unknowns=[u for u in data.get("unknowns", []) if isinstance(u, str) and not any(L.similar(u, q.text) for q in settled)],
+            unknowns=unknowns,
+            decisive_unknowns=decisive,
             target_variables=[t for t in data.get("target_variables", []) if isinstance(t, str)],
             methods_mentioned=[m for m in data.get("methods_requested", []) if m in ("NIR", "MIR_ATR", "RAMAN", "FLUO", "UVVIS")],
             fibers_mentioned=[f for f in data.get("fibers_mentioned", []) if isinstance(f, str)],
@@ -108,7 +137,7 @@ def analyst_node(state: AgentState) -> dict:
             analyzer_remote=bool(data.get("analyzer_remote")),
             link_length_m=float(data["link_length_m"]) if isinstance(data.get("link_length_m"), (int, float)) else None,
         )
-        facts = detect("\n\n".join(turns), facts, enquiry=turns[0] if turns else "")
+        facts = detect("\n\n".join(turns), facts, enquiry=turns[0] if turns else "")  # customer words only
         # Safety-gate premise flags (approval demand, immediate config, research as proof) feed the checks.
         gate = set(state.get("gate_flags") or [])
         if gate & {"approval_demand", "immediate_config"}:

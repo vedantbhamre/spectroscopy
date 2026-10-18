@@ -28,6 +28,8 @@ export const Recommendation = z.object({
   role: z.enum(["primary", "comparison", "combination", "not_recommended"]),
   reason: z.string(),
   citations: z.array(Citation).default([]),
+  /** From the premise checks: fibre range, link length, geometry; escalation note for a combination. */
+  limitations: z.array(z.string()).optional(),
 });
 
 export const PremiseCheck = z.object({
@@ -70,6 +72,8 @@ export const Report = z.object({
     unknowns: z.array(z.string()),
     /** Client turn (1 = enquiry) each stated fact was quoted from. */
     factTurns: z.array(z.number()).optional(),
+    /** Unknowns that could change the method; they stay until the customer resolves them. */
+    decisive: z.array(z.string()).optional(),
   }),
   /** The question ledger: every question asked so far, with its status. Only "open" ones are still asked. */
   questions: z.array(Question),

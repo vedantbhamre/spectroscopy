@@ -83,6 +83,8 @@ def summarise(s: dict, turns: list[dict]) -> dict:
         "violations": {k: v for k, v in violations.items() if v},
         "models": [t.get("model") for t in turns], "tokens": sum(t.get("tokens", 0) for t in turns),
         "expectations": exp, "expectation_failures": fails,
+        **{k: sum(t["validation"].get(k, 0) for t in turns) for k in ("certainty_rejected", "method_mismatch", "recited", "hardware_moved")},
+        "decisive_open": turns[-1]["validation"].get("decisive_open", 0),
     }
 
 
@@ -128,14 +130,15 @@ def main(argv: list[str]) -> None:
     store.write_text(json.dumps(rows, ensure_ascii=False, indent=1))
     ok = [r for r in rows if "error" not in r]
     lines = ["# Batch validation report", "", f"{len(ok)} of {len(rows)} cases ran · turns per case: {2 if follow_up_on else 1}", "",
-             "| Case | Status (turns) | Citation pass | Number hits | Repeated questions | Missing sections | Repairs | Sentences moved | Expectations | Model (turns) | Tokens |",
-             "|---|---|---|---|---|---|---|---|---|---|---|"]
+             "| Case | Status (turns) | Citation pass | Number hits | Repeated questions | Missing sections | Repairs | Sentences moved | Certainty rejected | Method-mismatch citations | Re-cited | Open decisive unknowns | Expectations | Model (turns) | Tokens |",
+             "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"]
     for r in rows:
         if "error" in r:
-            lines.append(f"| {r['id']} | FAILED: {r['error']} | | | | | | | | | |")
+            lines.append(f"| {r['id']} | FAILED: {r['error']} | | | | | | | | | | | | | |")
             continue
         lines.append(f"| {r['id']} | {' → '.join(r['status'])} | {r['citation_pass']} | {r['number_hits']} | {r['repeated_questions']} | "
-                     f"{r['missing_sections']} | {r['repaired']} | {r['moved_sentences']} | {r['expectations'] if r['expectations'] is not None else '–'} | "
+                     f"{r['missing_sections']} | {r['repaired']} | {r['moved_sentences']} | {r.get('certainty_rejected', '–')} | {r.get('method_mismatch', '–')} | {r.get('recited', '–')} | {r.get('decisive_open', '–')} | "
+                     f"{r['expectations'] if r['expectations'] is not None else '–'} | "
                      f"{' → '.join(m.replace('openai/', '') for m in r.get('models', []))} | {r.get('tokens', 0):,} |")
     viol = [(r["id"], k, v) for r in ok for k, vs in r["violations"].items() for v in vs]
     lines += ["", "## Acceptance violations", ""] + ([f"- **{i}** {k}: {v}" for i, k, v in viol] or ["None."])

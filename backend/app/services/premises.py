@@ -32,6 +32,7 @@ class Facts(BaseModel):
     stated: list[str] = Field(default_factory=list)
     stated_turns: list[int] = Field(default_factory=list)  # client turn each stated fact was quoted from
     unknowns: list[str] = Field(default_factory=list)
+    decisive_unknowns: list[str] = Field(default_factory=list)  # unknowns that could change the method
     target_variables: list[str] = Field(default_factory=list)
     methods_mentioned: list[str] = Field(default_factory=list)  # MethodId values
     fibers_mentioned: list[str] = Field(default_factory=list)  # FIBERS keys

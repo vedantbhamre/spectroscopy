@@ -11,6 +11,7 @@ from app.gateway import chat, parse_json
 from app.knowledge import table1 as T1
 from app.schemas import Citation, DirectAnswer, PremiseCheck, Question, Report
 from app.services import ledger as L
+from app.services import review_rules as RR
 from app.services import validators as V
 from app.services.citations import page_text, verify
 from app.services.numbers import allowed_numbers, scrub
@@ -226,6 +227,11 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
         report.risks.append("The mid-IR fibre link over the required distance is not shown to be feasible in the supplied material.")
 
     stats["later_stage_moved"] = V.validate_feasibility(report)
+    stats["hardware_moved"] = RR.validate_hardware(report)
+    stats["excitation_fixed"] = RR.fix_excitation(report)
+    RR.order_plan(report, medical=facts.application_domain == "medical and tissue" or facts.use_context == "clinical")
+    RR.add_limitations(report, report.premiseChecks)
+    stats.update(RR.enforce_decisive(report, facts.decisive_unknowns, final, turn))
 
     seen: dict[tuple, Citation] = {}
     for c in [*(report.answer.citations if report.answer else []), *(c for r in report.recommendations for c in r.citations), *report.concept.citations, *report.spectralRange.citations]:
@@ -241,6 +247,7 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
     # Final mode: provisional unless the checks justify otherwise. Otherwise the checks set the floor.
     report.decisionStatus = apply_floor("provisional" if final else report.decisionStatus, report.premiseChecks)
     stats["answer_written"] = ensure_answer(report)
+    stats["certainty_rejected"] = RR.reject_certainty(report)
     if report.answer and not (facts.cites_study_as_proof or _CLAIM.search(client_text(messages))):
         report.answer.sayInstead = None  # only when the customer wants to quote, claim or promise something
     stats["missing"] = V.missing_sections(report)
@@ -333,6 +340,9 @@ def responder_node(state: AgentState) -> dict:
     validation = {"numbers_replaced": stats["numbers"], "missing_sections": stats["missing"], "repaired": bool(repaired),
                   "sentences_moved": stats["sentences_moved"], "recommendations_moved": stats["recommendations_moved"],
                   "questions": stats["questions"], "transfers": stats["transfers"],
+                  "certainty_rejected": stats.get("certainty_rejected", 0), "method_mismatch": stats.get("method_mismatch", 0),
+                  "recited": stats.get("recited", 0), "decisive_open": stats.get("decisive_open", 0),
+                  "hardware_moved": stats.get("hardware_moved", 0), "excitation_fixed": stats.get("excitation_fixed", 0),
                   "citations": {k: stats[k] for k in ("verified", "visual_note", "failed", "unverified")}}
     return {"report": report.model_dump(), "reply": reply, "ledger": [x.model_dump() for x in report.questions], "trace": trace,
             "validation": validation}

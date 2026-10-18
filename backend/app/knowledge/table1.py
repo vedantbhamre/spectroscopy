@@ -23,6 +23,15 @@ ROWS: list[tuple[str, str, str, str, str]] = [
     ("FLUO", "fluorimetric probe", "fluorescence (emission)", "liquid, solid", "low"),
 ]
 RANK = {"low": 0, "average": 1, "high": 2}
+
+# optical_path_or_depth column of S01 Table 1, in µm, per method (all its measurement techniques).
+PATHS_UM: dict[str, list[tuple[float, float]]] = {
+    "MIR_ATR": [(1, 6), (10, 100), (5, 50), (10, 10)],
+    "NIR": [(1000, 5000), (1000, 10000), (500, 1000), (5000, 10000), (2000, 5000)],
+    "RAMAN": [(2000, 5000)],
+    "UVVIS": [(1000, 5000), (0.1, 1), (1000, 5000), (1000, 10000)],
+    "FLUO": [(10000, 10000), (1000, 5000)],
+}
 TABLE1 = Citation(source="S01", page="Table 1 (p.6)", check="unverified")
 
 

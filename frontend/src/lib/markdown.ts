@@ -19,7 +19,10 @@ export function toMarkdown(r: Report, enquiry: string): string {
   if (r.assumptions?.length) L.push("## Assumptions", "", ...r.assumptions.map((s) => `- ${s}`), "");
   if (r.pointsToConfirm?.length) L.push("## Points to confirm", "", ...r.pointsToConfirm.map((s) => `- ${s}`), "");
   L.push("## Recommendation", "");
-  for (const rec of r.recommendations) L.push(`- **${rec.method}** (${rec.role.replace("_", " ")}). ${rec.reason}${cites(rec.citations)}`);
+  for (const rec of r.recommendations) {
+    L.push(`- **${rec.method}** (${rec.role.replace("_", " ")}). ${rec.reason}${cites(rec.citations)}`);
+    for (const l of rec.limitations ?? []) L.push(`  - Limitation: ${l}`);
+  }
   L.push("", "## Measurement concept", "", r.concept.summary + cites(r.concept.citations), "");
   L.push("## Spectral range", "", r.spectralRange.summary + cites(r.spectralRange.citations), "");
   L.push("## Risks and uncertainty", "", ...r.risks.map((s) => `- ${s}`), "");
@@ -35,7 +38,7 @@ export function toMarkdown(r: Report, enquiry: string): string {
   return L.join("\n") + "\n";
 }
 
-const plainRole = { primary: "Primary candidate", comparison: "Comparison candidate", combination: "Combination, test after single methods", not_recommended: "Not recommended" } as const;
+const plainRole = { primary: "Primary candidate", comparison: "Comparison candidate", combination: "Escalation: combination after single methods", not_recommended: "Not recommended" } as const;
 const plainImpact = { method: "could change the method", setup: "could change the setup", acceptance: "sets acceptance" } as const;
 const plainCheck = { pass: "Pass", flag: "Flag", fail: "Fail" } as const;
 
@@ -94,6 +97,7 @@ export function toPlainText(r: Report, transcript: string): string {
     r.recommendations.forEach((rec, i) => {
       if (i) L.push("");
       L.push(`${rec.method} (${plainRole[rec.role]})`, `${rec.reason}${cites(rec.citations)}`);
+      for (const l of rec.limitations ?? []) L.push(`  Limitation: ${l}`);
     });
   }
 

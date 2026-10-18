@@ -12,9 +12,10 @@
 
 import re
 
-from app.knowledge.applications import context, of_citation
+from app.knowledge.applications import context
+from app.knowledge.page_tags import application_of, quote_methods, supports_method
 from app.knowledge.optics import METHODS
-from app.schemas import Report
+from app.schemas import Citation, Report
 from app.services.numbers import numbers_in
 
 VALID = ("verified", "visual_note")
@@ -50,30 +51,69 @@ def passages(cites) -> str:
     return " ".join(f"{c.quote or ''} {context(c.source, c.page, c.quote)}" for c in cites if c.check in VALID and c.source != "EXT")
 
 
-def validate_claims(report: Report) -> dict:
-    """Move unsupported recommendation sentences (and uncited recommendations) to the assumptions."""
-    moved, removed, kept = 0, 0, []
+def recite(sentence: str, method_ids: list[str], exclude: set[tuple[str, str]] = frozenset()) -> Citation | None:
+    """One re-citation search before a sentence is demoted: knowledge-base passages for the claim's method that support it."""
+    from app.knowledge.optics import METHODS as _M
+    from app.services.passages import _pieces
+    from app.services.retrieval import bm25, vector
+
+    query = " ".join([sentence, *(_M[m].label for m in method_ids if m in _M)])
+    seen, hits = set(), []
+    for h in [*bm25(query, 12), *vector(query, 12)]:
+        if h["id"] not in seen:
+            seen.add(h["id"])
+            hits.append(h)
+    for h in hits:
+        src, page = h["source"], str(h["page"])
+        if h.get("kind") == "table" or (src, page) in exclude:
+            continue
+        for piece in _pieces(h["text"]):
+            # Stricter than the check on the model's own citation: the passage names the method and carries half the claim.
+            if _strong(sentence, piece) and (not method_ids or quote_methods(piece) & set(method_ids)):
+                return Citation(source=src, page=page, quote=piece, check="verified")
+    return None
+
+
+def _strong(sentence: str, passage: str) -> bool:
+    sw, pw = _words(sentence), _words(passage)
+    hit = len(sw & pw)
+    return hit >= 3 and hit / max(len(sw), 1) >= 0.5
+
+
+def validate_claims(report: Report, recite_fn=recite) -> dict:
+    """Citations must support the recommendation's method (a page about one method is no evidence for another);
+    unsupported sentences get one re-citation search, and only then move to the assumptions."""
+    moved, removed, mismatch, recited, kept = 0, 0, 0, 0, []
     for r in report.recommendations:
         if r.role == "not_recommended":
             kept.append(r)
             continue
+        ok_cites = [c for c in r.citations if c.check not in VALID or supports_method(c.source, c.page, c.quote, r.methodIds)]
+        mismatch += len(r.citations) - len(ok_cites)
+        r.citations = ok_cites
         support = passages(r.citations)
-        if not support:
-            report.assumptions.append(f"{r.method} ({r.role.replace('_', ' ')} candidate, no verified page citation): {r.reason}")
-            removed += 1
-            continue
-        ok = [s for s in sentences(r.reason) if supported(s, support)]
-        for s in sentences(r.reason):
-            if s not in ok:
-                report.assumptions.append(f"{r.method}: {s} (not supported by the cited page)")
-                moved += 1
+        ok = []
+        for s in sentences(r.reason) or ([r.reason] if r.reason.strip() else []):
+            if support and supported(s, support):
+                ok.append(s)
+                continue
+            extra = recite_fn(s, r.methodIds, {(c.source, c.page) for c in r.citations}) if recite_fn else None
+            if extra is not None:
+                r.citations.append(extra)
+                support = passages(r.citations)
+                ok.append(s)
+                recited += 1
+                continue
+            report.assumptions.append(f"{r.method}: {s} (not supported by the cited page)" if support
+                                      else f"{r.method} ({r.role.replace('_', ' ')} candidate, no verified page citation): {s}")
+            moved += 1
         if not ok:
             removed += 1
             continue
         r.reason = " ".join(ok)
         kept.append(r)
     report.recommendations = kept
-    return {"sentences_moved": moved, "recommendations_moved": removed}
+    return {"sentences_moved": moved, "recommendations_moved": removed, "method_mismatch": mismatch, "recited": recited}
 
 
 _LATER_STAGE = re.compile(r"\b(animal|human|clinical|patient|in-vivo|in vivo|first-in-human)\s+(pilot\s+)?(stud(y|ies)|trials?|tests?|testing|evaluation)\b"
@@ -83,8 +123,8 @@ _DASHES = str.maketrans({c: "-" for c in "\u2010\u2011\u2012\u2013\u2014"})
 _NUMBERED = re.compile(r"^\s*(?:step\s*)?\d+[.):]\s*", re.I)
 _HELD_OUT = re.compile(r"held[- ]out|unseen|not used (to build|for (building|training|calibration))|independent (test|validation) set"
                        r"|external validation|(new|other|different) (patients|batches|lots|samples) (that|not)|not part of the (model|calibration)", re.I)
-HELD_OUT_STEP = ("Validate the model on samples not used to build it (held-out samples, e.g. from other patients, batches or "
-                 "days) before drawing any conclusion; a model built on few samples can fit them without generalising.")
+HELD_OUT_STEP = ("Validate the model on samples not used to build it (held-out samples, e.g. from other batches, days or "
+                 "production runs) before drawing any conclusion; a model built on few samples can fit them without generalising.")
 
 
 def validate_feasibility(report: Report) -> int:
@@ -114,9 +154,9 @@ def label_transfers(report: Report, domain: str | None) -> int:
         for c in h.citations:
             if c.check not in VALID or c.source == "EXT":
                 continue
-            tags = of_citation(c.source, c.page, c.quote)
-            if tags and domain not in tags:
-                c.transfer, c.application = True, ", ".join(tags)
+            app = application_of(c.source, c.page, c.quote)  # method descriptions are general: never a transfer
+            if app and app != domain:
+                c.transfer, c.application = True, app
                 note = (f"Transfer assumption: {c.source} p.{c.page} shows this for {c.application}, not for {domain}; "
                         "it has to be tested for this application.")
                 if note not in report.assumptions:

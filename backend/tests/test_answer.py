@@ -72,4 +72,5 @@ def test_feasibility_rules_survive_typography():
     raw["feasibility"] = {"steps": ["1. Build a model and validate on held\u2011out samples.",
                                     "2. Perform a pilot in\u2011vivo test on a small number of surgeries."], "decisionBasis": "Agreed first."}
     report, stats, _ = finalise(raw, checks=[], scenario_id=None)
-    assert report.feasibility.steps == ["Build a model and validate on held\u2011out samples."] and stats["later_stage_moved"] == 1
+    assert "Build a model and validate on held\u2011out samples." in report.feasibility.steps and stats["later_stage_moved"] == 1
+    assert not any("vivo" in s for s in report.feasibility.steps)

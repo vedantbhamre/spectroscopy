@@ -27,6 +27,8 @@ class Recommendation(BaseModel):
     role: Literal["primary", "comparison", "combination", "not_recommended"]
     reason: str
     citations: list[Citation] = Field(default_factory=list)
+    # From the premise checks: fibre range, link length, geometry; and for a combination, that it is an escalation.
+    limitations: list[str] = Field(default_factory=list)
 
 
 class PremiseCheck(BaseModel):
@@ -41,6 +43,8 @@ class Requirements(BaseModel):
     stated: list[str]
     unknowns: list[str]
     factTurns: list[int] = Field(default_factory=list)  # client turn (1 = enquiry) each stated fact was quoted from
+    # Unknowns whose answer could change the method; they persist until a customer answer resolves them.
+    decisive: list[str] = Field(default_factory=list)
 
 
 # Question ledger: every question asked in the conversation keeps its status, so it is never re-asked.
