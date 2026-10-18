@@ -30,7 +30,7 @@ interface Row {
   status?: string;
   ms?: number | null;
   error?: string;
-  metrics?: Record<string, unknown> & { expectation_failures?: string[]; unsupported_claims?: string[] };
+  metrics?: Record<string, unknown> & { expectation_failures?: string[]; unsupported_claims?: string[]; metric_errors?: Record<string, string> };
 }
 interface Result { run_at: string; mode: string; judge: string | null; judge_calls: number; metrics: string[]; summary: Summary; scenarios: Row[] }
 interface CachedReport { generatedAt?: string; decisionStatus?: string; answer?: { text: string } | null; sources?: Citation[] }
@@ -195,6 +195,9 @@ export default async function EvalsPage() {
   const independent = !!r?.judge && !/no judge key/i.test(r.judge);
   const metricKeys = r ? GROUPS.flatMap((g) => g.keys).filter((k) => r.metrics.includes(k)) : [];
   const groupStarts = new Set(r ? GROUPS.map((g) => g.keys.find((k) => r.metrics.includes(k))).filter(Boolean) : []);
+  const judgeKeys = Object.entries(METRICS).filter(([, m]) => m.marker === "judge").map(([k]) => k).filter((k) => r?.metrics.includes(k));
+  const judgeMissing = r ? r.scenarios.reduce((n, s) => n + Object.keys(s.metrics?.metric_errors ?? {}).filter((k) => judgeKeys.includes(k)).length, 0) : 0;
+  const judgeTotal = r ? r.scenarios.reduce((n, s) => n + judgeKeys.filter((k) => typeof s.metrics?.[k] === "number" || s.metrics?.metric_errors?.[k]).length, 0) : 0;
   const groupScore = (keys: string[]) => (r ? mean(keys.filter((k) => r.metrics.includes(k)).map((k) => r.summary[k]?.all)) : null);
 
   return (
@@ -217,7 +220,8 @@ export default async function EvalsPage() {
             )}
             {r && (
               <p className="mt-5 text-xs text-hero-ink-2">
-                Group score = average of its scores below · marked {fmtDate(r.run_at)} · judge: {r.judge ?? "off"}
+                Group score = average of its scores below · marked {fmtDate(r.run_at)} · {r.mode} · judge: {r.judge ?? "off"}
+                {judgeTotal > 0 && ` · ${judgeTotal - judgeMissing} of ${judgeTotal} judge marks completed`}
               </p>
             )}
           </div>
@@ -270,6 +274,7 @@ export default async function EvalsPage() {
               <span className="inline-flex items-center gap-1 text-warn"><CircleAlert className="h-3.5 w-3.5" aria-hidden /> 0.50–0.79 fair</span>
               <span className="inline-flex items-center gap-1 text-bad"><CircleX className="h-3.5 w-3.5" aria-hidden /> below 0.50 low</span>
               <span>– does not apply (not a zero)</span>
+              {judgeMissing > 0 && <span className="italic">not marked: the judge hit its rate limit ({judgeMissing} of {judgeTotal} judge marks)</span>}
             </div>
           </section>
 
@@ -368,7 +373,10 @@ export default async function EvalsPage() {
                                   {metricKeys.map((k) => {
                                     const v = s.metrics?.[k] as number | null | undefined;
                                     const b = bandOf(v);
-                                    return <td key={k} className={`px-3 py-2.5 ${b ? CELL[b] : ""} ${groupStarts.has(k) ? "border-l border-line" : ""}`}><Score v={v} /></td>;
+                                    const missed = s.metrics?.metric_errors?.[k];
+                                    return <td key={k} className={`px-3 py-2.5 ${b ? CELL[b] : ""} ${groupStarts.has(k) ? "border-l border-line" : ""}`}>
+                                      {missed ? <span className="text-xs italic text-ink-3" title={`The judge could not mark this: ${missed}`}>not marked</span> : <Score v={v} />}
+                                    </td>;
                                   })}
                                   <td className="whitespace-nowrap border-l border-line px-3 py-2.5 text-xs text-ink-3">{s.ms ? `${(s.ms / 1000).toFixed(1)} s` : "–"}</td>
                                 </>

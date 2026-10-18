@@ -1,7 +1,7 @@
 {
- "run_at": "2026-10-17T17:14:08+00:00",
- "mode": "live pipeline",
- "judge": "openai:gpt-4o (JUDGE_OPENAI_API_KEY)",
+ "run_at": "2026-10-18T19:33:26+00:00",
+ "mode": "stored answers (pages rebuilt offline)",
+ "judge": "groq:openai/gpt-oss-20b (JUDGE_GROQ)",
  "judge_calls": 46,
  "metrics": [
   "citation_validity",
@@ -22,8 +22,8 @@
    "evaluation": 1.0
   },
   "grounding": {
-   "all": 0.9167,
-   "development": 0.9,
+   "all": 1.0,
+   "development": 1.0,
    "evaluation": 1.0
   },
   "clarification": {
@@ -37,33 +37,33 @@
    "evaluation": 1.0
   },
   "expectations": {
-   "all": 0.9643,
-   "development": 0.9375,
+   "all": 1.0,
+   "development": 1.0,
    "evaluation": 1.0
   },
   "faithfulness": {
-   "all": 0.7202,
-   "development": 0.6771,
-   "evaluation": 0.7778
+   "all": 0.9471,
+   "development": 1.0,
+   "evaluation": 0.8061
   },
   "answer_relevancy": {
-   "all": 0.7381,
-   "development": 0.7417,
-   "evaluation": 0.7333
+   "all": 0.7712,
+   "development": 0.8048,
+   "evaluation": 0.7125
   },
   "context_precision": {
-   "all": 0.806,
-   "development": 0.8216,
-   "evaluation": 0.7852
+   "all": 0.9714,
+   "development": 0.9866,
+   "evaluation": 0.9182
   },
   "context_recall": {
-   "all": 0.3556,
-   "development": 0.3556,
+   "all": 0.5056,
+   "development": 0.5056,
    "evaluation": null
   },
   "answer_correctness": {
-   "all": 0.6458,
-   "development": 0.6458,
+   "all": 0.8615,
+   "development": 0.8615,
    "evaluation": null
   }
  },
@@ -73,8 +73,8 @@
    "set": "development",
    "title": "Blend potency in a tablet press feed frame",
    "status": "provisional",
-   "ms": 8842.21770905424,
-   "pages_retrieved": 8,
+   "ms": null,
+   "pages_retrieved": 11,
    "metrics": {
     "citation_validity": 1.0,
     "grounding": 1.0,
@@ -82,15 +82,12 @@
     "feasibility": 1.0,
     "expectations": 1.0,
     "expectation_failures": [],
-    "unsupported_claims": [
-     "Potential interference from excipients in the blend.",
-     "Need for matrix-specific calibration models."
-    ],
-    "faithfulness": 0.7142857142857143,
-    "answer_relevancy": 0.8,
-    "context_precision": 0.9266666666666665,
-    "context_recall": 0.6,
-    "answer_correctness": 0.625
+    "unsupported_claims": [],
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.8167,
+    "context_precision": 1.0,
+    "context_recall": 0.9,
+    "answer_correctness": 0.9230769230769231
    }
   },
   {
@@ -98,32 +95,8 @@
    "set": "development",
    "title": "Fat and protein monitoring in opaque dairy product",
    "status": "provisional",
-   "ms": 7759.114208049141,
-   "pages_retrieved": 8,
-   "metrics": {
-    "citation_validity": 1.0,
-    "grounding": 0.5,
-    "clarification": 1.0,
-    "feasibility": 1.0,
-    "expectations": 1.0,
-    "expectation_failures": [],
-    "unsupported_claims": [
-     "There is a risk of potential interference from product temperature and texture variations."
-    ],
-    "faithfulness": 0.8333333333333334,
-    "answer_relevancy": 0.8,
-    "context_precision": 0.8583333333333332,
-    "context_recall": 0.1111111111111111,
-    "answer_correctness": 0.6666666666666666
-   }
-  },
-  {
-   "id": "D03",
-   "set": "development",
-   "title": "A clear whey stream before concentration",
-   "status": "provisional",
-   "ms": 8012.178082950413,
-   "pages_retrieved": 8,
+   "ms": null,
+   "pages_retrieved": 11,
    "metrics": {
     "citation_validity": 1.0,
     "grounding": 1.0,
@@ -131,14 +104,32 @@
     "feasibility": 1.0,
     "expectations": 1.0,
     "expectation_failures": [],
-    "unsupported_claims": [
-     "Monitor protein concentration in a whey stream with varying turbidity using spectroscopy.",
-     "Raman shift typically 200–3400 cm-1 with excitation around 785 nm.",
-     "Potential interference from turbidity affecting spectral measurements."
-    ],
-    "faithfulness": 0.5714285714285714,
-    "answer_relevancy": 0.95,
-    "context_precision": 0.6791666666666667,
+    "unsupported_claims": [],
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.8,
+    "context_precision": 1.0,
+    "context_recall": 0.1111111111111111,
+    "answer_correctness": 0.8
+   }
+  },
+  {
+   "id": "D03",
+   "set": "development",
+   "title": "A clear whey stream before concentration",
+   "status": "provisional",
+   "ms": null,
+   "pages_retrieved": 10,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": 1.0,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [],
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.8167,
+    "context_precision": 1.0,
     "context_recall": null,
     "answer_correctness": null
    }
@@ -147,9 +138,9 @@
    "id": "D04",
    "set": "development",
    "title": "Glucose and lactate trends in an aqueous bioprocess",
-   "status": "insufficient",
-   "ms": 14325.55054104887,
-   "pages_retrieved": 8,
+   "status": "provisional",
+   "ms": null,
+   "pages_retrieved": 10,
    "metrics": {
     "citation_validity": 1.0,
     "grounding": 1.0,
@@ -157,13 +148,10 @@
     "feasibility": 1.0,
     "expectations": 1.0,
     "expectation_failures": [],
-    "unsupported_claims": [
-     "In situ spectroscopy is used for monitoring glucose and lactate in cell culture.",
-     "Calibration complexity arises due to medium and cell population changes."
-    ],
-    "faithfulness": 0.7142857142857143,
-    "answer_relevancy": 0.85,
-    "context_precision": 0.8541666666666666,
+    "unsupported_claims": [],
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.8833,
+    "context_precision": 1.0,
     "context_recall": null,
     "answer_correctness": null
    }
@@ -173,8 +161,8 @@
    "set": "development",
    "title": "Biomass related monitoring during yeast fermentation",
    "status": "insufficient",
-   "ms": 5931.4517499879,
-   "pages_retrieved": 8,
+   "ms": null,
+   "pages_retrieved": 11,
    "metrics": {
     "citation_validity": 1.0,
     "grounding": null,
@@ -182,12 +170,10 @@
     "feasibility": 1.0,
     "expectations": 1.0,
     "expectation_failures": [],
-    "unsupported_claims": [
-     "Undefined measurement targets may lead to inappropriate method selection."
-    ],
-    "faithfulness": 0.6666666666666666,
-    "answer_relevancy": 0.7,
-    "context_precision": 0.775,
+    "unsupported_claims": [],
+    "faithfulness": 1.0,
+    "answer_relevancy": null,
+    "context_precision": 1.0,
     "context_recall": null,
     "answer_correctness": null
    }
@@ -196,9 +182,9 @@
    "id": "D06",
    "set": "development",
    "title": "Water content in a petroleum stream",
-   "status": "insufficient",
-   "ms": 8235.884207999334,
-   "pages_retrieved": 8,
+   "status": "provisional",
+   "ms": null,
+   "pages_retrieved": 11,
    "metrics": {
     "citation_validity": 1.0,
     "grounding": 1.0,
@@ -206,12 +192,10 @@
     "feasibility": 1.0,
     "expectations": 1.0,
     "expectation_failures": [],
-    "unsupported_claims": [
-     "Potential challenges in fiber coupling efficiency over long distances."
-    ],
-    "faithfulness": 0.75,
-    "answer_relevancy": 0.4333,
-    "context_precision": 0.7329365079365079,
+    "unsupported_claims": [],
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.8833,
+    "context_precision": 0.9060405643738976,
     "context_recall": null,
     "answer_correctness": null
    }
@@ -221,35 +205,8 @@
    "set": "development",
    "title": "API concentration during hot polymer extrusion",
    "status": "insufficient",
-   "ms": 9433.919667033479,
-   "pages_retrieved": 8,
-   "metrics": {
-    "citation_validity": 1.0,
-    "grounding": null,
-    "clarification": 1.0,
-    "feasibility": 1.0,
-    "expectations": 0.5,
-    "expectation_failures": [
-     "mentions one of ['mir', 'atr', 'raman', 'nir']"
-    ],
-    "unsupported_claims": [
-     "Unspecified measurement variable may lead to inappropriate method selection.",
-     "High temperature and material build-up could affect probe performance."
-    ],
-    "faithfulness": 0.5,
-    "answer_relevancy": 0.8,
-    "context_precision": 0.8083333333333332,
-    "context_recall": null,
-    "answer_correctness": null
-   }
-  },
-  {
-   "id": "D08",
-   "set": "development",
-   "title": "Local measurements of heterogeneous model tissues",
-   "status": "insufficient",
-   "ms": 7912.875875015743,
-   "pages_retrieved": 8,
+   "ms": null,
+   "pages_retrieved": 10,
    "metrics": {
     "citation_validity": 1.0,
     "grounding": null,
@@ -257,13 +214,35 @@
     "feasibility": 1.0,
     "expectations": 1.0,
     "expectation_failures": [],
-    "unsupported_claims": [
-     "The study aims to compare MIR ATR and fluorescence for classifying biological tissues.",
-     "The combination's benefit is a hypothesis to test."
-    ],
-    "faithfulness": 0.6666666666666666,
-    "answer_relevancy": 0.6,
-    "context_precision": 0.9379251700680271,
+    "unsupported_claims": [],
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.9333,
+    "context_precision": null,
+    "context_recall": null,
+    "answer_correctness": null,
+    "metric_errors": {
+     "context_precision": "Error code: 400 - {'error': {'message': \"Failed to generate JSON. Please adjust your prompt. See 'failed_generation' for more details.\", 'type': 'invalid_request_error', 'code': 'json_validate_failed'"
+    }
+   }
+  },
+  {
+   "id": "D08",
+   "set": "development",
+   "title": "Local measurements of heterogeneous model tissues",
+   "status": "provisional",
+   "ms": null,
+   "pages_retrieved": 14,
+   "metrics": {
+    "citation_validity": 1.0,
+    "grounding": 1.0,
+    "clarification": 1.0,
+    "feasibility": 1.0,
+    "expectations": 1.0,
+    "expectation_failures": [],
+    "unsupported_claims": [],
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.5,
+    "context_precision": 1.0,
     "context_recall": null,
     "answer_correctness": null
    }
@@ -272,24 +251,23 @@
    "id": "H01",
    "set": "evaluation",
    "title": "A new formulation after an existing NIR pilot",
-   "status": "insufficient",
-   "ms": 6691.783000016585,
-   "pages_retrieved": 8,
+   "status": "provisional",
+   "ms": null,
+   "pages_retrieved": 11,
    "metrics": {
     "citation_validity": 1.0,
-    "grounding": null,
+    "grounding": 1.0,
     "clarification": 1.0,
     "feasibility": 1.0,
     "expectations": 1.0,
     "expectation_failures": [],
     "unsupported_claims": [
-     "Each method should be evaluated independently before considering a combination.",
-     "Existing NIR calibration may not transfer to the new blend.",
-     "Adding Raman does not guarantee the old calibration's validity."
+     "NIR absorption range is to be agreed with the customer",
+     "Raman excitation at 785 nm with Raman shift recorded typically to be agreed with the customer"
     ],
-    "faithfulness": 0.5,
-    "answer_relevancy": 0.9,
-    "context_precision": 0.41666666666666663,
+    "faithfulness": 0.8181818181818182,
+    "answer_relevancy": null,
+    "context_precision": 0.8363235529902195,
     "context_recall": null,
     "answer_correctness": null
    }
@@ -299,8 +277,8 @@
    "set": "evaluation",
    "title": "Composition monitoring across two dairy streams",
    "status": "provisional",
-   "ms": 8517.22816703841,
-   "pages_retrieved": 8,
+   "ms": null,
+   "pages_retrieved": 12,
    "metrics": {
     "citation_validity": 1.0,
     "grounding": 1.0,
@@ -308,12 +286,10 @@
     "feasibility": 1.0,
     "expectations": 1.0,
     "expectation_failures": [],
-    "unsupported_claims": [
-     "NIR (Transmission) is suitable for relatively clear whey stream, allowing deeper light penetration."
-    ],
-    "faithfulness": 0.8333333333333334,
-    "answer_relevancy": 0.9,
-    "context_precision": 0.8166666666666667,
+    "unsupported_claims": [],
+    "faithfulness": 1.0,
+    "answer_relevancy": null,
+    "context_precision": 1.0,
     "context_recall": null,
     "answer_correctness": null
    }
@@ -323,24 +299,29 @@
    "set": "evaluation",
    "title": "A fluorescence instrument requested for glucose and viable biomass",
    "status": "insufficient",
-   "ms": 7480.307791032828,
-   "pages_retrieved": 8,
+   "ms": null,
+   "pages_retrieved": 10,
    "metrics": {
     "citation_validity": 1.0,
-    "grounding": null,
+    "grounding": 1.0,
     "clarification": 1.0,
     "feasibility": 1.0,
     "expectations": 1.0,
     "expectation_failures": [],
     "unsupported_claims": [
-     "Fluorescence spectroscopy requires a defined fluorescent target for accurate measurement of glucose and biomass.",
-     "Lack of a defined fluorescent target may lead to inaccurate measurements."
+     "Fluorimetry is low‑cost but requires a known fluorescent species; without an identified target it cannot provide quantitative glucose or biomass data.",
+     "Test fluorescence only after a suitable fluorophore is identified; meanwhile develop Raman (probe‑based) and NIR (transmission probe) models on the same broth samples for comparison.",
+     "Raman excitation wavelength and shift are to be agreed with the customer.",
+     "Fluorescence excitation in UV‑Vis and emission are to be agreed with the customer."
     ],
-    "faithfulness": 0.3333333333333333,
-    "answer_relevancy": 0.6,
-    "context_precision": 0.8166666666666667,
+    "faithfulness": 0.6,
+    "answer_relevancy": 0.8333,
+    "context_precision": null,
     "context_recall": null,
-    "answer_correctness": null
+    "answer_correctness": null,
+    "metric_errors": {
+     "context_precision": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m57pnx7hea5vytmjhaqkbr1h` service tier `on_demand` on tokens per day (TPD): Limit 2000"
+    }
    }
   },
   {
@@ -348,21 +329,24 @@
    "set": "evaluation",
    "title": "Reuse of a silica link for petroleum MIR ATR",
    "status": "insufficient",
-   "ms": 6167.5138749415055,
-   "pages_retrieved": 8,
+   "ms": null,
+   "pages_retrieved": 11,
    "metrics": {
     "citation_validity": 1.0,
-    "grounding": null,
+    "grounding": 1.0,
     "clarification": 1.0,
     "feasibility": 1.0,
     "expectations": 1.0,
     "expectation_failures": [],
-    "unsupported_claims": [],
-    "faithfulness": 1.0,
-    "answer_relevancy": 0.8,
-    "context_precision": 0.9166666666666666,
+    "faithfulness": null,
+    "answer_relevancy": 0.7667,
+    "context_precision": null,
     "context_recall": null,
-    "answer_correctness": null
+    "answer_correctness": null,
+    "metric_errors": {
+     "faithfulness": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m57pnx7hea5vytmjhaqkbr1h` service tier `on_demand` on tokens per day (TPD): Limit 2000",
+     "context_precision": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m57pnx7hea5vytmjhaqkbr1h` service tier `on_demand` on tokens per day (TPD): Limit 2000"
+    }
    }
   },
   {
@@ -370,8 +354,8 @@
    "set": "evaluation",
    "title": "An undefined off specification liquid",
    "status": "insufficient",
-   "ms": 5733.053875039332,
-   "pages_retrieved": 8,
+   "ms": null,
+   "pages_retrieved": 10,
    "metrics": {
     "citation_validity": 1.0,
     "grounding": null,
@@ -379,12 +363,15 @@
     "feasibility": 1.0,
     "expectations": 1.0,
     "expectation_failures": [],
-    "unsupported_claims": [],
-    "faithfulness": 1.0,
-    "answer_relevancy": 0.4,
-    "context_precision": 0.7961904761904762,
+    "faithfulness": null,
+    "answer_relevancy": 0.8833,
+    "context_precision": null,
     "context_recall": null,
-    "answer_correctness": null
+    "answer_correctness": null,
+    "metric_errors": {
+     "faithfulness": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m57pnx7hea5vytmjhaqkbr1h` service tier `on_demand` on tokens per day (TPD): Limit 2000",
+     "context_precision": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m57pnx7hea5vytmjhaqkbr1h` service tier `on_demand` on tokens per day (TPD): Limit 2000"
+    }
    }
   },
   {
@@ -392,21 +379,24 @@
    "set": "evaluation",
    "title": "A research sensor requested for immediate surgical use",
    "status": "out_of_scope",
-   "ms": 6481.333083007485,
-   "pages_retrieved": 8,
+   "ms": null,
+   "pages_retrieved": 12,
    "metrics": {
     "citation_validity": 1.0,
-    "grounding": null,
+    "grounding": 1.0,
     "clarification": 1.0,
     "feasibility": 1.0,
     "expectations": 1.0,
     "expectation_failures": [],
-    "unsupported_claims": [],
-    "faithfulness": 1.0,
-    "answer_relevancy": 0.8,
-    "context_precision": 0.9484126984126983,
+    "faithfulness": null,
+    "answer_relevancy": 0.3667,
+    "context_precision": null,
     "context_recall": null,
-    "answer_correctness": null
+    "answer_correctness": null,
+    "metric_errors": {
+     "faithfulness": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m57pnx7hea5vytmjhaqkbr1h` service tier `on_demand` on tokens per day (TPD): Limit 2000",
+     "context_precision": "Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01m57pnx7hea5vytmjhaqkbr1h` service tier `on_demand` on tokens per day (TPD): Limit 2000"
+    }
    }
   }
  ]

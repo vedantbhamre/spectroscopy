@@ -58,8 +58,25 @@ def run_live(scenario: dict) -> tuple[dict, list[dict], float]:
 
 
 def load_cached(scenario: dict) -> tuple[dict, list[dict], float | None]:
+    """A stored answer and the pages it was written from. The pages are rebuilt offline (no LLM): the same retrieval for
+    the enquiry (without the planner's extra queries) plus every page the answer cites, so the judge can grade
+    faithfulness and context against them."""
+    from app.config import settings
+    from app.services.retrieval import chunks, retrieve
+
     data = json.loads((FRONTEND_OUT / f"{scenario['id']}.json").read_text())
-    return data.get("report", data), [], None
+    report = data.get("report", data)
+    docs, _ = retrieve([], top_n=settings.RETRIEVE_TOP_N, routing_text=scenario["enquiry"])
+    have = {(d["source"], str(d["page"])) for d in docs}
+    for c in report.get("sources", []):
+        key = (c.get("source"), str(c.get("page")))
+        if key in have or not str(c.get("page", "")).isdigit():
+            continue
+        page = [ch for ch in chunks() if ch["source"] == key[0] and str(ch["page"]) == key[1]]
+        if page:
+            docs.append(page[0])
+            have.add(key)
+    return report, docs, None
 
 
 def score(scenario: dict, report: dict, documents: list[dict], judge: Judge | None) -> dict:
@@ -167,7 +184,7 @@ def run(ids: list[str] | None = None, *, judge_on: bool = True, from_cache: bool
 
     result = {
         "run_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "mode": "cached outputs" if from_cache else "live pipeline",
+        "mode": "stored answers (pages rebuilt offline)" if from_cache else "live pipeline",
         "judge": judge.route if judge else None,
         "judge_calls": judge.calls if judge else 0,
         "metrics": names,
