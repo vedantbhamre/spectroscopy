@@ -1,13 +1,13 @@
 {
- "reply": "The first step is to treat the new blend as a separate sample set: use the existing NIR probe to collect spectra and build a fresh calibration against an independent reference assay, and in parallel acquire Raman spectra (e.g., with a 785 nm probe) to evaluate whether the Raman data add useful orthogonal information. This experiment will tell if the NIR model can be transferred or must be rebuilt and whether Raman is worth adding.",
+ "reply": "The first step is to test whether the existing NIR calibration still works on the new blend and, in parallel, collect Raman spectra to see if the added information can improve the model. A feasibility experiment should compare NIR‑only, Raman‑only and fused NIR‑Raman models on representative powder samples with independent reference assays.",
  "report": {
   "scenarioId": "H01",
-  "title": "Assessing NIR calibration transfer and Raman complement for new API blend",
+  "title": "Assess NIR calibration transfer and Raman addition for new API blend",
   "origin": "live",
-  "generatedAt": "2026-10-18T15:10:32+00:00",
+  "generatedAt": "2026-10-18T18:16:10+00:00",
   "decisionStatus": "provisional",
   "answer": {
-   "text": "Not yet – the existing NIR calibration cannot be assumed valid for the new formulation; the first experiment must test NIR alone on the new blend and evaluate Raman as a possible complementary method.",
+   "text": "Not yet – the existing NIR calibration must be validated on the new formulation and a Raman probe trial is needed to evaluate any benefit.",
    "citations": [
     {
      "source": "S01",
@@ -36,9 +36,9 @@
     "colleague suggests adding Raman so that the old calibration will remain valid"
    ],
    "unknowns": [
-    "Magnitude of matrix change on NIR spectra",
-    "Whether Raman provides independent variance for the new blend",
-    "Acceptable prediction error and reference method availability"
+    "spectral overlap and matrix effect of the new API/excipient blend",
+    "whether Raman can be integrated in‑line at the feed frame",
+    "acceptable accuracy for a combined NIR‑Raman model"
    ],
    "factTurns": [
     1,
@@ -46,46 +46,74 @@
     1
    ],
    "decisive": [
-    "whether Raman can compensate for matrix change and keep the NIR calibration valid"
+    "whether Raman can be integrated and maintain calibration validity across the new formulation"
    ]
   },
   "questions": [
    {
-    "text": "What reference analytical method (e.g., HPLC) will be used to provide independent API concentration values for the calibration/validation sets?",
+    "text": "Do you have an independent reference assay (e.g., HPLC) for the new blend to provide ground‑truth API concentrations during the feasibility study?",
     "impact": "method",
     "id": "q1",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "Are there any constraints on probe insertion points or available ports at the feed frame?",
-    "impact": "setup",
+    "text": "What is the typical temperature range of the powder stream at the feed frame?",
+    "impact": "method",
     "id": "q2",
     "status": "open",
     "askedTurn": 1
    },
    {
-    "text": "What is the acceptable prediction error (e.g., %RMSEP) for the API concentration in this process?",
-    "impact": "acceptance",
+    "text": "What type of Raman probe (e.g., fiber‑optic Raman probe with 785 nm excitation) can be installed at the feed frame and what are the mechanical/temperature constraints of that location?",
+    "impact": "setup",
     "id": "q3",
-    "status": "open",
-    "askedTurn": 1
-   },
-   {
-    "text": "Can you tell us whether Raman can compensate for matrix change and keep the NIR calibration valid?",
-    "impact": "method",
-    "id": "q4",
     "status": "open",
     "askedTurn": 1
    }
   ],
   "recommendations": [
    {
-    "method": "Raman spectroscopy",
+    "method": "NIR (diffuse reflection)",
+    "methodIds": [
+     "NIR"
+    ],
+    "role": "primary",
+    "reason": "The existing NIR pilot already measures the powder in‑line and, per‑2, NIR works well with opaque, scattering solids using diffuse‑reflection probes, making it the simplest, cheapest first candidate.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "5",
+      "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "5",
+      "quote": "as well as standard lamps as light sources, making it ideal for online applications, including remote measurements via fiber optic probes.",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "Table 1 (p.6)",
+      "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
+      "check": "verified"
+     }
+    ],
+    "limitations": []
+   },
+   {
+    "method": "Raman spectroscopy (fiber probe)",
     "methodIds": [],
     "role": "comparison",
-    "reason": "Raman offers complementary vibrational information (symmetrical, non‑polar groups) and can be implemented with a contact probe; testing it will reveal whether it improves model robustness for the new matrix.",
+    "reason": "Raman provides complementary vibrational information (symmetrical, non‑polar groups) that can help resolve matrix effects; notes the benefit of NIR‑Raman fusion for pharmaceutical solids, while states Raman requires a special probe but records in the visible/NIR region.",
     "citations": [
+     {
+      "source": "S01",
+      "page": "15",
+      "quote": "The combination of these techniques is particularly effective because it captures complementary chemical information: NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
+      "check": "verified"
+     },
      {
       "source": "S01",
       "page": "5",
@@ -94,8 +122,8 @@
      },
      {
       "source": "S01",
-      "page": "15",
-      "quote": "The combination of these techniques is particularly effective because it captures complementary chemical information: NIR detects hydrogen bonds and asymmetric polar groups, while Raman provides information on the molecular backbone and symmetrical non-polar groups.",
+      "page": "Table 1 (p.6)",
+      "quote": "RAMAN: Raman probe (Raman scattering (emission)); sample: liquid, powder, solid; cost: high",
       "check": "verified"
      }
     ],
@@ -103,11 +131,11 @@
    }
   ],
   "concept": {
-   "summary": "Collect simultaneous NIR diffuse‑reflection spectra (existing probe) and Raman spectra (785 nm excitation probe) from the powder stream at the feed frame; use the NIR data to build a new calibration, and evaluate Raman data for added predictive power.",
-   "probe": "NIR diffuse‑reflection probe (existing) and Raman contact probe (785 nm excitation)",
-   "location": "Feed frame of the rotary tablet press, inserted into the powder flow",
-   "fiberLink": "Standard silica fiber for NIR; appropriate Raman fiber (e.g., low‑OH silica) for the Raman probe",
-   "analyzer": "Existing NIR spectrometer; separate Raman spectrometer (if not already owned)",
+   "summary": "Collect simultaneous NIR diffuse‑reflection spectra with the existing probe and Raman back‑scatter spectra with a fiber‑optic Raman probe inserted at the same point in the feed frame; transmit both signals via separate fibers to their respective analyzers and fuse the data offline for model development.",
+   "probe": "NIR diffuse‑reflection probe (existing) + fiber‑optic Raman probe (785 nm excitation)",
+   "location": "tablet press feed frame, in‑line with powder flow",
+   "fiberLink": "standard silica fiber for NIR; low‑OH fiber for Raman (as per vendor specs)",
+   "analyzer": "existing NIR spectrometer + a Raman spectrometer with compatible fiber interface",
    "citations": [
     {
      "source": "S01",
@@ -130,7 +158,7 @@
    ]
   },
   "spectralRange": {
-   "summary": "NIR absorption range (≈780–2500 nm) measured in diffuse reflection; Raman excitation at 785 nm with Raman shift recorded in cm⁻¹.",
+   "summary": "NIR absorption range ([to be agreed with the customer]) in diffuse reflection; Raman excitation at 785 nm with Raman shift recorded typically [to be agreed with the customer].",
    "citations": [
     {
      "source": "S01",
@@ -141,27 +169,33 @@
     {
      "source": "S01",
      "page": "10",
-     "quote": "Unlike mid- IR spectroscopy, measurements in the NIR region are facilitated by a number of factors: the transparency of plain and quartz glass (which allows the use of standard optics and probes), low molar absorption coefficients,",
+     "quote": "ontain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups, such as -OH, -NH2=NH, -CH3, =CH2, ≥CH, etc., found in many organic and inorganic compounds.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "15",
+     "quote": "The equipment used for such task involves next spectral systems: NIR spectrometer and light source coupled with a NIR reflection probe Raman spectrometer and Raman fiber probe for contact measurements with 785 nm excitation wavelength During the experimental action,",
      "check": "verified"
     }
    ]
   },
   "risks": [
-   "Matrix change may alter NIR scattering/absorption enough to require a new calibration.",
-   "Raman signal may be weak in highly scattering powders, requiring longer integration or higher laser power.",
-   "Probe fouling or dust buildup could affect signal stability; cleaning procedures must be defined."
+   "Matrix change may shift NIR bands enough to invalidate the old calibration.",
+   "Raman signal may be weak in highly scattering powder, requiring longer integration or higher laser power.",
+   "Space/temperature constraints at the feed frame may limit probe installation."
   ],
   "feasibility": {
    "steps": [
-    "Prepare a set of representative powder samples covering the expected API concentration range of the new blend.",
-    "Simultaneously acquire Raman spectra with a 785 nm probe on the same samples.",
-    "Obtain reference API concentrations using the agreed reference method (e.g., HPLC).",
-    "Build an NIR calibration model (e.g., PLS) and evaluate its prediction error.",
-    "Build a Raman‑only model and a fused NIR‑Raman model to assess any improvement.",
-    "Validate each model on held‑out samples not used in calibration.",
-    "Measure each sample with the existing NIR probe in the same in‑line geometry used for the current process."
+    "Prepare a set of powder samples covering the expected API concentration range of the new blend.",
+    "Acquire reference API concentrations by an independent assay (e.g., HPLC).",
+    "Record NIR spectra with the existing probe under normal process conditions.",
+    "Record Raman spectra simultaneously (or sequentially) with a fiber‑optic Raman probe at the same location.",
+    "Build three chemometric models: NIR‑only, Raman‑only, and fused NIR‑Raman (low‑level data fusion).",
+    "Validate each model on held‑out samples to assess prediction error and robustness.",
+    "Then measure in-line or in a pilot set-up against the reference method."
    ],
-   "decisionBasis": "If the NIR model meets the agreed error criteria, the existing calibration can be updated without Raman. If Raman (alone or fused) reduces error or improves robustness, consider adding Raman for production monitoring. Agree two things separately with the customer before the test: the model accuracy required against the reference method, and the alarm or action threshold applied to the measured value."
+   "decisionBasis": "If the NIR‑only model meets the agreed accuracy, the Raman addition is unnecessary; if performance degrades, the fused model will be evaluated for improvement. Agree two things separately with the customer before the test: the model accuracy required against the reference method, and the alarm or action threshold applied to the measured value."
   },
   "premiseChecks": [
    {
@@ -180,9 +214,9 @@
    },
    {
     "id": "combination",
-    "label": "Method combination: an escalation option, not justified up front",
-    "status": "flag",
-    "detail": "Start with the simplest method that could meet the need and assess each method on its own; combine only if one is shown to be insufficient. A gain from combining is a hypothesis to test for this material.",
+    "label": "Method combination: justified, one method is stated to be insufficient",
+    "status": "pass",
+    "detail": "The customer states that a single method does not meet the need, so a combination is a reasonable next step; its gain is still tested.",
     "citations": [
      {
       "source": "S01",
@@ -196,14 +230,14 @@
     "id": "owned_equipment",
     "label": "Owned equipment: assessed",
     "status": "pass",
-    "detail": "The customer's existing equipment (NIR instrument) is assessed in the recommendation or the feasibility plan.",
+    "detail": "The customer's existing equipment (existing NIR pilot) is assessed in the recommendation or the feasibility plan.",
     "citations": []
    },
    {
     "id": "geometry_optics",
     "label": "Probe geometry matches the optical density of the medium",
     "status": "pass",
-    "detail": "Medium described as opaque; the proposed ATR / reflection geometry suits it.",
+    "detail": "Medium described as opaque; the proposed reflection geometry suits it.",
     "citations": [
      {
       "source": "S01",
@@ -235,6 +269,30 @@
    },
    {
     "source": "S01",
+    "page": "5",
+    "quote": "For example, NIR spectroscopy, with its relatively large penetration depth (up to several millimetres) even into dense solid samples due to low absorption and strong scattering, allows the use of ordinary glass for optics,",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "as well as standard lamps as light sources, making it ideal for online applications, including remote measurements via fiber optic probes.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "Table 1 (p.6)",
+    "quote": "NIR: diffuse reflection probe (diffuse reflection); sample: scattering media, powder; cost: average",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "Table 1 (p.6)",
+    "quote": "RAMAN: Raman probe (Raman scattering (emission)); sample: liquid, powder, solid; cost: high",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
     "page": "15",
     "quote": "the probes are inserted directly into the process environment, such as the feed frame of a rotary tablet press.",
     "check": "verified"
@@ -248,7 +306,13 @@
    {
     "source": "S01",
     "page": "10",
-    "quote": "Unlike mid- IR spectroscopy, measurements in the NIR region are facilitated by a number of factors: the transparency of plain and quartz glass (which allows the use of standard optics and probes), low molar absorption coefficients,",
+    "quote": "ontain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups, such as -OH, -NH2=NH, -CH3, =CH2, ≥CH, etc., found in many organic and inorganic compounds.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "15",
+    "quote": "The equipment used for such task involves next spectral systems: NIR spectrometer and light source coupled with a NIR reflection probe Raman spectrometer and Raman fiber probe for contact measurements with 785 nm excitation wavelength During the experimental action,",
     "check": "verified"
    },
    {
@@ -266,60 +330,60 @@
   ],
   "mode": "draft",
   "assumptions": [
-   "The powder remains opaque and scattering, suitable for diffuse‑reflection NIR.",
-   "A suitable Raman probe can be installed at the feed frame without major mechanical changes.",
-   "Reference assay data will be available for the new blend.",
-   "NIR (diffuse reflection): NIR diffuse‑reflection probes are suited to opaque powder streams and are already installed; they provide average‑depth information and have been used for in‑line API monitoring in pharmaceutical solids. (not supported by the cited page)"
+   "The powder remains opaque and scattering, so diffuse‑reflection NIR is appropriate.",
+   "A Raman probe compatible with the feed frame can be installed without major redesign.",
+   "Reference assay data will be available for model building.",
+   "Assumed until tested: an existing calibration applies to the new material.",
+   "Assumed, not stated by the customer: The existing NIR pilot already measures the powder in‑line and, per‑2, NIR works well with opaque, scattering solids using diffuse‑reflection probes, making it the simplest, cheapest first candidate."
   ],
   "pointsToConfirm": [
-   "Exact specifications of the reference analytical method and its sampling frequency.",
-   "Acceptable prediction error thresholds for API concentration.",
-   "Physical space and mounting options for a Raman probe at the feed frame.",
-   "Whether the existing NIR instrument can provide the required wavelength coverage (≈780–2500 nm)."
+   "Exact mechanical interface and temperature rating of the feed frame for a Raman probe.",
+   "Availability and specifications (laser wavelength, power) of a Raman probe suitable for pharmaceutical powders.",
+   "Reference method (e.g., HPLC) for API concentration and its sampling protocol."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 259.0,
+   "ms": 312.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 7850.0,
-   "detail": "3 stated (0 from answers) · 2 unknown"
+   "ms": 1945.0,
+   "detail": "3 stated (0 from answers) · 3 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 88.0,
+   "ms": 266.0,
    "detail": "S01 p.10, S01 p.11, S01 p.12, S01 p.14, S01 p.15, S01 p.5, S01 p.6, S01 p.8, S01 p.9, S02 p.14 · 9 routed by the source guide · vector+BM25"
   },
   {
    "step": "Premise checks",
    "status": "warn",
    "ms": 0.0,
-   "detail": "An existing calibration applies to the new material; Method combination: an escalation option, not justified up front"
+   "detail": "An existing calibration applies to the new material"
   },
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 51140.0,
+   "ms": 98167.0,
    "detail": "openai/gpt-oss-120b via groq"
   },
   {
    "step": "Verify citations",
    "status": "ok",
    "ms": 0.0,
-   "detail": "12 of 12 quotes found on the cited page"
+   "detail": "14 of 14 quotes found on the cited page"
   },
   {
    "step": "Validate numbers, claims and questions",
    "status": "warn",
    "ms": 0.0,
-   "detail": "all numbers traced to the customer or a cited page · 1 unsupported sentences and 1 uncited recommendations moved to assumptions · 4 open questions · all required sections present"
+   "detail": "2 unsupported numbers replaced · every recommendation sentence cited · 3 open questions · all required sections present"
   }
  ]
 }

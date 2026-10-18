@@ -106,3 +106,16 @@ def test_independent_samples_count_as_held_out_validation():
     raw["feasibility"] = {"steps": ["Measure lab samples.", "Validate the model on independent samples against the reference."], "decisionBasis": "x"}
     report, _, _ = finalise(raw, checks=[], scenario_id=None)
     assert not any("not used to build" in s for s in report.feasibility.steps)
+
+
+def test_no_comparison_when_a_premise_fails_and_never_from_a_fragment():
+    from app.schemas import PremiseCheck
+    docs = [c for c in chunks() if c["source"] == "S01" and int(c["page"]) in (14, 15)]
+    rep = copy.deepcopy(finalise(copy.deepcopy(RESPONDER), checks=[], scenario_id=None)[0])
+    rep.decisionStatus = "provisional"
+    rep.recommendations = [Recommendation(method="NIR", methodIds=["NIR"], role="primary", reason="x")]
+    rep.premiseChecks = [PremiseCheck(id="source_scope", label="x", status="fail", detail="x")]
+    assert not RR.ensure_comparison(rep, docs, ["API concentration"])
+    rep.premiseChecks = []
+    assert RR.ensure_comparison(rep, docs, ["API concentration"])
+    assert len(rep.recommendations[-1].citations[0].quote.split()) >= 8

@@ -20,3 +20,15 @@ Latest per-case check: docs/08-stress-test.md (H06: 19.5 → 25 / 30 after the d
 | | **Total** | | | | **50** | **40.5** |
 
 Biggest gains still available: #7 (second key + hosting decision + rehearsal), #9 (fresh full batch on the large model), #2–#3 (large model gives 90–100 % citation pass vs 40–60 % on the small fallback).
+
+## Official criteria scorecard (final, 18 Oct 20:30)
+
+| Criterion `[BRIEF]` | Score | Evidence (verified) | Weakest point |
+|---|---|---|---|
+| Technical quality | 4.5 | LangGraph pipeline + deterministic validators (citations, numbers, claims, facts, cost, certainty); 182 offline tests; production build | relies on one LLM provider's free tier |
+| Use of AFS knowledge | 4.5 | source-guide routing + BM25 + local BGE vectors (recall 0.97); citation by passage number (quotes exact by construction); method ranges, fibre windows and Table 1 encoded with page quotes | useful pages cited 0.72: some application pages read but not cited |
+| Feasibility | 4 | plan ordered lab → held-out validation → in-line/pilot → decision; reference method kept until validated; hardware details confirmed, not invented | plans are generic in places |
+| Uncertainty | 5 | premise checks set the status floor; certainty phrases rejected; unstated facts become assumptions; transfer labels; scope dimensions for studies | — |
+| Explainability | 4.5 | answer first; every claim has a clickable quote; premise checks with sources; Evals page drill-down vs the organisers' useful pages | Evals scores from 17 Oct |
+| Prototype | 4 | runs locally from the README in two terminals; no-key mode; H01–H06 answers in `answers/` | no hosted URL; large-model quota |
+| **Total** | **26.5 / 30** | | |

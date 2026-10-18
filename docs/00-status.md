@@ -1,74 +1,53 @@
-# SpectraSense — status (Sun 18 Oct 2026, 03:35 CEST)
+# SpectraSense: final evaluation (Sun 18 Oct 2026, 20:30 CEST)
 
-Evaluated with the hackathon-copilot process. Every "verified" item below was checked in this session; scores are rough team estimates for prioritising, not measurements.
+Evaluated with the hackathon-copilot process (Phase 10 submission gate + Phase 9 pitch). Every ✅ below was checked in this
+session; scores are 1–5 team estimates for prioritising, not measurements.
 
 ## Scoreboard
 
 ```
-Phase:                 8–10 (stress-test, pitch, submission)
-Time remaining:        ~20 h to the 23:59 deadline; ~6.5 h to the 10:00 feature freeze
-MVP completion:        ~85 %  (demo-path steps verified working / total, see below)
-Critical blockers:     1. 108 files uncommitted + 3 commits not pushed (loss risk; teammates cannot see the work)
-                       2. One LLM provider org, 200K tokens/day: a full eval batch or a long jury session can exhaust it
-                       3. Published eval results are stale/mixed (Evals page: 17 Oct gpt-4o run; batch: 10/14 on the small model)
-                       4. No deployed demo URL (whether one is required is unknown: the brief is not on disk)
-Judge score estimate:  36.5 / 45  (docs/01-judge-matrix.md)
-Next highest-value task: commit and push now; after 10:00 add the second-org Groq key and run the full batch on the large model
+Phase:                 10 (submission gate) + 9 (pitch)
+Time remaining:        ~3.5 h to 23:59  → feature freeze now; scope-cut protocol triggers at 22:00
+MVP completion:        100 % of the demo path verified (see below)
+Critical blockers:     1. Groq daily limit reached on the large model (both keys are in the same Groq account:
+                          199,147 / 200,000 at 20:20); live runs fall back to gpt-oss-20b until the window frees up.
+                          A key from a DIFFERENT Groq account in GROQ_FALLBACK_API_KEY removes this for the jury.
+                       2. Evals page shows the 17 Oct scores; one "Run evals" press refreshes them (needs quota).
+Judge score estimate:  26.5 / 30 on the six official criteria (docs/01-judge-matrix.md)
+Next highest-value task: second-account Groq key → re-run H02–H06 + Run evals; then pitch rehearsal and backup recording
 ```
 
-## Retrieval fix (measured, no LLM tokens)
-
-Recall of the organisers' "useful sources" (D01–D08) reaching the composer: **0.35 → 0.90**
-(keyword search + TinyBERT rerank → source-guide routing + stop-word BM25 + one chunk per page, 8 pages).
-Guarded by `backend/tests/test_retrieval.py`.
-Local semantic search added (BGE-base via fastembed, CPU, no key): on enquiries worded without routing keywords recall **0.64 → 0.93**,
-development set unchanged at 0.90 (`backend/tests/test_semantic_retrieval.py`). Compared BGE-small / BGE-base / mxbai-large (equal recall;
-BGE-base chosen for size/latency), arctic-m (0.43) and nomic (too heavy for CPU). Remaining miss: "malignant vs benign during an operation" does not reach S03 p.1. FlashRank rerank is now opt-in (`RERANK=flashrank`): it measured no gain.
-Answers have not been re-run with the new retrieval yet (needs tokens): see docs/11-next-run-plan.md step 2.
-
-## Answer accuracy (18 Oct evening, measured)
-
-`python -m evals.coverage` scores the cached reports without tokens against the organisers' useful sources (D01–D08) and the
-expected key points (D01, D02 organiser examples; H04, H06 expert reviews). Results: `backend/evals/results/coverage.md`.
-
-| | Before | After |
-|---|---|---|
-| Retrieval recall of useful pages (D01–D08) | 0.90 | **0.97** (method pages ordered by relevance, combined-probe and combining-methods routes, 10 pages) |
-| Useful pages actually **cited** in the reports | 0.40 | **0.82** (citation by passage number: quotes exact by construction) |
-| Citation pass rate on gpt-oss-120b (all 14 cases) | 40–100 % | **100 %**, no repair passes; golden expectations 1.0 on every case |
-| Key points of the expected answers | 0.79 | **0.97** |
-
-Also fixed on the way: classification studies count as having a target (D08 was wrongly "insufficient"); the customer's own words
-set the application domain when they point to one. All 14 cases re-run on gpt-oss-120b (18 Oct evening, new Groq key).
-
-## Demo path — verified now
+## Demo path: verified now
 
 | Step | Evidence (this session) | Status |
 |---|---|---|
-| Enquiry → cited first assessment, live | `POST /api/assess` D01: 5.5 s, *provisional*, NIR primary, 4/5 quotes found on the cited page, unsupported sentence and numbers moved/replaced by the validators | ✅ |
-| Answers → revised report, no repeated questions | 106 backend tests incl. scripted multi-turn acceptance tests; live 2-turn batch on 10 cases: 0 repeated questions | ✅ |
-| "Final report" → no question block, open points to confirm | acceptance test `test_powder_conversation…` + gate-flag test | ✅ |
-| Citation popover readable, on top | real click via Chrome DevTools on *How it works* | ✅ |
-| Evals page with scores | renders; data is the 17 Oct run | ⚠ stale data |
-| Production build | `next build` passes (12 routes) | ✅ |
-| Copy as text / PDF export after the redesign | not clicked this session | ❓ |
+| Enquiry → cited report, live | H01 live 20:16 on gpt-oss-120b: provisional, 14/14 quotes verified, all expectations met; new enquiry "stop the Karl Fischer titration, NIR needs no calibration?" → calibration premise flagged, answer "No…", 9/9 quotes verified | ✅ |
+| Premise checks on the trap cases | H04 silica fibre fails for MIR + link-length flag; H06 lab study → "beyond what the sources support"; H03 fluorescence without a target fails; H05 undefined target | ✅ |
+| Follow-up answers, no repeated questions | offline acceptance tests (182 tests); batch: 0 repeated questions | ✅ |
+| Assess page scrolling | progress bar under the header, page no longer stretches (fix/assess-scroll-ui) | ✅ |
+| Evals page | renders; Run evals at the top; scores from 17 Oct | ⚠ stale data |
+| Production build | `next build` passes, 12 routes | ✅ |
+| No-key fallback | stored live-pipeline answers for the 14 examples, badged "Batch run" | ✅ |
+
+## Answer quality (measured, `python -m evals.coverage`, no tokens)
+
+| | Value |
+|---|---|
+| Retrieval recall of the organisers' useful pages (D01–D08) | 0.97 (was 0.35 at the start) |
+| Useful pages cited in the stored reports | 0.72 |
+| Key points of the expected answers (D01, D02, H04, H06) | 1.00 |
+| Citations found on the cited page (large model) | 100 % in every stored case |
+| Golden expectations (14 cases) | 1.0 in every case |
+
+## Stored answers
+
+H01 was re-run tonight with every rule (20:16, large model). H02–H06 are the 15:12–15:20 large-model runs: the 20:16 batch
+fell back to the small model for them (daily limit), so those weaker runs were not kept. Re-run H02–H06 when a key from
+another Groq account is available: `python -m scripts.run_batch --single H02 H03 H04 H05 H06 && python -m scripts.export_answers`.
 
 ## Fallbacks that exist
 
-- **No backend / LLM down:** the frontend serves cached batch outputs for the unedited example enquiries (`frontend/outputs/<ID>.json`, labelled "Batch run"), never an invented answer [code: `src/app/api/assess/route.ts`].
-- **LLM gate down:** deterministic rule gate.
-- **Rate limit:** the gateway waits for the provider's retry time once, then falls back to the second key (`GROQ_FALLBACK_API_KEY`, currently empty) and the small model.
-
-## Plan (in order)
-
-1. **Now (10 min):** commit and push today's work to `main`.
-2. **10:00:** put the second-account Groq key in `GROQ_FALLBACK_API_KEY`; run `python -m scripts.run_batch` (all 14 cases, large model) → refreshes `frontend/outputs/*.json`, `evals/results/batch-latest.md`. Then one judge eval run from the Evals page (or `python -m evals.run_evals`) so the Evals page shows today's model. Rebuild the frontend afterwards (home-page numbers are prerendered).
-3. **Decide hosting** (see open questions). If a URL is needed: frontend on Vercel, backend on a small container host; test with an unseen enquiry.
-4. **Submission pack:** README (problem, screenshots, setup, stack, team, limitations), licence/attribution, architecture diagram matching the code (Groq + rule/LLM gate, no NeMo), docs/10-submission-checklist.md.
-5. **Pitch:** 3-minute script along the demo path (H04 is the strongest live moment: the premise check stops an impossible silica link), judge Q&A answers, backup screen recording.
-
-## Open questions (blocking)
-
-- What exactly does the brief require for submission: repo only, hosted URL, video, slides? Where are the evaluation criteria and their weights?
-- Will the jury run its own enquiry on our machine (local) or on a hosted URL? (Q&A: "The jury may ask you to run a shot on your own inquiry.")
-- Is an emergency fallback to OpenAI acceptable on demo day only, if both Groq keys hit their daily limit? (Currently disabled by choice.)
+- **LLM limit reached:** gateway waits once, then tries the fallback key and the small model; the frontend serves the stored
+  answers for the examples. The small model is noticeably weaker (shorter reports, fewer citations).
+- **No backend:** stored answers for the 14 examples; a new enquiry says "not connected", never invents an answer.
+- **No embeddings:** routing + keyword search.

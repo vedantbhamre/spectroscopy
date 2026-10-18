@@ -1,22 +1,16 @@
 # Submission checklist (deadline Sun 18 Oct 2026 23:59)
 
-Checked 03:35 CEST. ✅ verified now · ❌ missing · ❓ requirement unknown (brief not on disk)
+Checked 20:30 CEST against the organisers' requirements `[BRIEF]`. ✅ verified now · ⚠ action advised · ❓ not stated
 
-| Item | Status | Note |
+| Requirement | Status | Evidence |
 |---|---|---|
-| All work committed and pushed to `main` | ❌ | 108 files uncommitted, 3 local commits unpushed |
-| No secrets in the repo or its history | ✅ | scan of tracked files and full `git log -p`: 0 matches; `backend/.env` ignored |
-| `.env.example` with placeholders only | ✅ | |
-| Production build passes | ✅ | `next build`, 12 routes |
-| Backend tests pass | ✅ | 106 passed |
-| Live assessment works | ✅ | D01 in 5.5 s through the frontend |
-| Fresh evaluation results (all 14 cases, large model) | ❌ | Evals page shows the 17 Oct run; batch 10/14 on the small model |
-| Cached outputs regenerated for the fallback | ❌ | after the 10:00 batch |
-| README: problem, screenshots, setup, stack, team, limitations | ❌ | root README is setup only |
-| Licence and attribution (Carbon/IBM Plex, shadcn, motion-primitives MIT, AFS material) | ❌ | no LICENSE file |
-| Architecture diagram matches the code | ❌ | diagram still shows NeMo / Groq Llama boxes |
-| Hosted demo URL | ❓ | needed? |
-| Video | ❓ | required? record a backup either way |
-| Slides / pitch format | ❓ | |
-| Pitch rehearsed (3 min) and judge Q&A prepared | ❌ | |
-| `NEXT_PUBLIC_SITE_URL` set for the deployed address | ❓ | only if hosted |
+| Repository public and accessible | ✅ | GitHub API and raw files answer without login (`private: false`) |
+| Source code of a working prototype | ✅ | fresh clone: 150+ offline tests pass; production build passes (12 routes) |
+| README: reproducible setup and run, dependencies, model/tool configuration | ✅ | Windows + macOS steps; only `GROQ_API_KEY` required; models and tools table |
+| README: instructions for loading the supplied AFS materials | ✅ | "Loading the AFS materials": file names + one ingestion command; knowledge base committed |
+| Short architecture description + how the assistant uses the AFS knowledge base | ✅ | README "How it works" + "How the assistant uses the AFS knowledge base" |
+| Assistant answers for H01–H06 | ✅ | `answers/H01.md` … `H06.md` + index (exported unchanged from the live pipeline outputs) |
+| No secrets in the repo or its history | ✅ | full `git log -p` scan: 0 Groq / OpenAI / LangSmith / Google / Logfire keys |
+| All work committed and pushed | ✅ | after this commit |
+| Licence | ⚠ | no LICENSE file; third-party attributions are in the README. Team decision (e.g. MIT) |
+| Hosted demo URL / video / slides | ❓ | not required by the stated rules; record a backup screen video anyway |

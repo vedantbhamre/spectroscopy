@@ -579,6 +579,8 @@ def ensure_comparison(report: Report, documents: list[dict], targets: list[str],
 
     if report.decisionStatus != "provisional" or any(r.role == "comparison" for r in report.recommendations):
         return False
+    if any(c.status == "fail" for c in report.premiseChecks):
+        return False  # a failed premise blocks the method choice; a comparison would read as a recommendation
     primary = {m for r in report.recommendations if r.role == "primary" for m in r.methodIds}
     if not primary:
         return False
@@ -591,6 +593,8 @@ def ensure_comparison(report: Report, documents: list[dict], targets: list[str],
         if d.get("kind") == "table" or not application_of(d["source"], str(d["page"])):
             continue
         for p in _pieces(d["text"]):
+            if len(p.split()) < 8 or not re.search(r"[a-z]{4,}.*[.!?]$", p.strip()):
+                continue  # only a full sentence can be quoted as evidence
             for m in quote_methods(p) - primary - rejected:
                 if m not in METHODS:
                     continue

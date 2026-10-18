@@ -8,7 +8,7 @@ with its page citations, the measurement concept, the feasibility plan and every
 
 | ID | Enquiry | Status | Answer (first sentence) |
 |---|---|---|---|
-| [H01](H01.md) | A new formulation after an existing NIR pilot | Provisional feasibility assessment | Not yet – the existing NIR calibration cannot be assumed valid for the new formulation; the first experiment must test NIR alone on the new blend and evaluate Raman as a possible complementary method. |
+| [H01](H01.md) | A new formulation after an existing NIR pilot | Provisional feasibility assessment | Not yet – the existing NIR calibration must be validated on the new formulation and a Raman probe trial is needed to evaluate any benefit. |
 | [H02](H02.md) | Composition monitoring across two dairy streams | Provisional feasibility assessment | It depends on the optical appearance of each stream; NIR transmission is most suitable for the clear whey, while NIR diffuse‑reflection is the most promising first candidate for the opaque milk concentrate. |
 | [H03](H03.md) | A fluorescence instrument requested for glucose and viable biomass | Insufficient information | No, fluorescence cannot be used to report glucose concentration and viable biomass without first establishing a suitable fluorescent target or marker. |
 | [H04](H04.md) | Reuse of a silica link for petroleum MIR ATR | Insufficient information | No, the proposed reuse of a Vis‑NIR silica fiber for a mid‑IR ATR sensor is not feasible because silica does not transmit the required 2.5–25 µm range. |
