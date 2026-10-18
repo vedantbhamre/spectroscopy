@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, Ban, CheckCircle2, CircleHelp, Download, FlaskConical, ShieldAlert, ShieldCheck, Copy, Check } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type Report, statusLabel, type PremiseCheck, openQuestions, closedQuestions, questionStatusLabel, questionText, statusOf } from "@/lib/report";
 import { toPlainText } from "@/lib/markdown";
 import type { MethodId } from "@/data/optics";
@@ -37,6 +37,12 @@ export function ReportView({ report, transcript, toolbar }: { report: Report; tr
   const assumptions = report.assumptions ?? [];
   const toConfirm = report.pointsToConfirm ?? [];
   const [copied, setCopied] = useState(false);
+  const articleRef = useRef<HTMLElement>(null);
+  const [sections, setSections] = useState<{ id: string; title: string }[]>([]);
+  useEffect(() => {
+    const nodes = articleRef.current?.querySelectorAll<HTMLElement>("section[data-nav]") ?? [];
+    setSections(Array.from(nodes, (n) => ({ id: n.id, title: n.dataset.nav ?? "" })));
+  }, [report]);
 
   const downloadPdf = () => {
     const previous = document.title;
@@ -66,7 +72,8 @@ export function ReportView({ report, transcript, toolbar }: { report: Report; tr
   };
 
   return (
-    <article className="print-report mx-auto max-w-3xl pb-24">
+    <article ref={articleRef} className="print-report mx-auto max-w-3xl pb-24">
+      <SectionNav sections={sections} />
       <header className="pb-6">
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className={`rounded border px-2 py-0.5 font-medium ${O.cls}`}>{O.text}</span>
@@ -91,7 +98,7 @@ export function ReportView({ report, transcript, toolbar }: { report: Report; tr
       </header>
 
       {report.answer && (
-        <section className="print-section border-t border-line py-7" aria-labelledby="answer-heading">
+        <section id="report-answer" data-nav="Answer" className="print-section scroll-mt-4 border-t border-line py-7" aria-labelledby="answer-heading">
           <h2 id="answer-heading" className="text-lg font-semibold tracking-tight">Answer</h2>
           <p className="mt-3 border-l-4 border-l-accent pl-4 font-serif text-[18px] leading-relaxed text-ink">
             {report.answer.text} <Citations items={report.answer.citations} />
@@ -257,9 +264,34 @@ export function ReportView({ report, transcript, toolbar }: { report: Report; tr
   );
 }
 
+const sectionId = (title: string) => `report-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-$/, "")}`;
+
+// Jump list for long reports (from the shiv branch): one mark per section the report actually renders, pinned beside the
+// report pane, left of the 440 px chat panel. Keyboard reachable; the section name shows on hover and on focus.
+function SectionNav({ sections }: { sections: { id: string; title: string }[] }) {
+  if (sections.length < 3) return null;
+  return (
+    <nav aria-label="Report sections"
+         className="print-hidden fixed right-[calc(440px+0.75rem)] top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-1 border border-line bg-bg/90 p-2 shadow-lg backdrop-blur min-[1360px]:flex">
+      {sections.map((s) => (
+        <div key={s.id} className="group relative flex items-center justify-end">
+          <button type="button" aria-label={`Go to ${s.title}`}
+                  onClick={() => document.getElementById(s.id)?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                  className="flex h-4 w-6 items-center justify-end focus-visible:outline-2 focus-visible:outline-accent">
+            <span className="h-0.5 w-3 bg-line-strong transition-all group-hover:w-5 group-hover:bg-accent group-focus-within:w-5 group-focus-within:bg-accent motion-reduce:transition-none" aria-hidden />
+          </button>
+          <span className="pointer-events-none absolute right-full mr-3 hidden whitespace-nowrap border border-line bg-bg px-2.5 py-1.5 font-sans text-xs font-medium text-ink shadow-md group-hover:block group-focus-within:block">
+            {s.title}
+          </span>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
-    <section className="print-section border-t border-line py-7">
+    <section id={sectionId(title)} data-nav={title} className="print-section scroll-mt-4 border-t border-line py-7">
       <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
       {hint && <p className="mt-0.5 text-sm text-ink-3">{hint}</p>}
       <div className="mt-4 font-serif text-[15.5px] leading-relaxed text-ink">{children}</div>
