@@ -34,12 +34,12 @@ expected key points (D01, D02 organiser examples; H04, H06 expert reviews). Resu
 | | Before | After |
 |---|---|---|
 | Retrieval recall of useful pages (D01–D08) | 0.90 | **0.97** (method pages ordered by relevance, combined-probe and combining-methods routes, 10 pages) |
-| Useful pages actually **cited** in the reports | 0.40 | **0.69** (citation by passage number: quotes exact by construction) |
-| Citation pass rate on gpt-oss-120b (D01–D06, D08) | 40–100 % | **100 %**, no repair passes |
-| Key points of the expected answers | 0.79 | **0.85** |
+| Useful pages actually **cited** in the reports | 0.40 | **0.82** (citation by passage number: quotes exact by construction) |
+| Citation pass rate on gpt-oss-120b (all 14 cases) | 40–100 % | **100 %**, no repair passes; golden expectations 1.0 on every case |
+| Key points of the expected answers | 0.79 | **0.97** |
 
 Also fixed on the way: classification studies count as having a target (D08 was wrongly "insufficient"); the customer's own words
-set the application domain when they point to one. Open: D07 still on an old small-model run (large-model daily quota used up).
+set the application domain when they point to one. All 14 cases re-run on gpt-oss-120b (18 Oct evening, new Groq key).
 
 ## Demo path — verified now
 

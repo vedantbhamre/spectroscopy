@@ -1,76 +1,194 @@
 {
- "reply": "The client's current setup lacks a defined fluorescent target or marker for glucose concentration and viable biomass, which is essential for fluorescence spectroscopy to be effective. Without this, fluorescence cannot be reliably used for the intended measurements. Consider exploring Raman spectroscopy, which can provide a 'molecular fingerprint' for metabolites like glucose in aqueous environments, as a potential alternative. Further investigation into suitable fluorescent markers or complementary methods is recommended.",
+ "reply": "We cannot yet use your existing fluorescence spectrometer to report glucose or viable biomass because no intrinsic fluorescent marker for those components is known; you first need to identify a suitable fluorophore or indirect proxy.",
  "report": {
   "scenarioId": "H03",
-  "title": "Fluorescence for Fermentation Monitoring",
+  "title": "Fluorescence feasibility for glucose and biomass",
   "origin": "live",
-  "generatedAt": "2026-10-17T17:11:06+00:00",
+  "generatedAt": "2026-10-18T14:34:12+00:00",
   "decisionStatus": "insufficient",
+  "answer": {
+   "text": "Not yet – fluorescence requires a specific fluorescent target or marker, which has not been identified for glucose or viable biomass.",
+   "citations": [
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "However, most chemicals do not exhibit this property.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "Therefore, fluorimetry is primarily used in medicine, biology, and biotechnology.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "16",
+     "quote": "To fill this gap, Fluorescence spectroscopy can be used for highsensitivity detection (down to the nM-µM range) of critical cofactors and amino acids like NADH, tryptophan, and riboflavin.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "7",
+     "quote": "Thus, the combination of NIR spectroscopy with fluorescence spectroscopy demonstrated the possibility of more accurately determining the biomass content during yeast fermentation, as well as distinguishing between their intra- and extracellular metabolites.",
+     "check": "verified"
+    }
+   ]
+  },
   "requirements": {
    "stated": [
-    "client has a fluorescence spectrometer",
-    "client wants to report glucose concentration and viable biomass during fermentation",
-    "fluorescence can be very sensitive"
+    "already have a fluorescence spectrometer",
+    "want to report glucose concentration during fermentation",
+    "want to report viable biomass during fermentation",
+    "justify using fluorescence because it is very sensitive",
+    "have not identified a fluorescent target, marker or reference relationship"
    ],
    "unknowns": [
-    "fluorescent target, marker or reference relationship"
+    "fluorescent target, marker or indirect proxy for glucose",
+    "fluorescent target, marker or indirect proxy for viable biomass",
+    "optical density of the fermentation broth (affects probe choice)",
+    "availability of a reference method for calibration"
+   ],
+   "factTurns": [
+    1,
+    1,
+    1,
+    1,
+    1
    ]
   },
   "questions": [
    {
-    "text": "What specific fluorescent markers or targets are available for glucose and biomass in your process?",
-    "impact": "method"
+    "text": "Does the fermentation broth contain any naturally fluorescent metabolites (e.g., NADH, flavins, tryptophan) whose intensity correlates with glucose consumption or cell viability?",
+    "impact": "method",
+    "id": "q1",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "Have you considered alternative methods like Raman spectroscopy for glucose detection?",
-    "impact": "method"
+    "text": "Can you add a non‑intrusive fluorescent dye or label that specifically responds to glucose concentration or cell viability without perturbing the process?",
+    "impact": "method",
+    "id": "q2",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "What are the concentration ranges and detection limits required for your application?",
-    "impact": "setup"
+    "text": "What is the typical optical density (OD) range of the broth during the run?",
+    "impact": "setup",
+    "id": "q3",
+    "status": "open",
+    "askedTurn": 1
    }
   ],
-  "recommendations": [],
+  "recommendations": [
+   {
+    "method": "Fluorescence (existing FLUO)",
+    "methodIds": [
+     "FLUO"
+    ],
+    "role": "not_recommended",
+    "reason": "Fluorescence requires a fluorophore that emits upon excitation; most chemicals, including glucose, are not fluorescent, and no intrinsic marker for viable biomass is identified. Sensitivity alone does not create a measurable signal.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "5",
+      "quote": "However, most chemicals do not exhibit this property.",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "5",
+      "quote": "Therefore, fluorimetry is primarily used in medicine, biology, and biotechnology.",
+      "check": "verified"
+     },
+     {
+      "source": "S01",
+      "page": "16",
+      "quote": "To fill this gap, Fluorescence spectroscopy can be used for highsensitivity detection (down to the nM-µM range) of critical cofactors and amino acids like NADH, tryptophan, and riboflavin.",
+      "check": "verified"
+     }
+    ]
+   },
+   {
+    "method": "Raman spectroscopy (probe)",
+    "methodIds": [
+     "RAMAN"
+    ],
+    "role": "comparison",
+    "reason": "Raman provides a molecular fingerprint that can detect glucose directly in aqueous media and has been used for in‑line metabolite monitoring; cost is higher but may be the next viable option if fluorescence cannot be made specific.",
+    "citations": [
+     {
+      "source": "S01",
+      "page": "16",
+      "quote": "ity. While UV/Vis tracks growth, Raman spectroscopy can be used in the same reactor to provide a \"molecular fingerprint\" for direct detection of specific metabolites like glucose, acetate, or lactate.",
+      "check": "verified"
+     }
+    ]
+   }
+  ],
   "concept": {
-   "summary": "Fluorescence spectroscopy requires a defined target to measure glucose and biomass effectively. Without this, its application is limited.",
+   "summary": "Start with laboratory feasibility: collect broth samples across the fermentation, measure fluorescence spectra with the existing spectrometer, and test correlation of any intrinsic emission (e.g., NADH) to glucose and biomass. If no correlation, consider adding a specific fluorescent probe or switching to Raman/NIR.",
+   "probe": "fluorimetric probe (existing) for initial tests; later evaluate Raman probe or NIR diffuse‑reflection probe if needed",
+   "location": "sample tap or side‑stream loop for offline‑online measurements (no new ports required for initial feasibility)",
+   "fiberLink": "use existing fiber cable to the FLUO instrument; for Raman/NIR a compatible fiber (silica or chalcogenide) would be added if selected",
+   "analyzer": "current fluorescence spectrometer for feasibility; Raman/NIR spectrometer as alternative",
    "citations": [
     {
      "source": "S01",
-     "page": "16",
-     "quote": "Raman spectroscopy can be used in the same reactor to provide a 'molecular fingerprint' for direct detection of specific metabolites like glucose",
+     "page": "12",
+     "quote": "This method is frequently used in biology and biotechnology.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "7",
+     "quote": "Thus, the combination of NIR spectroscopy with fluorescence spectroscopy demonstrated the possibility of more accurately determining the biomass content during yeast fermentation, as well as distinguishing between their intra- and extracellular metabolites.",
      "check": "verified"
     }
    ]
   },
   "spectralRange": {
-   "summary": "Fluorescence emission is typically in the UV to visible range, but specific targets are needed.",
+   "summary": "Fluorescence excitation typically in the UV‑Vis ([to be agreed with the customer]‑[to be agreed with the customer]) with emission up to ~[to be agreed with the customer]; Raman excitation often [to be agreed with the customer] with Raman shift 0‑4000 cm⁻¹; NIR transmission 780‑2500 nm.",
    "citations": [
     {
      "source": "S01",
-     "page": "12",
-     "quote": "Fluorimetry is based on measuring the broad emission signal observed upon irradiation of certain samples in the UV and visible regions.",
+     "page": "5",
+     "quote": "Another highly sensitive method, UV/Vis fluorimetry, is based on the secondary emission of excited molecules of certain substances, most often of biological origin.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "10",
+     "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups, such as -OH, -NH2=NH, -CH3, =CH2, ≥CH, etc., found in many organic and inorganic compounds.",
      "check": "verified"
     }
    ]
   },
   "risks": [
-   "Lack of a defined fluorescent target may lead to unreliable measurements.",
-   "Potential need for additional calibration or method development."
+   "No intrinsic fluorophore → no measurable signal for glucose or biomass",
+   "Adding exogenous dyes may affect cell health or process chemistry",
+   "High optical density may quench fluorescence or cause inner‑filter effects",
+   "Model over‑fitting if calibration built on limited sample set",
+   "The proposed signal may follow a related quantity rather than viable biomass."
   ],
   "feasibility": {
    "steps": [
-    "Identify potential fluorescent markers for glucose and biomass.",
-    "Evaluate alternative methods like Raman spectroscopy for glucose detection.",
-    "Develop calibration models if a suitable fluorescent target is identified."
+    "Collect broth samples at multiple time points covering the full range of glucose depletion and biomass growth.",
+    "Measure fluorescence spectra with the existing FLUO instrument (excitation [to be agreed with the customer]‑[to be agreed with the customer] typical for NADH/tryptophan).",
+    "Simultaneously measure reference glucose (e.g., HPLC) and viable biomass (e.g., cell counting or dry weight).",
+    "Apply chemometric analysis (e.g., PLS) to test correlation between fluorescence features and the reference values.",
+    "If correlation is weak, test addition of a specific fluorescent probe (e.g., glucose‑binding dye) in a small‑scale trial.",
+    "Validate the final model on independent fermentation batches.",
+    "Validate the model on samples not used to build it (held-out samples, e.g. from other patients, batches or days) before drawing any conclusion; a model built on few samples can fit them without generalising."
    ],
-   "decisionBasis": "The decision to proceed with fluorescence depends on identifying a suitable target or marker."
+   "decisionBasis": "A feasible fluorescence‑based model requires a statistically significant correlation between a fluorescence feature and the target variable on independent validation samples; otherwise an alternative method must be pursued."
   },
   "premiseChecks": [
    {
     "id": "target_defined",
     "label": "The variable to measure is named",
     "status": "pass",
-    "detail": "Target: glucose concentration, viable biomass.",
+    "detail": "Target: glucose, viable biomass.",
     "citations": []
    },
    {
@@ -92,19 +210,69 @@
       "check": "verified"
      }
     ]
+   },
+   {
+    "id": "target_qualifier",
+    "label": "Target qualifier: the method may not distinguish it",
+    "status": "flag",
+    "detail": "The target is 'viable biomass', but the sources cited for Raman do not show that the signal distinguishes 'viable' from the total; the method may follow a related quantity instead. A reference method that measures 'viable biomass' itself is required to test whether the signal follows it.",
+    "citations": []
+   },
+   {
+    "id": "owned_equipment",
+    "label": "Owned equipment: assessed",
+    "status": "pass",
+    "detail": "The customer's existing equipment (fluorescence spectrometer) is assessed in the recommendation or the feasibility plan.",
+    "citations": []
    }
   ],
   "sources": [
    {
     "source": "S01",
+    "page": "5",
+    "quote": "However, most chemicals do not exhibit this property.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "Therefore, fluorimetry is primarily used in medicine, biology, and biotechnology.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
     "page": "16",
-    "quote": "Raman spectroscopy can be used in the same reactor to provide a 'molecular fingerprint' for direct detection of specific metabolites like glucose",
+    "quote": "To fill this gap, Fluorescence spectroscopy can be used for highsensitivity detection (down to the nM-µM range) of critical cofactors and amino acids like NADH, tryptophan, and riboflavin.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "7",
+    "quote": "Thus, the combination of NIR spectroscopy with fluorescence spectroscopy demonstrated the possibility of more accurately determining the biomass content during yeast fermentation, as well as distinguishing between their intra- and extracellular metabolites.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "16",
+    "quote": "ity. While UV/Vis tracks growth, Raman spectroscopy can be used in the same reactor to provide a \"molecular fingerprint\" for direct detection of specific metabolites like glucose, acetate, or lactate.",
     "check": "verified"
    },
    {
     "source": "S01",
     "page": "12",
-    "quote": "Fluorimetry is based on measuring the broad emission signal observed upon irradiation of certain samples in the UV and visible regions.",
+    "quote": "This method is frequently used in biology and biotechnology.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "Another highly sensitive method, UV/Vis fluorimetry, is based on the secondary emission of excited molecules of certain substances, most often of biological origin.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "10",
+    "quote": "NIR spectra (780–2500 nm) contain predominantly overtones and component bands of fundamental vibrations of molecules and atomic groups, such as -OH, -NH2=NH, -CH3, =CH2, ≥CH, etc., found in many organic and inorganic compounds.",
     "check": "verified"
    },
    {
@@ -119,26 +287,38 @@
     "quote": "NIR, UV, and fluorescence spectra contain broad, highly overlapping signals",
     "check": "verified"
    }
+  ],
+  "mode": "draft",
+  "assumptions": [
+   "The existing fluorescence spectrometer can be configured for excitation in the UV‑Vis range typical for biological fluorophores.",
+   "Sample handling (e.g., cuvette or inline probe) can be arranged without modifying the process hardware.",
+   "NIR spectroscopy (diffuse reflection): NIR is a common low‑cost in‑line technique for glucose monitoring in bioprocesses; it can be combined with fluorescence for biomass if a suitable fluorophore is found. (not supported by the cited page)"
+  ],
+  "pointsToConfirm": [
+   "Presence of any intrinsic fluorescent metabolites that track glucose consumption or cell viability.",
+   "Acceptable optical density range for fluorescence measurement without severe inner‑filter effects.",
+   "Availability of a reference analytical method for glucose and viable biomass to build calibration models.",
+   "Regulatory or safety constraints on adding exogenous fluorescent dyes to the fermentation."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 753.0,
+   "ms": 428.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
    "status": "ok",
-   "ms": 1636.0,
-   "detail": "3 stated · 1 unknown"
+   "ms": 4629.0,
+   "detail": "5 stated (0 from answers) · 1 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 96.0,
-   "detail": "S01 p.12, S01 p.14, S01 p.16, S01 p.6, S01 p.7, S02 p.15, S03 p.15 · BM25 · flashrank"
+   "ms": 68.0,
+   "detail": "S01 p.10, S01 p.11, S01 p.12, S01 p.16, S01 p.17, S01 p.5, S01 p.6, S01 p.7, S01 p.9, S03 p.4 · 7 routed by the source guide · vector+BM25"
   },
   {
    "step": "Premise checks",
@@ -149,14 +329,20 @@
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 4508.0,
-   "detail": "gpt-4o via openai"
+   "ms": 58154.0,
+   "detail": "openai/gpt-oss-120b via groq"
   },
   {
    "step": "Verify citations",
    "status": "ok",
    "ms": 0.0,
-   "detail": "2 of 2 quotes found on the cited page"
+   "detail": "13 of 13 quotes found on the cited page"
+  },
+  {
+   "step": "Validate numbers, claims and questions",
+   "status": "warn",
+   "ms": 0.0,
+   "detail": "6 unsupported numbers replaced · 1 unsupported sentences and 1 uncited recommendations moved to assumptions · 3 open questions · all required sections present"
   }
  ]
 }

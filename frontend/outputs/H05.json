@@ -1,66 +1,124 @@
 {
- "reply": "To recommend a spectroscopy method, we first need to identify the contaminant or the affected quality variable in your liquid process. Without this information, selecting a method is premature. Initial lab trials using multiple spectroscopy methods can help identify key spectral features and guide method selection. Consider starting with a multi-method lab trial to explore potential contaminants and affected variables.",
+ "reply": "We need a few key facts before picking a method – what you’re trying to measure, how the liquid looks optically, and any reference analysis you can run. Then a quick lab screening (e.g., NIR transmission and MIR‑ATR on the same sample set) will tell which spectral region captures the contaminant signatures.",
  "report": {
   "scenarioId": "H05",
-  "title": "Identifying Contaminant in Liquid Process",
+  "title": "Liquid process – unknown contaminant, method selection",
   "origin": "live",
-  "generatedAt": "2026-10-17T17:11:19+00:00",
+  "generatedAt": "2026-10-18T14:35:54+00:00",
   "decisionStatus": "insufficient",
+  "answer": {
+   "text": "Not yet – the measurement target and sample optical properties are unknown, so a definitive method cannot be chosen.",
+   "citations": []
+  },
   "requirements": {
    "stated": [
-    "liquid process occasionally goes off specification"
+    "liquid process occasionally off specification",
+    "suspect contamination but unknown contaminant",
+    "unknown affected quality variable",
+    "request recommendation of best spectroscopy method and sensor configuration immediately",
+    "ask what information and first experiment should come before decision"
    ],
    "unknowns": [
-    "contaminant identity",
-    "affected quality variable"
+    "Which chemical species or quality variable must be measured",
+    "Optical appearance of the process stream (clear, turbid, colored, scattering)",
+    "Availability of a reference analytical method for the contaminant or quality variable"
+   ],
+   "factTurns": [
+    1,
+    1,
+    1,
+    1,
+    1
    ]
   },
   "questions": [
    {
-    "text": "What is the suspected contaminant or affected quality variable?",
-    "impact": "method"
+    "text": "What specific quality variable (e.g., concentration of a known impurity, total organic carbon, viscosity change) do you ultimately need to monitor?",
+    "impact": "method",
+    "id": "q1",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "What are the specific process conditions (e.g., temperature, pressure)?",
-    "impact": "setup"
+    "text": "Is the process liquid optically clear, mildly colored, or scattering/turbid under normal operating conditions?",
+    "impact": "setup",
+    "id": "q2",
+    "status": "open",
+    "askedTurn": 1
    },
    {
-    "text": "Do you have any existing spectroscopy equipment?",
-    "impact": "setup"
+    "text": "Do you have an existing laboratory reference method (e.g., HPLC, GC, titration) that can quantify the suspected contaminant or the target variable for model calibration?",
+    "impact": "acceptance",
+    "id": "q3",
+    "status": "open",
+    "askedTurn": 1
    }
   ],
   "recommendations": [],
   "concept": {
-   "summary": "Multi-method lab trials can identify key spectral features for method selection.",
+   "summary": "Perform an initial laboratory feasibility study using two complementary in‑line‑compatible techniques on representative process samples: (1) NIR transmission (1–5 mm path) for bulk liquid absorption, and (2) MIR‑ATR (1–6 µm penetration) using a standard cuvette or ATR probe. Collect spectra while simultaneously measuring the reference value of the target variable. Build separate chemometric models (e.g., PLS regression) for each technique and compare performance.",
+   "probe": "NIR transmission probe (1–5 mm path) and MIR‑ATR probe (ATR crystal) in a lab cuvette holder",
+   "location": "Laboratory bench, using process samples drawn from the line",
+   "fiberLink": "Standard silica fiber for NIR; chalcogenide fiber for MIR‑ATR (as supported by AFS multimodal probes)",
+   "analyzer": "Bench‑top NIR spectrometer (≈[to be agreed with the customer]) and MIR FT‑IR spectrometer with ATR accessory",
    "citations": [
     {
-     "source": "S02",
-     "page": "20",
-     "quote": "Multi-method lab trials (AFS tests your process using all key fiber optic spectroscopy methods)",
-     "check": "visual_note"
+     "source": "S01",
+     "page": "5",
+     "quote": "Immersible fiber optic probes operating in various spectral regions from UV to mid-IR are increasingly being used for measuring liquid and soft or powdered solid samples.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "5",
+     "quote": "They can be used to obtain absorption, diffuse reflectance or transmission, Raman, and ATR spectra.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "Table 1 (p.6)",
+     "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "Table 1 (p.6)",
+     "quote": "MIR_ATR: cuvette (absorption); sample: liquid; cost: average",
+     "check": "verified"
     }
    ]
   },
   "spectralRange": {
-   "summary": "0.3–16 µm range for multi-spectral fiber systems",
+   "summary": "NIR transmission: ~[to be agreed with the customer]; MIR‑ATR: ~2.5–10 µm ([to be agreed with the customer]). Both cover the 0.3–16 µm overall range offered by AFS multispectral systems.",
    "citations": [
     {
      "source": "S02",
      "page": "3",
-     "quote": "Multi-Spectral Fiber Systems allow to test 4 spectroscopy methods in 0.3-16µm range",
+     "quote": "Choice of optimal System & Method for process-control in-line Multi-Spectral Fiber Systems allow to test 4 spectroscopy methods in 0.3-16µm range using robust fiber probes for remote monitoring of chemical reaction in-line.",
+     "check": "verified"
+    },
+    {
+     "source": "S01",
+     "page": "9",
+     "quote": "Vibrational spectroscopy in the mid-IR range (4000–400 cm-1) is one of the most informative methods of chemical analysis.",
      "check": "verified"
     }
    ]
   },
   "risks": [
-   "Choosing a method without identifying the contaminant may lead to ineffective monitoring."
+   "If the liquid is highly scattering or opaque, NIR transmission may saturate and MIR‑ATR may suffer from limited penetration.",
+   "Chemometric models may overfit if the training set is too small or not representative of process variability.",
+   "Without a known target variable, model validation cannot be completed."
   ],
   "feasibility": {
    "steps": [
-    "Conduct multi-method lab trials to identify spectral features.",
-    "Develop a chemometric model based on identified features."
+    "Collect a set of process liquid samples covering normal operation and off‑spec events.",
+    "Measure each sample with NIR transmission and MIR‑ATR under identical conditions.",
+    "Obtain reference values for the suspected contaminant or quality variable using the existing lab method.",
+    "Develop separate calibration models for each technique and evaluate prediction error on a held‑out validation set.",
+    "Select the technique that meets the agreed‑upon prediction performance and practical constraints (probe cleaning, fiber length, cost)."
    ],
-   "decisionBasis": "Identify the contaminant or affected variable before selecting a method."
+   "decisionBasis": "Model performance (RMSEP, bias) compared against acceptance criteria agreed with the customer; cost and ease of integration also considered."
   },
   "premiseChecks": [
    {
@@ -72,63 +130,104 @@
    },
    {
     "id": "certainty",
-    "label": "The request can be answered with certainty",
+    "label": "Certainty: the answer can only be provisional",
     "status": "flag",
-    "detail": "The client asks for approval, proof or an exact configuration. The answer can only be a provisional assessment with the questions and experiment that would decide it.",
+    "detail": "The customer asks for approval, proof or an exact configuration, but 3 decisive point(s) are still open or contradicted. The answer is a provisional assessment; the open points are listed as assumptions and the first experiment decides them.",
     "citations": []
    }
   ],
   "sources": [
    {
-    "source": "S02",
-    "page": "20",
-    "quote": "Multi-method lab trials (AFS tests your process using all key fiber optic spectroscopy methods)",
-    "check": "visual_note"
+    "source": "S01",
+    "page": "5",
+    "quote": "Immersible fiber optic probes operating in various spectral regions from UV to mid-IR are increasingly being used for measuring liquid and soft or powdered solid samples.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "5",
+    "quote": "They can be used to obtain absorption, diffuse reflectance or transmission, Raman, and ATR spectra.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "Table 1 (p.6)",
+    "quote": "NIR: transmission or transflection probe (transmission); sample: liquid, colloidal; cost: average",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "Table 1 (p.6)",
+    "quote": "MIR_ATR: cuvette (absorption); sample: liquid; cost: average",
+    "check": "verified"
    },
    {
     "source": "S02",
     "page": "3",
-    "quote": "Multi-Spectral Fiber Systems allow to test 4 spectroscopy methods in 0.3-16µm range",
+    "quote": "Choice of optimal System & Method for process-control in-line Multi-Spectral Fiber Systems allow to test 4 spectroscopy methods in 0.3-16µm range using robust fiber probes for remote monitoring of chemical reaction in-line.",
+    "check": "verified"
+   },
+   {
+    "source": "S01",
+    "page": "9",
+    "quote": "Vibrational spectroscopy in the mid-IR range (4000–400 cm-1) is one of the most informative methods of chemical analysis.",
     "check": "verified"
    }
+  ],
+  "mode": "draft",
+  "assumptions": [
+   "The liquid can be sampled without altering its composition.",
+   "Standard NIR transmission and MIR‑ATR probes are compatible with the process chemistry (no aggressive solvents that damage the probe).",
+   "A reference analytical method is available or can be developed for the contaminant/quality variable."
+  ],
+  "pointsToConfirm": [
+   "Exact quality variable to be monitored and its required detection limit.",
+   "Optical clarity/turbidity of the process stream under normal and fault conditions.",
+   "Availability and suitability of a reference method for model calibration and validation."
   ]
  },
  "trace": [
   {
    "step": "Plan the turn",
    "status": "ok",
-   "ms": 651.0,
+   "ms": 307.0,
    "detail": "assessment · 3 search queries"
   },
   {
    "step": "Separate facts and unknowns",
-   "status": "warn",
-   "ms": 1407.0,
-   "detail": "2 stated · 4 unknown · 1 unquoted dropped"
+   "status": "ok",
+   "ms": 17388.0,
+   "detail": "5 stated (0 from answers) · 2 unknown"
   },
   {
    "step": "Retrieve AFS pages",
    "status": "ok",
-   "ms": 73.0,
-   "detail": "S01 p.16, S01 p.4, S01 p.7, S02 p.20, S02 p.3, S04 p.1, S05 p.2 · BM25 · flashrank"
+   "ms": 70.0,
+   "detail": "S01 p.1, S01 p.5, S01 p.6, S02 p.20, S02 p.3, S03 p.14, S03 p.4, S04 p.4, S05 p.1, S05 p.2 · 2 routed by the source guide · vector+BM25"
   },
   {
    "step": "Premise checks",
    "status": "fail",
    "ms": 0.0,
-   "detail": "The variable to measure is named; The request can be answered with certainty"
+   "detail": "The variable to measure is named; Certainty: the answer can only be provisional"
   },
   {
    "step": "Compose the assessment",
    "status": "ok",
-   "ms": 3485.0,
-   "detail": "gpt-4o via openai"
+   "ms": 42490.0,
+   "detail": "openai/gpt-oss-120b via groq"
   },
   {
    "step": "Verify citations",
    "status": "ok",
    "ms": 0.0,
-   "detail": "2 of 2 quotes found on the cited page"
+   "detail": "6 of 6 quotes found on the cited page"
+  },
+  {
+   "step": "Validate numbers, claims and questions",
+   "status": "warn",
+   "ms": 0.0,
+   "detail": "3 unsupported numbers replaced · every recommendation sentence cited · 3 open questions · all required sections present"
   }
  ]
 }

@@ -116,19 +116,19 @@
  {
   "id": "D07",
   "status": [
-   "insufficient"
+   "provisional"
   ],
-  "citation_pass": "0/0",
-  "number_hits": 0,
+  "citation_pass": "12/12 (100%)",
+  "number_hits": 1,
   "repeated_questions": 0,
   "missing_sections": 0,
   "repaired": 0,
   "moved_sentences": 0,
   "violations": {},
   "models": [
-   "openai/gpt-oss-20b via groq"
+   "openai/gpt-oss-120b via groq"
   ],
-  "tokens": 7473,
+  "tokens": 8487,
   "expectations": 1.0,
   "expectation_failures": []
  },
@@ -154,55 +154,97 @@
  {
   "id": "H01",
   "status": [
-   "provisional",
    "provisional"
   ],
-  "citation_pass": "5/7 (71%)",
+  "citation_pass": "15/15 (100%)",
   "number_hits": 3,
   "repeated_questions": 0,
   "missing_sections": 0,
-  "repaired": 1,
-  "moved_sentences": 3,
+  "repaired": 0,
+  "moved_sentences": 2,
   "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 9073,
   "expectations": 1.0,
-  "expectation_failures": [],
-  "s": 125
+  "expectation_failures": []
  },
  {
   "id": "H02",
   "status": [
-   "provisional",
    "provisional"
   ],
-  "citation_pass": "4/10 (40%)",
+  "citation_pass": "16/16 (100%)",
   "number_hits": 2,
   "repeated_questions": 0,
-  "missing_sections": 1,
-  "repaired": 1,
+  "missing_sections": 0,
+  "repaired": 0,
   "moved_sentences": 2,
-  "violations": {
-   "required sections present": [
-    "turn 1: missing recommendation"
-   ]
-  },
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 9615,
   "expectations": 1.0,
-  "expectation_failures": [],
-  "s": 117
+  "expectation_failures": []
  },
  {
   "id": "H03",
-  "error": "All LLM targets failed: Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01jvw984shfvvrk7rcm2nj2e9f` service tier `on_demand` on tokens p",
-  "s": 15
+  "status": [
+   "insufficient"
+  ],
+  "citation_pass": "13/13 (100%)",
+  "number_hits": 6,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 2,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 9299,
+  "expectations": 1.0,
+  "expectation_failures": []
  },
  {
   "id": "H04",
-  "error": "All LLM targets failed: Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01jvw984shfvvrk7rcm2nj2e9f` service tier `on_demand` on tokens p",
-  "s": 12
+  "status": [
+   "insufficient"
+  ],
+  "citation_pass": "10/10 (100%)",
+  "number_hits": 0,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 4,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 8371,
+  "expectations": 1.0,
+  "expectation_failures": []
  },
  {
   "id": "H05",
-  "error": "All LLM targets failed: Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-20b` in organization `org_01jvw984shfvvrk7rcm2nj2e9f` service tier `on_demand` on tokens p",
-  "s": 7
+  "status": [
+   "insufficient"
+  ],
+  "citation_pass": "6/6 (100%)",
+  "number_hits": 3,
+  "repeated_questions": 0,
+  "missing_sections": 0,
+  "repaired": 0,
+  "moved_sentences": 0,
+  "violations": {},
+  "models": [
+   "openai/gpt-oss-120b via groq"
+  ],
+  "tokens": 7895,
+  "expectations": 1.0,
+  "expectation_failures": []
  },
  {
   "id": "H06",
