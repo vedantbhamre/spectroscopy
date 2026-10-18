@@ -60,7 +60,7 @@ export default async function Home() {
   const stats = run ? SHOWN.filter(([k]) => typeof run.summary[k]?.all === "number") : [];
   return (
     <>
-      <SiteHeader />
+      <SiteHeader overHero />
       <main>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <Hero />

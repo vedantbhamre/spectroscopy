@@ -1,157 +1,89 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Intro frames (1280×720) played as the full-screen hero background. Only frames without text are used —
-// the probe in the line (1–7), the light split into its spectrum (20–30) and the spectrum trace (31–39) — so
-// nothing in the footage competes with the headline. (The dashboard and title-card frames are not shipped.)
-// Smooth playback: redraw at the display refresh rate, cross-fade continuously between neighbouring frames by
-// elapsed time, and dissolve slowly across each scene change and the loop wrap.
-const SEQUENCE = [...range(1, 7), ...range(20, 39)];
-const FPS = 9; // source frames per second; one loop ≈ 3 s
-const SCENE_DISSOLVE = 3; // frames over which one scene dissolves into the next
-
-function range(a: number, b: number) {
-  return Array.from({ length: b - a + 1 }, (_, k) => a + k);
-}
-// Index of the last frame of each scene (where the next frame is not the next source frame).
-const SCENE_ENDS = SEQUENCE.map((f, k) => (SEQUENCE[(k + 1) % SEQUENCE.length] !== f + 1 ? k : -1)).filter((k) => k >= 0);
-const TOTAL = SEQUENCE.length;
-
-const framePath = (frame: number) => `/frames/ezgif-frame-${String(frame).padStart(3, "0")}.jpg`;
+const BACKGROUND_VIDEO = "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260912_104303_0c6d60b2-9353-408e-9449-585108a22fb5.mp4";
+const BACKGROUND_POSTER = "https://d2ol7oe51mr4n9.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/130837c4-0244-4f37-9c61-8d801d93fd29.jpg";
 
 export function Hero() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imagesRef = useRef<HTMLImageElement[]>([]);
-  const positionRef = useRef(0); // playback position in frames (fractional)
-
-  // Draw a frame scaled to cover the canvas (cropped, never letterboxed).
-  const drawCover = useCallback((ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, i: number, alpha: number) => {
-    const img = imagesRef.current[i];
-    if (!img?.complete || img.naturalWidth === 0 || alpha <= 0) return;
-    const scale = Math.max(canvas.width / img.naturalWidth, canvas.height / img.naturalHeight);
-    const w = img.naturalWidth * scale;
-    const h = img.naturalHeight * scale;
-    ctx.globalAlpha = Math.min(alpha, 1);
-    ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
-    ctx.globalAlpha = 1;
-  }, []);
-
-  const draw = useCallback((position: number) => {
-    const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
-    const i = Math.floor(position) % TOTAL;
-    const frac = position - Math.floor(position);
-    const end = SCENE_ENDS.find((e) => i <= e && i > e - SCENE_DISSOLVE);
-    if (end === undefined) {
-      drawCover(ctx, canvas, i, 1);
-      drawCover(ctx, canvas, (i + 1) % TOTAL, frac); // continuous blend into the next frame
-    } else {
-      // Across a scene change: hold this scene's frames and fade the next scene's first frame in slowly.
-      drawCover(ctx, canvas, i, 1);
-      drawCover(ctx, canvas, Math.min(i + 1, end), frac);
-      drawCover(ctx, canvas, (end + 1) % TOTAL, (i - (end - SCENE_DISSOLVE + 1) + frac) / SCENE_DISSOLVE);
-    }
-  }, [drawCover]);
-
-  const resize = useCallback(() => {
-    const canvas = canvasRef.current;
-    const box = sectionRef.current;
-    if (!canvas || !box) return;
-    const { width, height } = box.getBoundingClientRect();
-    if (!width || !height) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(width * dpr);
-    canvas.height = Math.round(height * dpr);
-    const ctx = canvas.getContext("2d");
-    if (ctx) { ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high"; }
-    draw(positionRef.current);
-  }, [draw]);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    let rafId = 0;
-    let visible = true;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const video = videoRef.current;
+    if (!video) return;
 
-    const play = () => {
-      if (cancelled || reduce) return;
-      let last = performance.now();
-      const tick = (now: number) => {
-        if (cancelled) return;
-        if (visible && !document.hidden) {
-          // Advance by elapsed time; clamp long gaps (tab switches) so playback never jumps.
-          positionRef.current = (positionRef.current + (Math.min(now - last, 100) / 1000) * FPS) % TOTAL;
-          draw(positionRef.current);
-        }
-        last = now;
-        rafId = requestAnimationFrame(tick);
-      };
-      rafId = requestAnimationFrame(tick);
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const syncPlayback = () => {
+      if (reducedMotion.matches) {
+        video.pause();
+        return;
+      }
+      void video.play().catch(() => {});
     };
 
-    // Decode every frame before playing, so the first loop does not stutter while images decode.
-    imagesRef.current = SEQUENCE.map((frame) => {
-      const img = new Image();
-      img.decoding = "async";
-      img.src = framePath(frame);
-      return img;
-    });
-    imagesRef.current[0].decode().then(resize, resize);
-    Promise.allSettled(imagesRef.current.map((img) => img.decode())).then(() => { if (!cancelled) play(); });
+    syncPlayback();
+    if (reducedMotion.addEventListener) {
+      reducedMotion.addEventListener("change", syncPlayback);
+      return () => reducedMotion.removeEventListener("change", syncPlayback);
+    }
 
-    const ro = new ResizeObserver(resize);
-    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; });
-    if (sectionRef.current) { ro.observe(sectionRef.current); io.observe(sectionRef.current); }
-
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(rafId);
-      ro.disconnect();
-      io.disconnect();
-    };
-  }, [draw, resize]);
+    reducedMotion.addListener(syncPlayback);
+    return () => reducedMotion.removeListener(syncPlayback);
+  }, []);
 
   return (
     <section
-      ref={sectionRef}
       id="home"
-      className="relative isolate flex min-h-[calc(100svh-3.5rem)] flex-col justify-end overflow-hidden bg-hero bg-cover bg-center text-hero-ink"
-      style={{ backgroundImage: `url(${framePath(SEQUENCE[0])})` }}
+      className="relative isolate flex min-h-[100svh] flex-col justify-center overflow-hidden bg-[#03060c] bg-cover bg-center text-hero-ink"
     >
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 -z-20 h-full w-full contrast-[1.06] saturate-[1.15]"
-        aria-label="Animation: an AFS fibre-optic probe in a process line, its light split into the spectrum"
-        role="img"
+      <video
+        ref={videoRef}
+        className="absolute inset-0 -z-20 h-full w-full object-cover object-center contrast-[1.06] saturate-[1.15]"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        poster={BACKGROUND_POSTER}
+        src={BACKGROUND_VIDEO}
+        aria-hidden="true"
       />
-      {/* Scrims keep the text readable over any frame: from the left on wide screens, from the bottom everywhere. */}
+      {/* A centered veil keeps the headline readable over the bright focal point. */}
       <div
-        className="absolute inset-0 -z-10 bg-hero/55 md:bg-transparent md:bg-[linear-gradient(90deg,var(--hero)_0%,color-mix(in_srgb,var(--hero)_82%,transparent)_30%,color-mix(in_srgb,var(--hero)_35%,transparent)_48%,transparent_62%)]"
+        className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,rgba(3,6,12,0.70)_0%,rgba(3,6,12,0.50)_42%,rgba(3,6,12,0.22)_100%)]"
         aria-hidden
       />
-      <div className="absolute inset-x-0 bottom-0 -z-10 h-1/2 bg-linear-to-t from-hero via-hero/40 to-transparent" aria-hidden />
+      <div className="absolute inset-x-0 bottom-0 -z-10 h-1/3 bg-linear-to-t from-hero/80 to-transparent" aria-hidden />
 
-      <div className="mx-auto w-full max-w-7xl px-6 pb-20 pt-28 md:px-10 md:pb-28">
-        <div className="max-w-xl lg:max-w-[38rem]">
-          <p className="text-sm text-hero-ink-2">In-line spectroscopy · Art Fiber Systems</p>
-          <h1 className="mt-4 text-[clamp(2.5rem,4.6vw,4rem)] font-light leading-[1.06] tracking-[-0.015em]">
+      <div className="mx-auto w-full max-w-7xl px-6 py-28 md:px-10">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="mx-auto inline-flex rounded-full border border-white/25 bg-black/20 px-4 py-2 text-xs font-medium tracking-[0.14em] text-white/90 shadow-lg backdrop-blur-md sm:text-sm">
+            In-line spectroscopy · Art Fiber Systems
+          </p>
+          <h1 className="mx-auto mt-7 max-w-4xl text-balance text-[clamp(2.5rem,5.4vw,5.5rem)] font-semibold leading-[1.02] tracking-[-0.04em] text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.35)]">
             Turn a customer enquiry into a cited spectroscopy assessment
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-hero-ink-2">
+          <p className="mx-auto mt-7 max-w-3xl text-pretty text-base leading-relaxed text-white/85 drop-shadow-[0_2px_14px_rgba(0,0,0,0.35)] sm:text-lg md:text-xl">
             SpectraSense separates what the customer said from what is still unknown, recommends NIR, Raman, MIR or UV-Vis methods with page
             citations from the AFS material, and proposes a first feasibility experiment for an expert to review.
           </p>
-          <div className="mt-9 flex flex-wrap gap-3">
-            <Button asChild size="lg">
-              <Link href="/assess">Start an assessment <ArrowRight aria-hidden /></Link>
+          <div className="mt-10 flex flex-wrap justify-center gap-3 sm:gap-4">
+            <Button
+              asChild
+              size="lg"
+              className="group h-12 rounded-full border border-white/75 bg-white px-7 font-medium text-[#111827] shadow-[0_10px_32px_rgba(0,0,0,0.24)] transition duration-300 hover:-translate-y-0.5 hover:bg-white/90 hover:shadow-[0_16px_42px_rgba(0,0,0,0.32)]"
+            >
+              <Link href="/assess">Start an assessment <ArrowRight className="transition-transform group-hover:translate-x-0.5" aria-hidden /></Link>
             </Button>
-            <Button asChild size="lg" variant="outline-inverse">
+            <Button
+              asChild
+              size="lg"
+              variant="outline-inverse"
+              className="h-12 rounded-full border-white/60 bg-white/10 px-7 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-md transition duration-300 hover:-translate-y-0.5 hover:border-white/85 hover:bg-white/20 hover:shadow-[0_12px_28px_rgba(0,0,0,0.2)]"
+            >
               <Link href="/how-it-works">See how it works</Link>
             </Button>
           </div>

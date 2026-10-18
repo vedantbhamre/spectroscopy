@@ -12,14 +12,14 @@ const links = [
   { href: "/evals", label: "Evals" },
 ];
 
-export function SiteHeader() {
+export function SiteHeader({ overHero = false }: { overHero?: boolean }) {
   const path = usePathname();
   return (
-    <header className="print-hidden sticky inset-x-0 top-0 z-40 border-b border-line bg-bg text-ink">
+    <header className={`print-hidden inset-x-0 top-0 z-40 border-b ${overHero ? "absolute border-white/15 bg-[#03060c]/35 text-white backdrop-blur-md" : "sticky border-line bg-bg text-ink"}`}>
       <div className="flex h-14 items-center justify-between gap-2 px-4 sm:gap-4 sm:px-8 lg:px-10">
-        <Link href="/" aria-label="SpectraSense home"><Logo /></Link>
+        <Link href="/" aria-label="SpectraSense home"><Logo dark={overHero} /></Link>
         <nav aria-label="Main" className="flex min-w-0 items-center gap-0 text-sm sm:gap-2">
-          <AnimatedBackground enableHover className="bg-panel" transition={{ type: "spring", bounce: 0, duration: 0.25 }}>
+          <AnimatedBackground enableHover className={overHero ? "bg-white/10" : "bg-panel"} transition={{ type: "spring", bounce: 0, duration: 0.25 }}>
             {links.map((l) => {
               const on = path === l.href;
               return (
@@ -28,7 +28,7 @@ export function SiteHeader() {
                   data-id={l.href}
                   href={l.href}
                   aria-current={on ? "page" : undefined}
-                  className={`relative h-14 items-center whitespace-nowrap px-1.5 transition-colors sm:px-3 ${on ? "text-ink" : "text-ink-2 hover:text-ink"}`}
+                  className={`relative h-14 items-center whitespace-nowrap px-1.5 transition-colors sm:px-3 ${overHero ? "text-white/85 hover:text-white" : on ? "text-ink" : "text-ink-2 hover:text-ink"}`}
                 >
                   <span className="flex h-full items-center">{l.label}</span>
                   <span className={`absolute inset-x-0 bottom-0 h-[2px] bg-accent ${on ? "opacity-100" : "opacity-0"}`} aria-hidden />
@@ -36,7 +36,7 @@ export function SiteHeader() {
               );
             })}
           </AnimatedBackground>
-          <ThemeToggle />
+          <ThemeToggle inverse={overHero} />
         </nav>
       </div>
     </header>

@@ -1,8 +1,8 @@
 // Ink wordmark: a prism that splits one ray into three, with a violet registered dot.
-export function Logo({ className = "", size = "md" }: { className?: string; size?: "md" | "lg"; dark?: boolean }) {
+export function Logo({ className = "", size = "md", dark = false }: { className?: string; size?: "md" | "lg"; dark?: boolean }) {
   const lg = size === "lg";
   return (
-    <span className={`inline-flex items-center ${lg ? "gap-[0.32em]" : "gap-2"} text-ink ${className}`}>
+    <span className={`inline-flex items-center ${lg ? "gap-[0.32em]" : "gap-2"} ${dark ? "text-white" : "text-ink"} ${className}`}>
       <svg viewBox="0 0 40 26" className={lg ? "h-[0.76em] w-auto" : "h-[17px] w-auto"} aria-hidden fill="currentColor">
         <path d="M0 12.2h11v1.6H0Z" />
         <path d="M11 26 20 0l9 26Zm4.4-3.2h9.2L20 9.6Z" />
