@@ -361,8 +361,7 @@ Check that `GROQ_API_KEY` is configured. If you want a separate judge key, add i
 spectroscopy/
 ├── answers/     The assistant's answers for H01–H06 and D01–D08 (readable Markdown)
 ├── backend/     Assessment API, AFS knowledge base, retrieval, validation and evaluation tools
-├── frontend/    Website and report display
-└── docs/        Project notes and submission information
+└── frontend/    Website and report display
 ```
 
 The backend uses Python and FastAPI. The website uses Next.js and npm. Only the Groq API key (`GROQ_API_KEY`) is required.

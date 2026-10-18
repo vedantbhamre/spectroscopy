@@ -8,3 +8,6 @@ __pycache__/
 .venv/
 venv/
 .next/
+
+# Team notes for the presentation: kept locally, not published
+/docs/
