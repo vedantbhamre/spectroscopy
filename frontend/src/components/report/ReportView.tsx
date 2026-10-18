@@ -267,12 +267,12 @@ export function ReportView({ report, transcript, toolbar }: { report: Report; tr
 const sectionId = (title: string) => `report-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-$/, "")}`;
 
 // Jump list for long reports (from the shiv branch): one mark per section the report actually renders, pinned beside the
-// report pane, left of the 440 px chat panel. Keyboard reachable; the section name shows on hover and on focus.
+// report pane, left of the 520 px chat panel. Keyboard reachable; the section name shows on hover and on focus.
 function SectionNav({ sections }: { sections: { id: string; title: string }[] }) {
   if (sections.length < 3) return null;
   return (
     <nav aria-label="Report sections"
-         className="print-hidden fixed right-[calc(440px+0.75rem)] top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-1 border border-line bg-bg/90 p-2 shadow-lg backdrop-blur min-[1360px]:flex">
+         className="print-hidden fixed right-[calc(520px+0.75rem)] top-1/2 z-30 hidden -translate-y-1/2 flex-col gap-1 border border-line bg-bg/90 p-2 shadow-lg backdrop-blur min-[1440px]:flex">
       {sections.map((s) => (
         <div key={s.id} className="group relative flex items-center justify-end">
           <button type="button" aria-label={`Go to ${s.title}`}

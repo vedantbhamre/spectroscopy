@@ -36,6 +36,13 @@ export function Workbench() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => { threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: "smooth" }); }, [turns, pending]);
+  // The message box grows with its text (up to half the screen), so a normal enquiry is visible without scrolling inside it.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, Math.round(window.innerHeight * 0.45))}px`;
+  }, [draft]);
 
   const example = exampleId ? scenarioById(exampleId) : undefined;
   // An edited example is a new enquiry: it must not pick up the example's batch-run answer.
@@ -177,7 +184,7 @@ export function Workbench() {
       </div>
 
       {/* Chat panel */}
-      <aside className="print-hidden order-1 flex h-[55dvh] w-full shrink-0 flex-col border-b border-night-line bg-night text-night-ink lg:order-2 lg:h-auto lg:w-[440px] lg:border-b-0 lg:border-l">
+      <aside className="print-hidden order-1 flex h-[55dvh] w-full shrink-0 flex-col border-b border-night-line bg-night text-night-ink lg:order-2 lg:h-auto lg:w-[440px] lg:border-b-0 lg:border-l xl:w-[520px]">
         <div className="flex h-11 items-center justify-between border-b border-night-line px-4">
           <span className="text-sm font-semibold">Customer conversation</span>
           <Button variant="ghost" size="sm" onClick={reset} disabled={(!turns.length && !draft) || pending}>
@@ -232,7 +239,7 @@ export function Workbench() {
               rows={4}
               placeholder={turns.length ? "Answer the questions or add details…" : "Describe the customer's process and what they need to measure…"}
               aria-label="Message"
-              className="block max-h-64 w-full resize-none bg-transparent px-3 pt-3 text-sm leading-relaxed text-night-ink placeholder:text-night-ink-3 focus:outline-none focus-visible:outline-none"
+              className="block max-h-[45dvh] min-h-24 w-full resize-none overflow-y-auto bg-transparent px-3 pt-3 text-sm leading-relaxed text-night-ink placeholder:text-night-ink-3 focus:outline-none focus-visible:outline-none"
             />
             <div className="flex items-center gap-2 px-2 pb-2">
               {exampleUnchanged && <span className="border border-accent px-1.5 py-0.5 text-xs text-accent">Example enquiry</span>}
