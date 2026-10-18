@@ -43,6 +43,10 @@
   --hero-ink: #f2f4f8;
   --hero-ink-2: #c1c7cd;
   --hero-line: #343a3f;
+  /* Status colours on the hero band (Carbon dark-theme support colours, >= 4.5:1 on --hero). */
+  --hero-ok: #42be65;
+  --hero-warn: #f1c21b;
+  --hero-bad: #ff8389;
   --inverse-ink-2: #c1c7cd;
 
   --chart-bg: #ffffff;
@@ -145,6 +149,9 @@
   --color-hero-ink: var(--hero-ink);
   --color-hero-ink-2: var(--hero-ink-2);
   --color-hero-line: var(--hero-line);
+  --color-hero-ok: var(--hero-ok);
+  --color-hero-warn: var(--hero-warn);
+  --color-hero-bad: var(--hero-bad);
   --font-sans: var(--font-plex-sans);
   --font-serif: var(--font-plex-serif);
   --font-mono: var(--font-plex-mono);
