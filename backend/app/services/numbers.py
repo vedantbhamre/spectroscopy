@@ -125,4 +125,6 @@ def scrub(text: str, allowed: Allowed) -> tuple[str, int]:
     out = re.sub(rf"\bbetween\s+(?:{_NUM})\s*(?:{_UNIT})?\s+and\s+{P}|\bbetween\s+{P}\s+and\s+(?:{_NUM})\s*(?:{_UNIT})?", PLACEHOLDER, out, flags=re.I)
     out = re.sub(rf"(?<![\w.])(?:{_NUM})\s*(?:–|-|to)\s*{P}|{P}\s*(?:–|-|to)\s*(?:{_NUM})(?:\s?(?:{_UNIT}))?(?![\w])", PLACEHOLDER, out, flags=re.I)
     out = re.sub(rf"{P}(\s*(?:–|-|to|and|or|/|,)\s*{P})+", PLACEHOLDER, out)
+    # An example that lost its number says nothing: "(e.g., P, 5 mm)" goes as a whole.
+    out = re.sub(rf"\s*\((?:e\.g\.|eg\.|for example|such as)[^()]*{P}[^()]*\)", "", out, flags=re.I)
     return out, count

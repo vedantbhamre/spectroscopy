@@ -36,7 +36,27 @@ _ASSISTANT_DECISION = re.compile(
     # asks the customer for the assistant's own design parameters (unless about equipment they already have)
     r"|^(?!.*\b(your|you already|existing|current(ly)?|installed|do you have)\b).*\b(what|which)\s+(\w+\s+){0,3}(wavelength|wavelength range|spectral range|"
     r"band|resolution|integration time|exposure time|laser power|excitation|path ?length|optical path|probe (type|geometry|design)|"
-    r"fib(er|re) (type|core|diameter)|detector|spectrometer settings?|number of scans|preprocessing|chemometric model|model type)s?\b",
+    r"fib(er|re) (type|core|diameter)|detector|spectrometer settings?|number of scans|preprocessing|chemometric model|model type)s?\b"
+    # asks the customer for a design limit the assistant derives from process facts ("maximum allowable path length")
+    r"|\b(maximum|minimum|max\.?|min\.?|optimal|optimum|ideal|best)\s+((allowable|permissible|acceptable|feasible|possible|suitable)\s+)?"
+    r"(optical\s+)?(path\s?length|fib(er|re)\s+length|link\s+length|integration\s+time|spectral\s+resolution)\b"
+    r"|\bpath\s?length\s+(do|can|could|would)\s+you\b"
+    # asks the customer to specify equipment the assistant chooses (fibre type, probe material, ratings, losses)
+    r"|\bwhat\s+(type|kind|sort)\s+of\s+(fib(er|re)|probe|cable|crystal|window|analy[sz]er|spectrometer|sensor)s?\b"
+    r"|\b(exact|which|what)\s+(\w+\s+){0,2}(probe|window|crystal|tip|fib(er|re)|cable)\s+(material|rating)s?\b"
+    r"|\b(probe|window|crystal|tip|fib(er|re)|cable)\s+material\b|\btemperature\s+rating\b"
+    r"|\b(maximum|minimum|max\.?|min\.?)\s+((acceptable|allowable|permissible|tolerable)\s+)?(fib(er|re)\s+)?(attenuation|transmission\s+loss|signal\s+loss)\b"
+    r"|\b(wavelengths?|bands?|methods?|probes?|fib(er|re)s?)\s+you\s+plan\s+to\s+use\b",
+    re.I,
+)
+# Facts only the customer can give (process, sample, place, reference, requirements). After the first turn a new question
+# must ask for one of these; questions about equipment specifications are the assistant's to work out.
+_CUSTOMER_FACT = re.compile(
+    r"\b(range|concentration|content|level|amount|target|priorit\w*|reference|lab\w*|assay|hplc|titrat\w*|temperature|pressure|"
+    r"flow|speed|distance|far|where|location|position|ports?|access|mount\w*|nozzle|flange|line|vessel|tank|reactor|"
+    r"accuracy|precision|error|toleran\w*|limits?|thresholds?|specification|how often|interval|frequency|response time|update|"
+    r"samples?|batch\w*|runs?|history|appearance|turbid\w*|clear|opaque|colou?r|particles?|bubbles?|solids|viscosity|"
+    r"clean\w*|cip|maintenance|hazard\w*|atex|zone|explosion|budget|time ?line|deadline|own|existing|already|currently|today)\b",
     re.I,
 )
 _NUMBERING = re.compile(r"^\s*(?:\(?(?:q(?:uestion)?\s*)?\d+\s*[.):]|[-•*]|\*\*\d+\.\*\*)\s*", re.I)
@@ -117,9 +137,10 @@ def closed(ledger: list[Question]) -> list[Question]:
 def merge_new(ledger: list[Question], proposed: list[dict], turn: int, final: bool) -> tuple[list[Question], dict]:
     """Add the responder's proposed questions that are new, about customer facts, and within the cap."""
     ledger = [q.model_copy() for q in ledger]
-    stats = {"repeated": 0, "assistant_decision": 0, "over_cap": 0, "added": 0}
+    stats = {"repeated": 0, "assistant_decision": 0, "not_customer_fact": 0, "over_cap": 0, "added": 0}
     if final:
         return ledger, stats
+    follow_up = bool(ledger)  # after the first assessment, only questions that ask for a customer fact
     proposed = sorted((r for r in proposed if isinstance(r, dict)), key=lambda r: IMPACT_RANK.get(r.get("impact"), 3))
     for raw in proposed:
         text = clean(str(raw.get("text") or ""))
@@ -130,6 +151,9 @@ def merge_new(ledger: list[Question], proposed: list[dict], turn: int, final: bo
             continue
         if asks_assistant_decision(text):
             stats["assistant_decision"] += 1
+            continue
+        if follow_up and not _CUSTOMER_FACT.search(text):
+            stats["not_customer_fact"] += 1
             continue
         if sum(q.status == "open" for q in ledger) >= MAX_OPEN:
             stats["over_cap"] += 1

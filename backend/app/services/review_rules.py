@@ -99,6 +99,11 @@ def enforce_decisive(report: Report, decisive: list[str], final: bool, turn: int
     method_open = any(q.status == "open" and q.impact == "method" for q in led)
     for u in report.requirements.decisive:
         asked = next((q for q in led if L.similar(u, q.text)), None)
+        if L.asks_assistant_decision(_ask(u)):  # the expert's own choice (material, fibre type): confirmed, never asked
+            note = f"For the expert to select and confirm with the supplier: {u.rstrip('.')}."
+            if not any(L.similar(u, p) for p in report.pointsToConfirm):
+                report.pointsToConfirm.append(note)
+            continue
         if final:
             risk = f"Decisive point not confirmed by the customer, assumed for now: {u}."
             if not any(L.similar(u, r) for r in report.risks):
@@ -174,8 +179,17 @@ _PH_LAB = re.compile(r"\b(lab|laboratory|samples?|spectra|bench|offline|off-line
 _DASHES = str.maketrans({c: "-" for c in "‐‑‒–—"})
 
 
+# Getting the measuring hardware ready (a fibre, cell, lamp) comes before any spectra; installing at the process point does not.
+_PH_SETUP = re.compile(r"\b(obtain|procure|buy|order|source|replace|swap|fit|equip|assemble|set up|install)\b.{0,60}?"
+                       r"\b(fib(er|re)s?|cells?|lamps?|light sources?|spectrometers?|cables?|windows?)\b", re.I)
+_PROCESS_POINT = re.compile(r"\b(line|channel|reactor|vessel|feed frame|flange|port|pipe|tank|plant|pilot|in-line|inline|on-line|"
+                            r"process|production|press|stream|outlet|inlet)\b", re.I)
+
+
 def _phase(step: str) -> int | None:
     s = step.translate(_DASHES)
+    if _PH_SETUP.search(s) and not _PROCESS_POINT.search(s):
+        return 0
     if _PH_DECISION.search(s) and not _PH_MODEL.search(s):
         return 4
     if _PH_INLINE.search(s):
@@ -209,9 +223,11 @@ THRESHOLD_NOTE = ("Agree two things separately with the customer before the test
 def order_plan(report: Report, medical: bool) -> None:
     """Lab → model/validation → in-line/pilot → decision; missing phases get a domain-neutral step."""
     steps = [s for s in report.feasibility.steps if s.strip()]
+    if not medical:  # the prompt's held-out example names patients; outside medical work they are batches or days
+        steps = [re.sub(r"\b(other\s+)?patients(,\s*|\s+or\s+)", r"\1", s) for s in steps]
     phases, last = [], 1
     for s in steps:
-        p = _phase(s) or last
+        p = ph if (ph := _phase(s)) is not None else last  # phase 0 (hardware setup) is a phase, not "unknown"
         phases.append(p)
         last = p
     present = set(phases)
@@ -262,7 +278,7 @@ def validate_hardware(report: Report) -> int:
         nonlocal n
         n += 1
         note = f"Confirm with the supplier or the customer: {s.strip().rstrip('.')}."
-        if note not in report.pointsToConfirm:
+        if not L.covered(s, report.pointsToConfirm, 0.8):  # the probe field repeats the concept sentence
             report.pointsToConfirm.append(note)
 
     c = report.concept
@@ -279,6 +295,86 @@ def validate_hardware(report: Report) -> int:
     for s in report.feasibility.steps:
         (steps.append(s) if ok(s) else confirm(s))
     report.feasibility.steps = steps
+    return n
+
+
+# ---------------------------------------------------------------- a failed fibre check is settled, not hedged
+_OLD_FIBER = re.compile(r"\b(existing|current|old|present|their|the customer's|reused?)\s+(\w+[\s-]+){0,3}?fib(er|re)", re.I)
+_HEDGE = re.compile(r"\b(may|might|could)\s+not\s+(transmit|carry|cover|pass|work)", re.I)
+_TEST_IT = re.compile(r"\b(verify|test|check|measure|confirm|determine)\w*\b|cut-?off", re.I)
+
+
+def settle_failed_fiber(report: Report) -> int:
+    """When a premise check shows the fibre cannot carry the range, the report says so: no step re-tests the old fibre,
+    no risk says it "may not" transmit, no point asks to confirm its cut-off."""
+    failed = [c for c in report.premiseChecks if c.id.startswith("fiber_") and c.status == "fail"]
+    if not failed:
+        return 0
+    n = 0
+    about_old = lambda s: bool(_OLD_FIBER.search(s))  # noqa: E731
+    keep = [s for s in report.feasibility.steps if not (about_old(s) and _TEST_IT.search(s))]
+    n += len(report.feasibility.steps) - len(keep)
+    report.feasibility.steps = keep
+    before = len(report.pointsToConfirm)
+    report.pointsToConfirm = [p for p in report.pointsToConfirm if not (about_old(p) and _TEST_IT.search(p))]
+    n += before - len(report.pointsToConfirm)
+    firm = f"{failed[0].label}: no. The existing fibre has to be replaced before any measurement (see the premise check)."
+    risks = []
+    for r in report.risks:
+        if re.search(r"fib(er|re)", r, re.I) and _HEDGE.search(r):
+            n += 1
+            r = firm
+        if r not in risks:
+            risks.append(r)
+    report.risks = risks
+    return n
+
+
+_COLOURED = re.compile(r"\b(yellow\w*|brown\w*|dark\w*|black|amber|tinted|colou?red|discolou?r\w*)\b", re.I)
+
+
+def raman_colour_risk(report: Report, customer: str) -> int:
+    """Raman on a coloured or darkening sample: fluorescence background is the first thing to check."""
+    raman = any("RAMAN" in r.methodIds for r in report.recommendations if r.role != "not_recommended")
+    if not raman or not _COLOURED.search(customer or "") or any(re.search(r"fluoresc", r, re.I) for r in report.risks):
+        return 0
+    report.risks.append("The sample is coloured or darkens: fluorescence background can swamp the Raman signal. Check Raman spectra "
+                        "of the darkest samples first, and compare with an absorption method if the background dominates.")
+    return 1
+
+
+_NO_INTERFERENCE = re.compile(r"\b(no|not|without|free of|absence of|does not contain|do not contain)\b.{0,60}\binterfer\w*", re.I)
+
+
+def interferences_as_risk(report: Report) -> int:
+    """'No interferents' is an assumption the samples have to confirm; it is also a risk, since other species may absorb there."""
+    if not any(_NO_INTERFERENCE.search(a) for a in report.assumptions) or any(re.search(r"interfer", r, re.I) for r in report.risks):
+        return 0
+    report.risks.append("Other substances in the sample may absorb in the same range and interfere; test this on real samples "
+                        "against the reference method before relying on the reading.")
+    return 1
+
+
+_WORDING = [(re.compile(r"\bsolari[sz]ed\b", re.I), "solarisation-resistant")]  # "solarised" means damaged by UV
+
+
+def fix_wording(report: Report) -> int:
+    n = 0
+
+    def fix(text: str | None) -> str | None:
+        nonlocal n
+        for pat, rep in _WORDING:
+            if text and pat.search(text):
+                text, k = pat.subn(rep, text)
+                n += k
+        return text
+
+    c = report.concept
+    c.summary, c.fiberLink, c.probe, c.analyzer = fix(c.summary) or "", fix(c.fiberLink), fix(c.probe), fix(c.analyzer)
+    for r in report.recommendations:
+        r.reason = fix(r.reason) or ""
+    report.risks = [fix(r) or "" for r in report.risks]
+    report.feasibility.steps = [fix(s) or "" for s in report.feasibility.steps]
     return n
 
 

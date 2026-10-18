@@ -53,6 +53,9 @@ class Facts(BaseModel):
     qualified_targets: list[dict] = Field(default_factory=list)  # [{"qualifier": "viable", "target": "viable biomass"}]
     analyzer_remote: bool = False  # the analyzer is stated to be away from the line (another building, control room, far)
     link_length_m: float | None = None  # stated fibre link length, metres
+    wavelengths_um: list[float] = Field(default_factory=list)  # measurement wavelengths the client names ("around 220 nm"), µm
+    vendor_claim: bool = False  # the choice rests on what a supplier or vendor said ("the gold standard")
+    drops_reference: bool = False  # expects no calibration, or wants to switch off the reference method
 
 
 # Qualifiers that a bulk optical signal usually does not distinguish (the total is measured).
@@ -69,6 +72,37 @@ _KW = {
     "FLUO": r"fluorescence (spectrometer|spectroscopy|measurement|probe|sensor|information|detection)|fluorimetr|(use|compare|with) .{0,30}fluorescence",
     "UVVIS": r"\buv[- ]?vis\b|\buv\b",
 }
+
+
+NTU_CLEAR = 10  # turbidity up to this many NTU reads as a clear liquid for the geometry check
+
+
+def _dropped(target: str, t: str) -> bool:
+    """The client takes a target out of scope ("TOC we can drop", "leave out turbidity"); the abbreviation counts too."""
+    words = re.findall(r"[a-z]+", target.lower())
+    names = [re.escape(target.lower())] + ([re.escape("".join(w[0] for w in words))] if len(words) > 1 else [])
+    for n in names:
+        if re.search(rf"\b{n}\b,?\s+(?:(?:we\s+can|can\s+be|could\s+be)\s+(?:drop(?:ped)?|skip(?:ped)?|leave\s+out|left\s+out)"
+                     rf"|is\s+(?:not\s+needed|optional)|we\s+don'?t\s+need)", t) \
+                or re.search(rf"\b(drop|skip|leave\s+out|forget(\s+about)?)\s+(the\s+)?{n}\b", t):
+            return True
+    return False
+
+
+# What a stated fact answers: an unknown or question about it is settled once the fact is known.
+_ANSWERED_BY = {
+    "optical_appearance": r"optical (appearance|density)|appearance|turbid|opaque|opacity|transparen|clarity|\bclear\b|cloud|ntu\b",
+    "link_length_m": r"(fib(er|re)|link|cable) length|distance (to|from|between)|how far",
+    "access_points": r"\b(ports?|access points?|mounting points?|flanges?|nozzles?)\b",
+}
+
+
+def resolved_by_facts(text: str, facts: Facts) -> bool:
+    """An unknown or question that a stated fact already answers (so it is never asked or listed again)."""
+    t = (text or "").lower()
+    known = {"optical_appearance": facts.optical_appearance not in ("unknown", "", None),
+             "link_length_m": facts.link_length_m is not None, "access_points": facts.access_points is not None}
+    return any(known[k] and re.search(pat, t) for k, pat in _ANSWERED_BY.items())
 
 
 def detect(text: str, facts: Facts, enquiry: str | None = None) -> Facts:
@@ -101,6 +135,13 @@ def detect(text: str, facts: Facts, enquiry: str | None = None) -> Facts:
         upd["use_context"] = "clinical"
     if re.search(r"\b(proof|prove|ready for)\b", t) and re.search(r"stud|paper|findings", t):
         upd["cites_study_as_proof"] = True
+    if re.search(r"\b(supplier|vendor|sales\s?(rep|person|man)|manufacturer|distributor|brochure|datasheet)s?\b.{0,60}\b(told|said|says|claims?|states?|recommends?)\b"
+                 r"|\bgold standard\b|\bbest (method|technology|technique) (on the market|available)\b", t):
+        upd["vendor_claim"] = True
+    if re.search(r"\b(needs?|requires?)\s+no\s+calibration|\bno\s+calibration\s+(is\s+)?(needed|required)|without\s+(any\s+)?calibration"
+                 r"|\b(switch|turn)\s+off\s+(the\s+)?(gc|hplc|lab\w*|reference)|\breplace\s+(the\s+)?(gc|hplc|lab analysis|reference method)\b"
+                 r"|\b(stop|no longer)\s+(need\w*|using|use)\s+(the\s+)?(gc|hplc|lab)", t):
+        upd["drops_reference"] = True
     if re.search(r"reuse the calibration|calibration (will )?remain valid|reuse (our|the) (existing )?calibration", t):
         upd["reuses_existing_calibration"] = True
     if re.search(r"(different|new) (api|formulation|blend|excipient|matrix|product)", t):
@@ -121,6 +162,11 @@ def detect(text: str, facts: Facts, enquiry: str | None = None) -> Facts:
     opaque = re.search(r"\b(turbid\w*|cloudy|opaque|milky|high (optical density|od)|black|highly scattering|suspension|slurry|paste|"
                        r"powders?|solids?|granul\w*|thick)\b", t)
     change = re.search(r"\b(becomes?|turns?|gets?|getting|grows?)\s+(more\s+|very\s+)?(turbid|cloudy|opaque|thick|dense)|from clear to", t)
+    # Turbidity stated as a number answers the appearance too: low NTU/FNU reads clear, high reads turbid, both changes.
+    ntu = [float(v.replace(",", ".")) for v in re.findall(r"(\d+(?:[.,]\d+)?)\s?(?:ntu|fnu)\b", t)]
+    if ntu:
+        clear = clear or min(ntu) <= NTU_CLEAR
+        opaque = opaque or max(ntu) > NTU_CLEAR
     appearance = "changing" if change or (clear and opaque) else "opaque" if opaque else "clear" if clear else facts.optical_appearance
     upd["optical_appearance"] = appearance if facts.optical_appearance in ("unknown", "", None) or change else facts.optical_appearance
 
@@ -146,10 +192,16 @@ def detect(text: str, facts: Facts, enquiry: str | None = None) -> Facts:
     if facts.link_length_m is None and (m := re.search(r"(\d+(?:[.,]\d+)?)\s?(m|metres|meters|km)\b[^.]{0,40}\b(fib(er|re)|cable|link|distance|away|long)", t)):
         n = float(m.group(1).replace(",", "."))
         upd["link_length_m"] = n * 1000 if m.group(2) == "km" else n
+    # Measurement wavelengths ("UV absorbance around 220 nm"); a range ("400 to 2200 nm") describes equipment, not the measurement.
+    waves = {round(float(v.replace(",", ".")) / (1000 if u == "nm" else 1), 4)
+             for v, u in re.findall(r"\b(?:at|around|near|approximately|approx\.?|about|of)\s*[~≈]?\s*(\d{2,5}(?:[.,]\d+)?)\s?(nm|µm|um)\b(?!\s*(?:–|-|to)\s*\d)", t)}
+    upd["wavelengths_um"] = sorted(set(facts.wavelengths_um) | waves)
+    # Targets the client drops later ("TOC we can drop") leave the scope.
+    upd["target_variables"] = [v for v in upd.get("target_variables", facts.target_variables) if not _dropped(v, t)]
 
     # Qualified targets ("viable biomass", "free fatty acids", "dissolved oxygen").
     qualified = []
-    for target in facts.target_variables:
+    for target in upd["target_variables"]:
         tl = target.lower()
         q = next((w for w in QUALIFIERS if re.search(rf"\b{w}\b{_NOT_QUALIFIER}", tl)), None)
         if not q:
@@ -208,6 +260,26 @@ def run_checks(facts: Facts, open_points: int = 0) -> list[PremiseCheck]:
                 checks.append(PremiseCheck(id=f"fiber_{fid}_{mid}", label=f"{f.label} carries the {m.label} range", status="pass",
                                            detail="The fibre window covers the nominal range.", citations=cites))
 
+    # 2b. Fibre window covers the wavelength the client names (methods without a fixed nominal range, e.g. UV-Vis at 220 nm).
+    ranged = {c.id for c in checks}
+    for fid in facts.fibers_mentioned:
+        f = FIBERS.get(fid)
+        outside = [w for w in facts.wavelengths_um if f and not f.range_um[0] <= w <= f.range_um[1]]
+        if not f or not outside:
+            continue
+        mid = next((m for m in facts.methods_mentioned if m in METHODS and not METHODS[m].range_um), None) or "WAVELENGTH"
+        if f"fiber_{fid}_{mid}" in ranged:
+            continue
+        nm = ", ".join(f"{w * 1000:g} nm" for w in outside)
+        alt = [a for a, af in FIBERS.items() if a != fid and all(af.range_um[0] <= w <= af.range_um[1] for w in outside)]
+        checks.append(PremiseCheck(
+            id=f"fiber_{fid}_{mid}", label=f"{f.label} carries {nm}", status="fail",
+            detail=f"A {f.label} transmits about {f.range_um[0]}–{f.range_um[1]} µm ({f.range_um[0] * 1000:g}–{f.range_um[1] * 1000:g} nm); "
+                   f"the stated measurement wavelength {nm} lies outside it, so the link cannot carry the signal."
+                   + (f" Fibres in the supplied material that reach it: {', '.join(f'{FIBERS[a].label} ({FIBERS[a].range_um[0]}–{FIBERS[a].range_um[1]} µm)' for a in alt)}." if alt else ""),
+            citations=[f.cite] + [FIBERS[a].cite for a in alt],
+        ))
+
     # 3. Fluorescence needs a defined fluorescent species, unless the task is to classify samples: then the samples' own
     #    fluorescence differing between classes is the measurand (S01 p.7, S04 p.4).
     classification = any("classification" in t for t in facts.target_variables)
@@ -239,11 +311,20 @@ def run_checks(facts: Facts, open_points: int = 0) -> list[PremiseCheck]:
             citations=[c.model_copy(update={"check": "verified"}) for _, c in dims],
         ))
 
-    # 4b. "No calibration needed" / "stop the lab method": spectra become results only through calibration models built
+    # 4b. A supplier's statement is a claim to test, not evidence for the method choice.
+    if facts.vendor_claim:
+        checks.append(PremiseCheck(
+            id="vendor_claim", label="Supplier claim: a statement to test, not evidence", status="flag",
+            detail="The method is proposed because a supplier recommends it. The choice here rests on the supplied AFS material and on "
+                   "the first experiment; compare the claimed method with the simplest sufficient alternative on the customer's own samples.",
+        ))
+
+    # 4c. "No calibration needed" / "stop the lab method": spectra become results only through calibration models built
     #     against reference values (S01 p.5, p.12), so the reference method stays until the in-line method is validated.
-    if facts.claims_no_calibration or facts.drops_reference_method:
+    if facts.claims_no_calibration or facts.drops_reference_method or facts.drops_reference:
         what = " and ".join(x for x in ("needs no calibration" if facts.claims_no_calibration else "",
-                                        "the reference method can be stopped" if facts.drops_reference_method else "") if x)
+                                        "the reference method can be stopped" if facts.drops_reference_method else "") if x) \
+            or "no calibration or reference method is needed"
         checks.append(PremiseCheck(
             id="calibration_and_reference", label="A calibration and the reference method are still needed", status="flag",
             detail=(f"The enquiry assumes {what}; the supplied material does not support that. Spectra give concentrations or "
@@ -399,12 +480,16 @@ def mir_link_check(facts: Facts, report: dict) -> PremiseCheck | None:
     )
 
 
+_ESCALATION = re.compile(r"\b(otherwise|if (not|it fails|the correlation is (weak|poor))|consider adding|escalat\w*|only if|as a fallback|later add)\b", re.I)
+
+
 def owned_equipment_check(facts: Facts, report: dict) -> PremiseCheck | None:
     owned = [o for o in facts.owned_equipment if o.get("method") in METHODS or o.get("method") in ("RAMAN", "FLUO", "UVVIS")]
     if not owned:
         return None
-    mentioned = {m for r in report.get("recommendations", []) for m in r.get("methodIds", [])}
-    plan = " ".join(report.get("feasibility", {}).get("steps", [])).lower()
+    mentioned = {m for r in report.get("recommendations", []) if r.get("role") != "not_recommended" for m in r.get("methodIds", [])}
+    # An escalation ("otherwise consider adding NIR") does not use the instrument the customer owns.
+    plan = " ".join(s for s in report.get("feasibility", {}).get("steps", []) if not _ESCALATION.search(s)).lower()
     missing = [o for o in owned if o["method"] not in mentioned and not re.search(_KW.get(o["method"], "$^"), plan)]
     names = ", ".join(o.get("name") or o["method"] for o in owned)
     if missing:
@@ -419,13 +504,16 @@ def geometry_check(facts: Facts, report: dict) -> PremiseCheck | None:
     """Probe geometry vs the optical appearance of the medium (S01 p.16, p.18; Table 1)."""
     c = report.get("concept", {})
     text = " ".join([c.get("summary", ""), c.get("probe") or "", c.get("location") or ""]).lower()
+    # ATR is its own geometry: it suits clear liquids and opaque media alike (Table 1: liquid, paste, soft).
+    atr = bool(re.search(r"\batr\b|attenuated total", text))
+    text = re.sub(r"attenuated total reflect\w*", "atr", text)
     trans = bool(re.search(r"transmission|transflect", text))
-    refl = bool(re.search(r"reflect|\batr\b|attenuated total", text))
+    refl = bool(re.search(r"reflect", text)) or (atr and not trans)
     a = facts.optical_appearance
     if a == "unknown" or not (trans or refl):
         return None
     label = "Probe geometry matches the optical density of the medium"
-    if a == "clear" and refl and not trans:
+    if a == "clear" and refl and not trans and not atr:
         return PremiseCheck(id="geometry_optics", label="Probe geometry: reflection for a clear medium", status="flag",
                             detail="The medium is described as clear. Transmission or transflection suits transparent, low optical density liquids; reflection can be less representative for clear liquids.",
                             citations=[T1.CLEAR_TRANSMISSION, T1.REFLECTION_SCATTERING])
@@ -438,7 +526,7 @@ def geometry_check(facts: Facts, report: dict) -> PremiseCheck | None:
                             detail="The medium changes from clear to opaque, so a single transmission path may saturate. Plan ATR or reflection for the opaque phase, or check the path length on samples from both phases.",
                             citations=[T1.OPAQUE_SATURATES, T1.HIGH_OD_ATR])
     return PremiseCheck(id="geometry_optics", label=label, status="pass",
-                        detail=f"Medium described as {a}; the proposed {'transmission' if trans else 'ATR / reflection'} geometry suits it.",
+                        detail=f"Medium described as {a}; the proposed {'transmission' if trans else 'ATR' if atr else 'reflection'} geometry suits it.",
                         citations=[T1.CLEAR_TRANSMISSION] if a == "clear" else [T1.OPAQUE_SATURATES])
 
 

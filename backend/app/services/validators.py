@@ -118,12 +118,15 @@ def validate_claims(report: Report, recite_fn=recite) -> dict:
 
 _LATER_STAGE = re.compile(r"\b(animal|human|clinical|patient|in-vivo|in vivo|first-in-human)\s+(pilot\s+)?(stud(y|ies)|trials?|tests?|testing|evaluation)\b"
                           r"|\bclinical trial|\bpilot (in-vivo |in vivo )?(human|clinical|patient|in-vivo|in vivo)|\bregulatory (submission|approval)"
-                          r"|\b(during|in) (live |real )?(surgery|surgeries|operations)\b", re.I)
+                          r"|\b(during|in) (live |real )?(surgery|surgeries|operations)\b"
+                          r"|\b(proceed|move|go|switch)\s+to\s+(routine|full|regular|continuous|production)\s+(operation|use|production|monitoring)\b"
+                          r"|\broll[- ]?out\b", re.I)
 _DASHES = str.maketrans({c: "-" for c in "\u2010\u2011\u2012\u2013\u2014"})
 _NUMBERED = re.compile(r"^\s*(?:step\s*)?\d+[.):]\s*", re.I)
 _HELD_OUT = re.compile(r"held[- ]out|unseen|not used (to build|for (building|training|calibration))|independent (test|validation) set"
                        r"|(validat\w*|test\w*)\b[^.]{0,40}\bindependent (samples|batches|runs|data|lots)"
-                       r"|external validation|(new|other|different) (patients|batches|lots|samples) (that|not)|not part of the (model|calibration)", re.I)
+                       r"|external validation|(new|other|different) (patients|batches|lots|samples) (that|not)|not part of the (model|calibration)"
+                       r"|validat\w* on (new|independent|separate|fresh) (samples|batches|runs|days|production|data)", re.I)
 HELD_OUT_STEP = ("Validate the model on samples not used to build it (held-out samples, e.g. from other batches, days or "
                  "production runs) before drawing any conclusion; a model built on few samples can fit them without generalising.")
 

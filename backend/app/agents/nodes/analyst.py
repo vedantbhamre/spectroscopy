@@ -9,7 +9,12 @@ from app.gateway import chat, parse_json
 from app.schemas import Answer
 from app.services import ledger as L
 from app.services.citations import contains, normalise
-from app.services.premises import Facts, detect
+from app.services.premises import Facts, detect, resolved_by_facts
+
+
+# Answers that state no fact: they hand the decision back or repeat an earlier answer.
+_NON_FACT = re.compile(r"\b(don'?t know|do not know|not sure|no idea|please recommend|recommend it|(hoped|want|expect) you (would|to)|"
+                       r"that'?s (for|what) (you|we hoped)|up to you|same as before|as (i|we) said)\b", re.I)
 
 
 def _quoted_turn(quote: str, turns_n: list[str]) -> int | None:
@@ -77,10 +82,16 @@ def analyst_node(state: AgentState) -> dict:
             else:
                 dropped += 1
         # Every answered question is a fact in the customer's own answer words (never the question's wording).
+        # Sentence by sentence: only what the facts do not already say, and never a non-answer ("please recommend it").
         for q in ledger:
-            if q.status == "answered" and q.answer and not L.covered(q.answer, stated) and len(L._words(q.answer)) >= 2:
-                stated.append(q.answer)
-                stated_turns.append(q.answeredTurn or turn)
+            if q.status != "answered" or not q.answer:
+                continue
+            for s in re.split(r"(?<=[.!?;])\s+", q.answer.strip()):
+                if _NON_FACT.search(s) and not re.search(r"\d", s):
+                    continue
+                if len(L._words(s)) >= 2 and not L.covered(s, stated):
+                    stated.append(s.strip())
+                    stated_turns.append(q.answeredTurn or turn)
         # One row per fact (normalised); raw question-answer pairs stay in the ledger, not in the requirements.
         seen: set[str] = set()
         uniq = [(f, t) for f, t in zip(stated, stated_turns) if not (normalise(f) in seen or seen.add(normalise(f)))]
@@ -138,6 +149,9 @@ def analyst_node(state: AgentState) -> dict:
             link_length_m=float(data["link_length_m"]) if isinstance(data.get("link_length_m"), (int, float)) else None,
         )
         facts = detect("\n\n".join(turns), facts, enquiry=turns[0] if turns else "")  # customer words only
+        # A fact the customer has stated (turbidity in NTU, link length, ports) settles the unknowns about it.
+        facts.unknowns = [u for u in facts.unknowns if not resolved_by_facts(u, facts)]
+        facts.decisive_unknowns = [u for u in facts.decisive_unknowns if not resolved_by_facts(u, facts)]
         # Safety-gate premise flags (approval demand, immediate config, research as proof) feed the checks.
         gate = set(state.get("gate_flags") or [])
         if gate & {"approval_demand", "immediate_config"}:

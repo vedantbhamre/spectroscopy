@@ -133,8 +133,11 @@ export function Workbench() {
   return (
     <div className="print-layout flex h-[calc(100dvh-3.5rem-3px)] flex-col lg:flex-row">
       {/* Report sheet */}
-      <div ref={reportRef} className="print-main order-2 min-h-0 flex-1 overflow-y-auto bg-bg px-4 pt-8 sm:px-10 lg:order-1">
-        {shown && <ScrollProgress containerRef={reportRef} className="print-hidden sticky top-0 z-20 -mx-4 -mt-8 mb-8 h-0.5 bg-accent sm:-mx-10" />}
+      {/* `relative` keeps absolutely positioned children (sr-only labels) inside this scroller, so the page itself never scrolls.
+          The padding sits on the inner sheet: a sticky bar in a padded scroller sticks below the padding and lets text show above it. */}
+      <div ref={reportRef} className="print-main relative order-2 min-h-0 flex-1 overflow-y-auto bg-bg lg:order-1">
+        {shown && <ScrollProgress containerRef={reportRef} className="print-hidden sticky top-0 z-20 h-0.5 bg-accent" />}
+        <div className="px-4 pt-8 sm:px-10 print:p-0">
         {shown ? (
           <ReportView
             key={`${active}-${compare}`}
@@ -170,6 +173,7 @@ export function Workbench() {
         ) : (
           <EmptySheet pending={pending} />
         )}
+        </div>
       </div>
 
       {/* Chat panel */}

@@ -17,7 +17,7 @@ from app.services.citations import page_text, verify
 from app.services.numbers import allowed_numbers, scrub
 from app.services.passages import number, resolve, strip_refs
 from app.services.premises import (Facts, access_check, apply_floor, combination_check, combined_probe_applies, cost_check,
-                                   geometry_check, mir_link_check, owned_equipment_check, target_qualifier_check)
+                                   geometry_check, mir_link_check, owned_equipment_check, resolved_by_facts, target_qualifier_check)
 
 KNOWN_METHODS = {"NIR", "MIR_ATR", "RAMAN", "FLUO", "UVVIS"}
 VALID = V.VALID
@@ -102,6 +102,66 @@ def ensure_answer(report: Report) -> bool:
     return True
 
 
+# Flags that limit what the answer may recommend as it stands: the answer has to say so, not only the checks section.
+ANSWER_FLAGS = ("mir_link_length", "access_points", "combination", "vendor_claim")
+
+
+def answer_follows_flags(report: Report) -> int:
+    """A flag that limits the proposed setup is stated in the answer (and in the concept for a link-length flag)."""
+    a, n = report.answer, 0
+    if not a:
+        return 0
+    for c in report.premiseChecks:
+        if c.id not in ANSWER_FLAGS or c.status != "flag":
+            continue
+        key = re.sub(r":.*", "", c.label).lower()
+        if key in a.text.lower():
+            continue
+        advice = c.detail.split(". ")[-1].rstrip(".")
+        a.text = f"{a.text.rstrip('. ')}. Caution, {key}: {advice}."
+        n += 1
+        if c.id == "mir_link_length" and "not shown to be feasible" not in report.concept.summary:
+            report.concept.summary = (f"{report.concept.summary.rstrip('. ')}. The mid-IR link over this distance is not shown to be "
+                                      f"feasible in the supplied material: {advice[:1].lower() + advice[1:]}.").lstrip(". ")
+    return n
+
+
+def settle_certainty(report: Report) -> None:
+    """'Nothing decisive is unknown' cannot stand next to a check that still flags a point to test; flagged points are
+    also assumptions until the first experiment settles them."""
+    open_checks = [c for c in report.premiseChecks if c.id != "certainty" and c.status in ("flag", "fail")]
+    for i, c in enumerate(report.premiseChecks):
+        if c.id == "certainty" and c.status == "pass" and open_checks:
+            report.premiseChecks[i] = PremiseCheck(
+                id="certainty", label="Certainty: the answer can only be provisional", status="flag",
+                detail=f"{len(open_checks)} premise check(s) still flag a point to test ({', '.join(x.label.split(':')[0] for x in open_checks)}). "
+                       "The answer is a provisional assessment; the first experiment decides them.")
+    for c in open_checks:
+        note = f"Assumed until tested: {c.label[0].lower() + c.label[1:]}."
+        if not any(L.similar(note, x) for x in report.assumptions):
+            report.assumptions.append(note)
+
+
+_METHOD_ID = re.compile(r"\b(" + "|".join(sorted(KNOWN_METHODS, key=len, reverse=True)) + r")\b")
+
+
+def label_methods(report: Report) -> None:
+    """Method ids ("MIR_ATR", "UVVIS") are internal; the reader sees the method's name."""
+    from app.knowledge.optics import METHODS
+
+    def lab(text: str | None) -> str | None:
+        return _METHOD_ID.sub(lambda m: METHODS[m.group(1)].label, text) if text else text
+
+    for r in report.recommendations:
+        r.method = lab(r.method) or r.method
+        r.reason = lab(r.reason) or ""
+    if report.answer:
+        report.answer.text = lab(report.answer.text) or ""
+    report.concept.summary = lab(report.concept.summary) or ""
+    report.risks = [lab(x) or "" for x in report.risks]
+    report.feasibility.steps = [lab(x) or "" for x in report.feasibility.steps]
+
+
 def _strip_refs(report: Report) -> None:
     """Passage numbers belong in citations; the model sometimes also writes them into the prose."""
     for r in report.recommendations:
@@ -171,8 +231,15 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
         report.requirements.stated = facts.stated
         report.requirements.factTurns = facts.stated_turns
 
+    # What the customer already stated is never asked or listed as unknown again, in any wording.
+    answered = [q for q in proposed if resolved_by_facts(str(q.get("text") or ""), facts)]
+    proposed = [q for q in proposed if q not in answered]
+    report.requirements.unknowns = [u for u in report.requirements.unknowns if not resolved_by_facts(u, facts)]
+    report.pointsToConfirm = [p for p in report.pointsToConfirm if not resolved_by_facts(p, facts)]
+
     # Question ledger: every earlier question keeps its status; only new customer-fact questions are added.
     led, stats["questions"] = L.merge_new(ledger or [], proposed, turn, final)
+    stats["questions"]["repeated"] = stats["questions"].get("repeated", 0) + len(answered)
     led, report.feasibility.steps = L.move_unknowns(led, report.feasibility.steps, report.risks)
     settled = [q for q in led if q.status in ("answered", "declined")]
     report.requirements.unknowns = [u for u in report.requirements.unknowns if not any(L.similar(u, q.text) for q in settled)]
@@ -215,6 +282,7 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
     if "combination" not in ids and any(r.role == "combination" for r in report.recommendations):
         extra.append(combination_check(facts))
     report.premiseChecks += [c for c in extra if c is not None]
+    settle_certainty(report)
     if any(c.id == "target_qualifier" and c.status == "flag" for c in report.premiseChecks):
         qts = ", ".join(q["target"] for q in facts.qualified_targets)
         if not any("reference" in s.lower() and any(q["qualifier"] in s.lower() for q in facts.qualified_targets) for s in report.feasibility.steps):
@@ -231,6 +299,10 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
     stats["cost_claims_rejected"] = RR.check_cost_claims(report)
     stats["comparison_added"] = RR.ensure_comparison(report, documents or [], facts.target_variables, facts.access_points)
     stats["numbers_cited"] = RR.cite_numbers(report, documents or [], customer)
+    stats["raman_colour_risk"] = RR.raman_colour_risk(report, customer)
+    stats["failed_fiber_cleaned"] = RR.settle_failed_fiber(report)
+    stats["interferences_as_risk"] = RR.interferences_as_risk(report)
+    stats["wording_fixed"] = RR.fix_wording(report)
     stats["later_stage_moved"] = V.validate_feasibility(report)
     stats["hardware_moved"] = RR.validate_hardware(report)
     stats["excitation_fixed"] = RR.fix_excitation(report)
@@ -246,12 +318,15 @@ def finalise(raw: dict, *, checks: list[PremiseCheck], scenario_id: str | None, 
             seen.setdefault((c.source, c.page, c.quote), verify(c) if c.quote else c)
     report.sources = list(seen.values())
 
+    # Cited quotes count as sources too (a slide figure's team transcription is the quote, not the page's extracted text).
     reply, stats["numbers"] = _validate_numbers(report, strip_refs(str(raw.get("reply") or "")) or "", customer=customer,
-                                                cited_pages=cited_page_texts(report))
+                                                cited_pages=cited_page_texts(report) + [c.quote for c in report.sources if c.quote and c.check in VALID])
 
     # Final mode: provisional unless the checks justify otherwise. Otherwise the checks set the floor.
     report.decisionStatus = apply_floor("provisional" if final else report.decisionStatus, report.premiseChecks)
+    label_methods(report)
     stats["answer_written"] = ensure_answer(report)
+    stats["answer_caveats"] = answer_follows_flags(report)
     stats["sections_explained"] = RR.explain_blocked_sections(report)
     stats["certainty_rejected"] = RR.reject_certainty(report)
     stats["reference_kept"] = RR.keep_reference(report)
